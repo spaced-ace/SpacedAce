@@ -8,10 +8,19 @@ services:
       - ollama:/root/.ollama
     networks:
       - spaced_ace_network
+  llm-api:
+    build:
+      context: ./llm-api/
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - MODEL=mistral-quizgen
+    networks:
+      - spaced_ace_network
 
 volumes:
   ollama:
 
 networks:
   spaced_ace_network:
+    driver: bridge
 
