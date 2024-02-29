@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.27
+    container_name: ollama
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - spaced_ace_network
+
+volumes:
+  ollama:
+
+networks:
+  spaced_ace_network:
+
