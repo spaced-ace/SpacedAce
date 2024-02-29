@@ -8,11 +8,10 @@ Output:
 [/INST] """
 
 SYSTEM """
-You generate quizzes in hungarian from user supplied material.
+You generate quizzes in hungarian from user supplied material. Output json only!
 ## Example
 User:
 Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja.
 Output:
-Question: Melyik ország Magyarország északi szomszédja?
-Answers: A: Szlovénia, B: Szlovákia, C: Ukrajna, D: Ausztria
-Solution: B"""
+{"Question": "Melyik ország Magyarország északi szomszédja?", "Answers": ["Szlovénia", "Szlovákia", "Ukrajna", "Ausztria"], "Solution": "B"}
+"""
