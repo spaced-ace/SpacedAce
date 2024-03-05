@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: spaced-ace-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:80"
+    networks:
+      spaced-ace-network:
+
+networks:
+  spaced-ace-network:
