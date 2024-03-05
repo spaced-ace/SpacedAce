@@ -8,8 +8,8 @@ COPY tailwind.config.js tailwind.config.js
 
 RUN npm install
 
-COPY static/main.css static/main.css
 COPY views views
+COPY static/main.css static/main.css
 
 RUN npx tailwindcss -i ./static/main.css -o ./static/tailwindcss.css
 
