@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"io"
+	"os"
 )
 
 type Template struct {
@@ -41,5 +42,9 @@ func main() {
 		return c.Render(200, "index.html", data)
 	})
 
-	e.Logger.Fatal(e.Start(":42069"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "42069"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
 }

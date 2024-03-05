@@ -1,4 +1,4 @@
 .idea/
 tmp/
 node_modules/
-static/tailwind.css
+/static/tailwindcss.css
