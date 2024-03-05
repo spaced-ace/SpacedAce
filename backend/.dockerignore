@@ -1,0 +1,7 @@
+tmp/
+.gitignore
+air.toml
+docker-compose.yaml
+Dockerfile
+.dockerignore
+.idea/
