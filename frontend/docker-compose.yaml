@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: spaced-ace-frontend
+    build:
+        context: .
+        dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      spaced-ace-network:
+
+networks:
+  spaced-ace-network:
