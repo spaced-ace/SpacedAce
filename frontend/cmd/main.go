@@ -71,8 +71,11 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "index", data)
 	})
+	e.GET("/generate", func(c echo.Context) error {
+		return c.Render(200, "generate", nil)
+	})
 
-	e.POST("multiple-choice", func(c echo.Context) error {
+	e.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")
 		if prompt == "" {
 			return echo.NewHTTPError(http.StatusBadRequest, "prompt is required")
@@ -100,7 +103,7 @@ func main() {
 		}
 
 		question := Question{Question: result.Question, Option1: result.Options[0], Option2: result.Options[1], Option3: result.Options[2], Option4: result.Options[3]}
-		return c.Render(200, "question.html", question)
+		return c.Render(200, "multiple-choice-question", question)
 	})
 
 	e.Logger.Fatal(e.Start(":" + PORT))

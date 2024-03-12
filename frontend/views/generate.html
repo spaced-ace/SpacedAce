@@ -1,0 +1,37 @@
+{{ block "generate" . }}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/tailwindcss.css">
+        <meta charset="UTF-8">
+        <title>Spaced Ace</title>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+    <body class="w-screen flex flex-col whitespace-nowrap cursor-default">
+    {{ template "navbar" . }}
+    <div class="w-screen flex flex-col justify-center items-center">
+        <div class="flex flex-col items-start gap-y-2 mt-24">
+            <span class="font-semibold text-2xl">Question Generator</span>
+            <span class="text-md text-gray-400">Enter the context below.</span>
+            <form
+                hx-post="/multiple-choice-question"
+                hx-target="#question-placeholder"
+                hx-swap="outerHTML"
+                class="w-[700px] p-6 flex flex-col gap-y-3 rounded-md border border-gray-300 items-start">
+                <span>Your context</span>
+                <label class="w-full">
+                    <textarea name="prompt" placeholder="Enter your context..." class="flex w-full rounded-md border border-gray-200 min-h-[300px] max-h-[600px] p-2"></textarea>
+                </label>
+                <button
+                    type="submit"
+                    class="px-4 py-2 rounded-md border border-gray-300 text-white bg-black">
+                    Generate
+                </button>
+            </form>
+
+            <div id="question-placeholder"></div>
+        </div>
+    </div>
+    </body>
+    </html>
+{{ end }}
