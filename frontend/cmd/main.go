@@ -69,7 +69,7 @@ func main() {
 
 	// Routes
 	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index.html", data)
+		return c.Render(200, "index", data)
 	})
 
 	e.POST("multiple-choice", func(c echo.Context) error {
