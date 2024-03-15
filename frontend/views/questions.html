@@ -1,21 +1,21 @@
 {{ block "multiple-choice-question" . }}
 <div class="w-[700px] p-6 flex flex-col gap-y-1 rounded-md border border-gray-300 items-start mb-20">
-    <span class="text-xl font-semibold">{{ .Question }}</span>
+    <span class="text-xl font-semibold overflow-auto whitespace-normal">{{ .Question }}</span>
     <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
-    <div class="flex flex-col w-full rounded-md border border-gray-200 p-2 gap-y-0.5 text-lg">
-        <label>
+    <div class="flex flex-col w-full rounded-md border border-gray-200 p-2 gap-y-0.5 text-lg overflow-auto whitespace-normal">
+        <label class="overflow-auto whitespace-normal">
             <input type="radio" class="" name="answer" value="1">
             {{ .Option1 }}
         </label>
-        <label>
+        <label class="overflow-auto whitespace-normal">
             <input type="radio" class="" name="answer" value="2">
             {{ .Option2 }}
         </label>
-        <label>
+        <label class="overflow-auto whitespace-normal">
             <input type="radio" class="" name="answer" value="3">
             {{ .Option3 }}
         </label>
-        <label>
+        <label class="overflow-auto whitespace-normal">
             <input type="radio" class="" name="answer" value="4">
             {{ .Option4 }}
         </label>
