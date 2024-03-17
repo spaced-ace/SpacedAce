@@ -1,12 +1,6 @@
 {{ block "navbar" . }}
     <nav class="h-16 w-full bg-white flex items-center justify-start gap-x-2 p-2 fixed mb-16 top-0 z-100">
-        <a href="/" class="h-full p-4 flex items-center justify-center text-3xl font-semibold cursor-default gap-x-2">
-            <img
-                src="/static/images/logo.png"
-                alt="logo"
-                class="h-12 w-12">
-            <span>Spaced Ace</span>
-        </a>
+        <a href="/" class="cursor-pointer"> {{ template "logo" }}</a>
         <div class="w-full"></div>
 {{/*        <div class="h-full p-2 flex items-center justify-center bg-white hover:bg-black text-black hover:text-white">*/}}
 {{/*            <span>Menu 1</span>*/}}
@@ -21,11 +15,11 @@
 {{/*            <span>Menu 4</span>*/}}
 {{/*        </div>*/}}
         <div class="w-full"></div>
-        <div class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
+        <a href="/login" class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
             <span>Login</span>
-        </div>
-        <div class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
+        </a>
+        <a href="/signup" class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
             <span>Sign up</span>
-        </div>
+        </a>
     </nav>
 {{ end }}
