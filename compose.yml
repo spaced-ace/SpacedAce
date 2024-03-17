@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.27
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - spaced_ace_network
+  llm-api:
+    build:
+      context: ./llm-api/
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - MODEL=mistral-quizgen
+    ports:
+      - "8000:80"
+    networks:
+      - spaced_ace_network
+  frontend:
+    build:
+      context: ./frontend/
+    environment:
+      - BACKEND_URL=http://backend:80
+      - PORT=80
+    ports:
+      - "80:80"
+    networks:
+      - spaced_ace_network
+  backend:
+    build:
+      context: ./backend/
+    environment:
+      - LLM_API_URL=http://llm-api:80
+      - PORT=80
+      - JWT_SECRET=secret
+    ports:
+      - "9000:80"
+    networks:
+      - spaced_ace_network
+
+volumes:
+  ollama:
+
+networks:
+  spaced_ace_network:
+    driver: bridge
+

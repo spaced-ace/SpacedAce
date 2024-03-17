@@ -26,6 +26,7 @@ COPY cmd cmd
 COPY views views
 
 COPY --from=tailwind /workdir/static static
+COPY static/images static/images
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go
 
