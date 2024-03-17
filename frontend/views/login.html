@@ -1,0 +1,49 @@
+{{ block "login" . }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/tailwindcss.css">
+    <meta charset="UTF-8">
+    <title>Spaced Ace</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="w-screen flex flex-col whitespace-nowrap cursor-default">
+    {{ template "navbar" . }}
+    <div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
+        <form class="flex flex-col p-6 gap-y-4 w-[500px]">
+            <span class="text-center text-3xl font-bold">Login</span>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="email" class="text-sm leading-5 font-medium">Email</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="password" class="text-sm leading-5 font-medium">Password</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <button
+                type="submit"
+                hx-post="/login"
+                class="w-full h-10 rounded-md border border-black px-4 py-2 bg-black text-white">
+                Login
+            </button>
+            <a
+                href="/signup"
+                hx-get="/signup"
+                class="w-full h-10 rounded-md border text-center px-4 py-2 bg-white text-black cursor-pointer">
+                Sign up
+            </a>
+        </form>
+    </div>
+</body>
+</html>
+{{ end }}

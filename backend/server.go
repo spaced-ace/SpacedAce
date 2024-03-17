@@ -19,9 +19,9 @@ var (
 	JWT_SECRET  = "secret"
 )
 
-type LoginForm struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
+type LoginBody struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type MultipleChoiceAPIRequestBody struct {
@@ -44,7 +44,7 @@ type MultipleChoiceResponse struct {
 	CorrectOption string   `json:"correctOption"`
 }
 
-func createJWT(form LoginForm, expires time.Time) (string, error) {
+func createJWT(form LoginBody, expires time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": form.Email,
 		"exp":   expires.Unix(),
@@ -58,19 +58,18 @@ func createJWT(form LoginForm, expires time.Time) (string, error) {
 }
 
 func login(c echo.Context) error {
-	var loginForm LoginForm
-	err := c.Bind(&loginForm)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
+	var request = LoginBody{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
 	}
 
-	if loginForm.Email != "user@email.com" && loginForm.Password != "password" {
+	if request.Email != "user@email.com" && request.Password != "password" {
 		return c.String(http.StatusUnauthorized, "unauthorized")
 	}
 
 	// Generate the token
 	expires := time.Now().Add(1 * time.Hour)
-	jwtString, err := createJWT(loginForm, expires)
+	jwtString, err := createJWT(request, expires)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "internal server error")
 	}

@@ -43,6 +43,16 @@ type Question struct {
 	Option4  string
 }
 
+type LoginForm struct {
+	Email    string `form:"email"`
+	Password string `form:"password"`
+}
+
+type LoginRequestBody struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type MultipleChoiceResponse struct {
 	Question      string   `json:"question"`
 	Options       []string `json:"options"`
@@ -74,7 +84,49 @@ func main() {
 	e.GET("/generate", func(c echo.Context) error {
 		return c.Render(200, "generate", nil)
 	})
+	e.GET("/login", func(c echo.Context) error {
+		return c.Render(200, "login", nil)
+	})
 
+	e.POST("/login", func(c echo.Context) error {
+		var loginForm = LoginForm{}
+		if err := c.Bind(&loginForm); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		bodyMap := LoginRequestBody{
+			Email:    loginForm.Email,
+			Password: loginForm.Password,
+		}
+		bodyBytes, err := json.Marshal(bodyMap)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		bodyBuffer := bytes.NewBuffer(bodyBytes)
+
+		resp, err := http.Post(BACKEND_URL+"/login", "application/json", bodyBuffer)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		defer resp.Body.Close()
+
+		// get cookie with name auth
+		cookie := http.Cookie{}
+		for _, c := range resp.Cookies() {
+			if c.Name == "auth" {
+				cookie = *c
+			}
+		}
+
+		// if cookie is not set, return unauthorized
+		if cookie.Name == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+		}
+
+		c.SetCookie(&cookie)
+		c.Response().Header().Set("HX-Redirect", "/")
+		return c.Render(200, "login", nil)
+	})
 	e.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")
 		if prompt == "" {
