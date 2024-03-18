@@ -87,6 +87,9 @@ func main() {
 	e.GET("/login", func(c echo.Context) error {
 		return c.Render(200, "login", nil)
 	})
+	e.GET("/signup", func(c echo.Context) error {
+		return c.Render(200, "signup", nil)
+	})
 
 	e.POST("/login", func(c echo.Context) error {
 		var loginForm = LoginForm{}
