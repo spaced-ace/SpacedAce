@@ -1,0 +1,51 @@
+{{ block "dashboard" . }}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/tailwindcss.css">
+        <meta charset="UTF-8">
+        <title>Spaced Ace</title>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+    <body class="w-screen h-[calc(100dvh)] flex flex-col whitespace-nowrap cursor-default">
+{{/*        {{ template "navbar" . }}*/}}
+        <div class="w-screen h-full flex">
+            {{ template "sidebar" . }}
+            <main class="w-full h-full flex gap-4 flex-wrap p-6 items-start justify-start content-start overflow-y-scroll flex-grow-0">
+                <div class="w-[350px] min-w-[350px] h-[265px] rounded-md border flex flex-col gap-y-2 items-center justify-center bg-gray-100 hover:bg-gray-200">
+                    <img src="/static/icons/plus.svg" alt="icon" class="w-10 h-10">
+                    <span class="font-semibold text-md">Create new</span>
+                </div>
+                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
+                    <div class="w-full h-full rounded-t-md bg-gradient-to-br from-green-500 to-blue-400"></div>
+                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Test 1</span>
+                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    </div>
+                </div>
+                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
+                    <div class="w-full h-full rounded-t-md bg-gradient-to-br from-red-500 to-yellow-400"></div>
+                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Algorithms and data structures</span>
+                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    </div>
+                </div>
+                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
+                    <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-purple-500 to-pink-400"></div>
+                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Linux firewalls</span>
+                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    </div>
+                </div>
+                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
+                    <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    </div>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+{{ end }}
