@@ -1,0 +1,65 @@
+{{ block "signup" . }}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/tailwindcss.css">
+        <meta charset="UTF-8">
+        <title>Spaced Ace</title>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+    <body class="w-screen flex flex-col whitespace-nowrap cursor-default">
+    {{ template "navbar" . }}
+    <div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
+        <form class="flex flex-col p-6 gap-y-4 w-[500px]">
+            <span class="text-center text-3xl font-bold">Sign up</span>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="name" class="text-sm leading-5 font-medium">Name</label>
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="John Doe"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="email" class="text-sm leading-5 font-medium">Email</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="user@example.com"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="password" class="text-sm leading-5 font-medium">Password</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <div class="flex flex-col items-start gap-y-1">
+                <label for="passwordAgain" class="text-sm leading-5 font-medium">Password again</label>
+                <input
+                    id="passwordAgain"
+                    name="passwordAgain"
+                    type="password"
+                    placeholder="Password again"
+                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+            </div>
+            <button
+                type="submit"
+                hx-post="/signup"
+                class="w-full h-10 rounded-md border border-black px-4 py-2 bg-black text-white">
+                Sign up
+            </button>
+            <p class="w-full text-center text-md">
+                Already have an account?
+                <a href="/login" class="font-medium underline">Login</a>
+            </p>
+        </form>
+    </div>
+    </body>
+    </html>
+{{ end }}
