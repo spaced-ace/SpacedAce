@@ -7,41 +7,97 @@
         <title>Spaced Ace</title>
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     </head>
-    <body class="w-screen h-[calc(100dvh)] flex flex-col whitespace-nowrap cursor-default">
-{{/*        {{ template "navbar" . }}*/}}
-        <div class="w-screen h-full flex">
+    <body class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
+        {{ template "navbar" . }}
+        <div class="h-16 w-[260px] border-r"></div>
+        <div class="w-screen h-[calc(100dvh)] flex">
             {{ template "sidebar" . }}
-            <main class="w-full h-full flex gap-4 flex-wrap p-6 items-start justify-start content-start overflow-y-scroll flex-grow-0">
-                <div class="w-[350px] min-w-[350px] h-[265px] rounded-md border flex flex-col gap-y-2 items-center justify-center bg-gray-100 hover:bg-gray-200">
-                    <img src="/static/icons/plus.svg" alt="icon" class="w-10 h-10">
-                    <span class="font-semibold text-md">Create new</span>
-                </div>
-                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
-                    <div class="w-full h-full rounded-t-md bg-gradient-to-br from-green-500 to-blue-400"></div>
-                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
-                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Test 1</span>
-                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+            <main class="w-[calc(100%-260px)] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-4">
+                <span class="text-4xl font-bold px-6 pt-6">My exams</span>
+
+                <div class="w-full h-12 px-6">
+                    <div class="w-full h-full">
+                        <form hx-post="/my-exams" class="focus-within:border-gray-400 hover:focus-within:border-gray-400 hover:border-gray-300 flex w-full h-full flex-shrink-0 px-2 items-center border rounded-md">
+                            <img src="/static/icons/search.svg" alt="icon" class="w-5 h-5">
+                            <label for="query" class="w-full h-full px-2">
+                                <input
+                                    id="query"
+                                    name="query"
+                                    placeholder="Search"
+                                    type="search"
+                                    class="w-full h-full focus:outline-none focus:ring-0"/>
+                            </label>
+                        </form>
                     </div>
                 </div>
-                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
-                    <div class="w-full h-full rounded-t-md bg-gradient-to-br from-red-500 to-yellow-400"></div>
-                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
-                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Algorithms and data structures</span>
-                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+
+                <div id="exams" class="w-full h-[calc(100dvh-4rem-4rem)] flex gap-4 flex-wrap px-6 pt-1 pb-6 items-start justify-start content-start overflow-y-scroll flex-grow-0">
+                    <div class="w-[350px] min-w-[350px] h-[265px] rounded-md border flex flex-col gap-y-2 items-center justify-center bg-gray-100 hover:bg-gray-200">
+                        <img src="/static/icons/plus.svg" alt="icon" class="w-10 h-10">
+                        <span class="font-semibold text-md">Create new</span>
                     </div>
-                </div>
-                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
-                    <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-purple-500 to-pink-400"></div>
-                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
-                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Linux firewalls</span>
-                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-br from-green-500 to-blue-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Test 1</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
                     </div>
-                </div>
-                <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col">
-                    <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
-                    <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
-                        <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
-                        <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-br from-red-500 to-yellow-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Algorithms and data structures</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-purple-500 to-pink-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">Linux firewalls</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
+                    </div>
+                    <div class="w-[350px] min-w-[350px] h-[265px] bg-gray-100 hover:bg-gray-200 rounded-md border flex flex-col cursor-pointer">
+                        <div class="w-full h-full rounded-t-md bg-gradient-to-tr from-teal-200 to-green-400"></div>
+                        <div class="w-full h-[100px] rounded-b-md px-2 py-1 flex">
+                            <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">History: World War II</span>
+                            <img src="/static/icons/arrow-right.svg" alt="icon" class="w-6 h-6 self-center">
+                        </div>
                     </div>
                 </div>
             </main>
