@@ -27,6 +27,7 @@ COPY views views
 
 COPY --from=tailwind /workdir/static static
 COPY static/images static/images
+COPY static/icons static/icons
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go
 
