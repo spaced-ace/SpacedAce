@@ -5,9 +5,13 @@
         <div class="w-full"></div>
 
         {{ with . }}
-            <a hx-post="/logout" class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
+            <a href="/my-quizzes" class="font-semibold text-lg cursor-pointer">{{ .User.Name }}</a>
+            <div
+                hx-post="/logout"
+                class="flex px-4 py-2 items-center flex-grow-0 flex-shrink-0 gap-x-1 bg-red-700 rounded-md cursor-pointer text-white">
                 <span>Logout</span>
-            </a>
+                <img src="/static/icons/logout.svg" alt="logout-icon" class="w-5 h-5 stroke-white">
+            </div>
         {{ else }}
             <a href="/login" class="h-full px-2 py-1 flex items-center justify-center font-bold cursor-pointer">
                 <span>Login</span>
