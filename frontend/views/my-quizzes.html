@@ -1,4 +1,4 @@
-{{ block "dashboard" . }}
+{{ block "my-quizzes" . }}
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -8,12 +8,12 @@
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     </head>
     <body class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
-        {{ template "navbar" . }}
+        {{ template "navbar" .Session }}
         <div class="h-16 w-[260px] border-r"></div>
         <div class="w-screen h-[calc(100dvh)] flex">
             {{ template "sidebar" . }}
             <main class="w-[calc(100%-260px)] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-4">
-                <span class="text-4xl font-bold px-6 pt-6">My exams</span>
+                <span class="text-4xl font-bold px-6 pt-6">My quizzes</span>
 
                 <div class="w-full h-12 px-6">
                     <div class="w-full h-full">
