@@ -3,17 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"io"
 	"net/http"
-	"os"
-)
-
-var (
-	BACKEND_URL = "http://localhost:9000"
-	PORT        = "42069"
+	"spaced-ace/constants"
+	"spaced-ace/context"
+	"spaced-ace/pages"
+	"time"
 )
 
 type Template struct {
@@ -28,11 +27,6 @@ func newTemplate() *Template {
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.tmpl.ExecuteTemplate(w, name, data)
-}
-
-type Data struct {
-	Name   string
-	Result string
 }
 
 type Question struct {
@@ -53,6 +47,20 @@ type LoginRequestBody struct {
 	Password string `json:"password"`
 }
 
+type SignupForm struct {
+	Email         string `form:"email"`
+	Name          string `form:"name"`
+	Password      string `form:"password"`
+	PasswordAgain string `form:"passwordAgain"`
+}
+
+type SignupRequestBody struct {
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	Password      string `json:"password"`
+	PasswordAgain string `json:"passwordAgain"`
+}
+
 type MultipleChoiceResponse struct {
 	Question      string   `json:"question"`
 	Options       []string `json:"options"`
@@ -60,41 +68,41 @@ type MultipleChoiceResponse struct {
 }
 
 func main() {
-	if envBackendURL, exists := os.LookupEnv("BACKEND_URL"); exists {
-		BACKEND_URL = envBackendURL
-	}
-	if envPort, exists := os.LookupEnv("PORT"); exists {
-		PORT = envPort
-	}
-
 	e := echo.New()
 
 	e.Renderer = newTemplate()
 	e.Use(middleware.Logger())
-
-	data := Data{Name: "HTMX", Result: "Hello World!"}
+	e.Use(context.SessionMiddleware)
 
 	// Static files
 	e.Static("/static", "static")
 
-	// Routes
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index", data)
-	})
-	e.GET("/generate", func(c echo.Context) error {
-		return c.Render(200, "generate", nil)
-	})
-	e.GET("/login", func(c echo.Context) error {
-		return c.Render(200, "login", nil)
-	})
-	e.GET("/signup", func(c echo.Context) error {
-		return c.Render(200, "signup", nil)
-	})
-	e.GET("/dashboard", func(c echo.Context) error {
-		return c.Render(200, "dashboard", nil)
+	public := e.Group("")
+
+	protected := e.Group("")
+	protected.Use(context.RequireSessionMiddleware)
+
+	// Public pages
+	public.GET("/", pages.Index)
+	public.GET("/login", pages.Login)
+	public.GET("/signup", pages.Signup)
+
+	// Protected pages
+	protected.GET("/my-quizzes", pages.MyQuizzes)
+	protected.GET("/generate", func(c echo.Context) error {
+		cc := c.(*context.Context)
+
+		pageData := struct {
+			Session *context.Session
+		}{
+			Session: cc.Session,
+		}
+
+		return c.Render(200, "generate", pageData)
 	})
 
-	e.POST("/login", func(c echo.Context) error {
+	// API endpoints
+	public.POST("/login", func(c echo.Context) error {
 		var loginForm = LoginForm{}
 		if err := c.Bind(&loginForm); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -110,30 +118,100 @@ func main() {
 		}
 		bodyBuffer := bytes.NewBuffer(bodyBytes)
 
-		resp, err := http.Post(BACKEND_URL+"/login", "application/json", bodyBuffer)
+		resp, err := http.Post(constants.BACKEND_URL+"/authenticate-user", "application/json", bodyBuffer)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 		}
 		defer resp.Body.Close()
-
-		// get cookie with name auth
-		cookie := http.Cookie{}
-		for _, c := range resp.Cookies() {
-			if c.Name == "auth" {
-				cookie = *c
-			}
+		if resp.StatusCode != http.StatusOK {
+			return echo.NewHTTPError(resp.StatusCode, resp.Status)
 		}
 
-		// if cookie is not set, return unauthorized
-		if cookie.Name == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+		// parse the response
+		var user context.User
+		err = json.NewDecoder(resp.Body).Decode(&user)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		c.SetCookie(&cookie)
-		c.Response().Header().Set("HX-Redirect", "/")
-		return c.Render(200, "login", nil)
+		userSession := context.CreateSession(user)
+		cookie := new(http.Cookie)
+		cookie.Name = "session"
+		cookie.Value = userSession.Id
+		cookie.Path = "/"
+		cookie.HttpOnly = true
+		cookie.Expires = userSession.Expires
+
+		c.SetCookie(cookie)
+		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
+		return c.String(http.StatusOK, "login successful")
 	})
-	e.POST("multiple-choice-question", func(c echo.Context) error {
+	public.POST("/signup", func(c echo.Context) error {
+		var signupForm = SignupForm{}
+		if err := c.Bind(&signupForm); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		bodyMap := SignupRequestBody{
+			Name:          signupForm.Name,
+			Email:         signupForm.Email,
+			Password:      signupForm.Password,
+			PasswordAgain: signupForm.PasswordAgain,
+		}
+		bodyBytes, err := json.Marshal(bodyMap)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		bodyBuffer := bytes.NewBuffer(bodyBytes)
+
+		resp, err := http.Post(constants.BACKEND_URL+"/create-user", "application/json", bodyBuffer)
+		fmt.Println(err)
+		fmt.Println(resp.Status)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return echo.NewHTTPError(resp.StatusCode, resp.Status)
+		}
+
+		// parse the response
+		var user context.User
+		err = json.NewDecoder(resp.Body).Decode(&user)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		userSession := context.CreateSession(user)
+		cookie := new(http.Cookie)
+		cookie.Name = "session"
+		cookie.Value = userSession.Id
+		cookie.Path = "/"
+		cookie.HttpOnly = true
+		cookie.Expires = userSession.Expires
+
+		c.SetCookie(cookie)
+		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
+		return c.String(http.StatusCreated, "signup successful")
+	})
+	protected.POST("logout", func(c echo.Context) error {
+		cc := c.(*context.Context)
+		if cc.Session != nil {
+			context.DeleteSession(cc.Session.Id)
+		}
+
+		cookie := new(http.Cookie)
+		cookie.Name = "session"
+		cookie.Value = ""
+		cookie.Path = "/"
+		cookie.HttpOnly = true
+		cookie.Expires = time.Now().Add(-1 * time.Hour)
+
+		c.SetCookie(cookie)
+		c.Response().Header().Set("HX-Redirect", "/")
+		return c.String(http.StatusOK, "logout successful")
+	})
+	protected.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")
 		if prompt == "" {
 			return echo.NewHTTPError(http.StatusBadRequest, "prompt is required")
@@ -148,7 +226,7 @@ func main() {
 		}
 		bodyBuffer := bytes.NewBuffer(bodyBytes)
 
-		resp, err := http.Post(BACKEND_URL+"/multiple-choice", "application/json", bodyBuffer)
+		resp, err := http.Post(constants.BACKEND_URL+"/multiple-choice", "application/json", bodyBuffer)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 		}
@@ -164,5 +242,5 @@ func main() {
 		return c.Render(200, "multiple-choice-question", question)
 	})
 
-	e.Logger.Fatal(e.Start(":" + PORT))
+	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
