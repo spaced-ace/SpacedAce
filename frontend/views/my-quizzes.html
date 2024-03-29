@@ -7,7 +7,11 @@
         <title>Spaced Ace</title>
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     </head>
-    <body class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
+    <body
+        hx-history="false"
+        hx-boost="true"
+        hx-push-url="true"
+        class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
         {{ template "navbar" .Session }}
         <div class="h-16 w-[260px] border-r"></div>
         <div class="w-screen h-[calc(100dvh)] flex">
