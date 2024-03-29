@@ -14,12 +14,15 @@ func main() {
 	e.Use(middleware.Logger())
 
 	public := e.Group("")
+	protected := e.Group("")
 	public.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	public.POST("/authenticate-user", auth.AuthenticateUser)
-	public.POST("/create-user", auth.CreateUser)
+	public.GET("/authenticated", auth.Authenticated)
+	public.POST("/create-user", auth.Register)
+	protected.POST("/logout", auth.Logout)
 
 	public.GET("/quiz-infos", handlers.GetQuizInfos)
 
