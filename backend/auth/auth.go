@@ -3,10 +3,11 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"net/http"
-
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	bcrypt "golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 type User struct {
@@ -46,9 +47,11 @@ func AuthenticateUser(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
-	if user.Password != request.Password {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
+
 	session, err := CreateSession(user.Id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error, failed to create session")
@@ -124,12 +127,20 @@ func Register(c echo.Context) error {
 	if request.Password != request.PasswordAgain {
 		return echo.NewHTTPError(http.StatusBadRequest, "passwords do not match")
 	}
+	if len(request.Password) < 8 {
+		return echo.NewHTTPError(http.StatusBadRequest, "password must be at least 8 characters long")
+	}
+	bcryptPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
 
 	newUser := DBUser{
 		Id:       uuid.NewString(),
 		Name:     request.Name,
 		Email:    request.Email,
-		Password: request.Password,
+		Password: string(bcryptPassword),
 	}
 	err = CreateUser(&newUser)
 	if err != nil {
