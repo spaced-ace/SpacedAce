@@ -34,16 +34,39 @@ services:
     build:
       context: ./backend/
     environment:
-      - LLM_API_URL=http://llm-api:80
-      - PORT=80
-      - JWT_SECRET=secret
+      LLM_API_URL: http://llm-api:80
+      PORT: 80
+      DB_USER: ${PG_USER}
+      DB_PASS: ${PG_PW}
+      DB_PORT: 5432
+      DB_NAME: postgres
     ports:
       - "9000:80"
+    networks:
+      - spaced_ace_network
+  database:
+    build:
+        dockerfile: ./postgres/Dockerfile
+        context: ./postgres/
+    image: spacedace/postgres:0.0.1
+    container_name: spacedace_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      # can only create extensions in db postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PW}
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - spacedace-db:/var/lib/postgresql/data
     networks:
       - spaced_ace_network
 
 volumes:
   ollama:
+  spacedace-db:
 
 networks:
   spaced_ace_network:
