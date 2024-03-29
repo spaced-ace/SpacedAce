@@ -1,0 +1,19 @@
+version: '3'
+
+# specifically for testing only
+# mounted on localhost, no volume created, user and pw is test
+services:
+  database:
+    build:
+        dockerfile: Dockerfile
+        context: .
+    image: spacedace/postgres:0.0.1
+    container_name: spacedace_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      PGDATA: /var/lib/postgresql/data
