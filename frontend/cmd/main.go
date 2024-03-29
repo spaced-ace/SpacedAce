@@ -209,7 +209,8 @@ func main() {
 
 		c.SetCookie(cookie)
 		c.Response().Header().Set("HX-Redirect", "/")
-		return c.String(http.StatusOK, "logout successful")
+		//return c.Render(http.StatusOK, "index", nil)
+		return c.NoContent(http.StatusOK)
 	})
 	protected.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")
