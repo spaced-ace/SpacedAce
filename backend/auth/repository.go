@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 type DBUser struct {
@@ -43,8 +44,25 @@ SELECT cron.schedule('10 * * * *', $$DELETE FROM sessions WHERE valid_until < no
 var database *sqlx.DB
 
 func init() {
-	// todo use env vars
-	db, err := sqlx.Connect("postgres", "user=test dbname=postgres password=test sslmode=disable")
+	dbname := os.Getenv("DB_NAME")
+	if dbname == "" {
+		dbname = "postgres"
+	}
+	usr := os.Getenv("DB_USER")
+	if usr == "" {
+		usr = "test"
+	}
+	pass := os.Getenv("DB_PASS")
+	if pass == "" {
+		pass = "test"
+	}
+	port := os.Getenv("DB_PORT")
+	if port == "" {
+		port = "5432"
+	}
+	uri := "user=" + usr + " dbname=" + dbname + " password=" + pass + " port=" + port + " sslmode=disable"
+	db, err := sqlx.Connect("postgres", uri)
+
 	if err != nil {
 		log.Fatalln(err)
 		panic(err)

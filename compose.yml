@@ -34,9 +34,12 @@ services:
     build:
       context: ./backend/
     environment:
-      - LLM_API_URL=http://llm-api:80
-      - PORT=80
-      - JWT_SECRET=secret
+      LLM_API_URL: http://llm-api:80
+      PORT: 80
+      DB_USER: ${PG_USER}
+      DB_PASS: ${PG_PW}
+      DB_PORT: 5432
+      DB_NAME: postgres
     ports:
       - "9000:80"
     networks:
