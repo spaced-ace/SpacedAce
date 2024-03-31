@@ -16,18 +16,21 @@ var quizzes = []models.QuizInfo{
 	{
 		Id:          "1",
 		Title:       "Quiz 1",
+		Description: "This is a quiz.",
 		CreatorId:   "ccc6874f-40ab-46b1-b8e4-64ad278eaff5",
 		CreatorName: "John Doe",
 	},
 	{
 		Id:          "2",
 		Title:       "Quiz 2",
+		Description: "This is a quiz.",
 		CreatorId:   "2c26874f-44ab-46b1-b8e4-64ad278ea55e",
 		CreatorName: "Jane Doe",
 	},
 	{
 		Id:          "3",
 		Title:       "Quiz 3",
+		Description: "This is a quiz.",
 		CreatorId:   "2c26874f-40ab-46b1-b8e4-64ad278eaff5",
 		CreatorName: "John Smith",
 	},
