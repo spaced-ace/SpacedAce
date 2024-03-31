@@ -67,6 +67,20 @@ type MultipleChoiceResponse struct {
 	CorrectOption string   `json:"correctOption"`
 }
 
+type SingleChoiceQuestion struct {
+	Id           string   `json:"id"`
+	QuestionType int      `json:"questionType"`
+	Question     string   `json:"question"`
+	Options      []string `json:"options"`
+	Answer       int      `json:"answer"`
+}
+
+type SingleChoiceQuestionData struct {
+	Order    int
+	Edit     bool
+	Question SingleChoiceQuestion
+}
+
 func main() {
 	e := echo.New()
 
@@ -89,6 +103,7 @@ func main() {
 
 	// Protected pages
 	protected.GET("/my-quizzes", pages.MyQuizzes)
+	public.GET("/create-new-quiz", pages.CreateNewQuiz) // TODO
 	protected.GET("/generate", func(c echo.Context) error {
 		cc := c.(*context.Context)
 
@@ -194,7 +209,7 @@ func main() {
 		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
 		return c.String(http.StatusCreated, "signup successful")
 	})
-	protected.POST("logout", func(c echo.Context) error {
+	protected.POST("/logout", func(c echo.Context) error {
 		cc := c.(*context.Context)
 		if cc.Session != nil {
 			context.DeleteSession(cc.Session.Id)
@@ -211,6 +226,23 @@ func main() {
 		c.Response().Header().Set("HX-Redirect", "/")
 		//return c.Render(http.StatusOK, "index", nil)
 		return c.NoContent(http.StatusOK)
+	})
+
+	public.POST("/generate/single-choice", func(c echo.Context) error {
+		data := SingleChoiceQuestionData{
+			Order: 1,
+			Edit:  false,
+			Question: SingleChoiceQuestion{
+				Id:           "1",
+				QuestionType: 1,
+				Question:     "Mi Franciaország fővárosa?",
+				Options:      []string{"Párizs", "London", "Berlin", "Madrid"},
+				Answer:       0,
+			},
+		}
+
+		time.Sleep(3 * time.Second)
+		return c.Render(200, "single-choice-question", data)
 	})
 	protected.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")
