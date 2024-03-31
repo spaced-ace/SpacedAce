@@ -16,70 +16,60 @@
     {{ template "navbar" .Session }}
     <div class="h-16 border-r w-[260px]"></div>
     <div class="w-screen h-[calc(100dvh)] flex justify-center">
-        <main class="w-[700px] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
+        <div class="w-[700px] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
             <span class="text-4xl font-bold">Edit quiz</span>
 
             <label>
-                <input name="quiz-id" hidden="hidden" value="{{ .QuizWithMetaData.QuizInfo.Id }}">
-            </label>
-            <label for="title">
-                <input
-                    id="title"
-                    name="title"
-                    placeholder="My quiz"
-                    type="text"
-                    value="{{ .QuizWithMetaData.QuizInfo.Title }}"
-                    class="w-full rounded-md border border-gray-300 px-4 py-2"
-                />
+                <input name="quizId" hidden="hidden" value="{{ .QuizWithMetaData.QuizInfo.Id }}">
             </label>
 
-            <label for="description">
-                <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Description"
-                    type="text"
-                    rows="4"
-                    class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32">{{ .QuizWithMetaData.QuizInfo.Description }}</textarea>
-            </label>
+            {{ template "quiz-title-field" .QuizWithMetaData.QuizInfo }}
+
+            {{ template "quiz-description-field" .QuizWithMetaData.QuizInfo }}
 
             <hr class="w-full"/>
 
-            <label for="context">
-                <textarea
-                    id="context"
-                    name="context"
-                    placeholder="Context"
-                    type="text"
-                    class="max-h-96 w-full rounded-md border border-gray-300 px-4 py-2 min-h-48"></textarea>
-            </label>
+            <form>
+                <label for="context">
+                    <textarea
+                        id="context"
+                        name="context"
+                        placeholder="Context"
+                        type="text"
+                        class="max-h-96 w-full rounded-md border border-gray-300 px-4 py-2 min-h-48"></textarea>
+                </label>
 
-            <div id="generate-buttons" class="flex flex-shrink-0 gap-2">
-                <button
-                    hx-post="/generate?type=single-choice"
-                    hx-on="click"
-                    hx-target="#questions"
-                    hx-swap="beforeend"
-                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
-                <button
-                    hx-post="/generate?type=multiple-choice"
-                    hx-on="click"
-                    hx-target="#questions"
-                    hx-swap="beforeend"
-                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
-                <button
-                    hx-post="/generate?type=true-or-false"
-                    hx-on="click"
-                    hx-target="#questions"
-                    hx-swap="beforeend"
-                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
-                <button
-                    hx-post="/generate?type=open-ended"
-                    hx-on="click"
-                    hx-target="#questions"
-                    hx-swap="beforeend"
-                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Open-ended</button>
-            </div>
+                <div id="generate-buttons" class="flex flex-shrink-0 gap-2">
+                    <button
+                        hx-post="/generate?type=single-choice"
+                        hx-on="click"
+                        hx-target="#questions"
+                        hx-swap="beforeend"
+                        hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
+                    <button
+                        hx-post="/generate?type=multiple-choice"
+                        hx-on="click"
+                        hx-target="#questions"
+                        hx-swap="beforeend"
+                        hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
+                    <button
+                        hx-post="/generate?type=true-or-false"
+                        hx-on="click"
+                        hx-target="#questions"
+                        hx-swap="beforeend"
+                        hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
+                    <button
+                        hx-post="/generate?type=open-ended"
+                        hx-on="click"
+                        hx-target="#questions"
+                        hx-swap="beforeend"
+                        hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Open-ended</button>
+                </div>
+            </form>
 
             <div id="questions" class="flex w-full flex-col gap-y-2 pb-6">
                 {{ range $question := .QuizWithMetaData.QuestionsWithMetaData }}
@@ -97,7 +87,7 @@
                 {{ template "question-placeholder" . }}
             </div>
 
-        </main>
+        </div>
     </div>
     <script>
         // htmx.logAll();
@@ -124,4 +114,37 @@
     </script>
     </body>
     </html>
+{{ end }}
+
+{{ block "quiz-title-field" . }}
+    <label id="title-label" for="title">
+        <input
+            id="title"
+            name="title"
+            placeholder="My quiz"
+            type="text"
+            value="{{ .Title }}"
+            hx-patch="/quizzes/{{ .Id }}"
+            hx-trigger="blur"
+            hx-target="#title-label"
+            hx-vals='{ "quizId": "{{ .Id }}" }'
+            class="w-full rounded-md border border-gray-300 px-4 py-2"
+        />
+    </label>
+{{ end }}
+
+{{ block "quiz-description-field" . }}
+    <label id="description-label" for="description">
+        <textarea
+            id="description"
+            name="description"
+            placeholder="Description"
+            type="text"
+            rows="4"
+            hx-patch="/quizzes/{{ .Id }}"
+            hx-trigger="blur"
+            hx-target="#description-label"
+            hx-vals='{ "quizId": "{{ .Id }}" }'
+            class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32">{{ .Description }}</textarea>
+    </label>
 {{ end }}
