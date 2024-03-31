@@ -1,20 +1,19 @@
 {{ block "single-choice-question" . }}
-    <div id="{{ .Question.Id }}" class="w-[700px] p-6 flex flex-col gap-y-1 rounded-md border border-gray-300 items-start">
-        <span class="text-xl font-semibold overflow-auto whitespace-normal">{{ .Order }}) {{ .Question.Question }}</span>
+    <div id="{{ .Question.Id }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
+        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Order }}) {{ .Question.Question }}</span>
         <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
-        <div class="flex flex-col w-full rounded-md border border-gray-200 p-2 gap-y-0.5 text-lg overflow-auto whitespace-normal">
-            {{ $answer := .Question.Answer }}
+        <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
             {{ range $index, $option := .Question.Options }}
                 <label class="overflow-auto whitespace-normal">
                     <input
                         type="radio"
                         name="answer"
                         disabled
-                        {{ if eq $answer $index }}
+                        {{ if eq $option.Correct true }}
                             checked
                         {{ end }}
                         value="{{ $index }}">
-                    {{ $option }}
+                    {{ $option.Value }}
                 </label>
             {{ end }}
         </div>

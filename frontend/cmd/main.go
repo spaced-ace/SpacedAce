@@ -103,18 +103,11 @@ func main() {
 
 	// Protected pages
 	protected.GET("/my-quizzes", pages.MyQuizzes)
-	public.GET("/create-new-quiz", pages.CreateNewQuiz) // TODO
-	protected.GET("/generate", func(c echo.Context) error {
-		cc := c.(*context.Context)
 
-		pageData := struct {
-			Session *context.Session
-		}{
-			Session: cc.Session,
-		}
+	public.GET("/create-new-quiz", pages.CreateNewQuiz)  // TODO protected
+	public.POST("/quizzes/create", pages.PostCreateQuiz) // TODO protected
 
-		return c.Render(200, "generate", pageData)
-	})
+	public.GET("/quizzes/:id/edit", pages.EditQuiz) // TODO protected
 
 	// API endpoints
 	public.POST("/login", func(c echo.Context) error {

@@ -1,24 +1,24 @@
 {{ block "sidebar" . }}
-<aside class="w-[260px] h-full flex flex-col px-4 py-4 border-r gap-y-3 flex-shrink-0">
-    <div class="flex h-[72px] items-center gap-x-3 pb-2">
+<aside class="flex h-full flex-shrink-0 flex-col gap-y-3 border-r px-4 py-4 w-[260px]">
+    <div class="flex items-center gap-x-3 pb-2 h-[72px]">
         <img src="https://placehold.co/64x64/png" alt="logo" class="rounded-md">
         <span class="text-lg font-semibold">John Doe</span>
     </div>
 
-    <a class="flex py-2 px-3 items-center gap-x-3 bg-gray-100 hover:bg-gray-200 rounded-md">
-        <img src="/static/icons/learn.svg" alt="learn-icon" class="w-6 h-6">
+    <a class="flex items-center gap-x-3 rounded-md bg-gray-100 px-3 py-2 hover:bg-gray-200">
+        <img src="/static/icons/learn.svg" alt="learn-icon" class="h-6 w-6">
         <span class="text-md">Learn</span>
     </a>
-    <a class="flex py-2 px-3 items-center gap-x-3 hover:bg-gray-200 rounded-md">
-        <img src="/static/icons/bolt.svg" alt="icon" class="w-6 h-6">
+    <a class="flex items-center gap-x-3 rounded-md px-3 py-2 hover:bg-gray-200">
+        <img src="/static/icons/bolt.svg" alt="icon" class="h-6 w-6">
         <span class="text-md">Menu 2</span>
     </a>
-    <a class="flex py-2 px-3 items-center gap-x-3 hover:bg-gray-200 rounded-md">
-        <img src="/static/icons/bolt.svg" alt="icon" class="w-6 h-6">
+    <a class="flex items-center gap-x-3 rounded-md px-3 py-2 hover:bg-gray-200">
+        <img src="/static/icons/bolt.svg" alt="icon" class="h-6 w-6">
         <span class="text-md">Menu 3</span>
     </a>
-    <a class="flex py-2 px-3 items-center gap-x-3 hover:bg-gray-200 rounded-md">
-        <img src="/static/icons/profile.svg" alt="learn-icon" class="w-6 h-6">
+    <a class="flex items-center gap-x-3 rounded-md px-3 py-2 hover:bg-gray-200">
+        <img src="/static/icons/profile.svg" alt="learn-icon" class="h-6 w-6">
         <span class="text-md">Profile</span>
     </a>
 
@@ -26,7 +26,7 @@
 
     <button
         hx-post="/logout"
-        class="w-full h-10 rounded-md border px-4 py-2 bg-red-700 hover:bg-red-600 text-white">
+        class="h-10 w-full rounded-md border bg-red-700 px-4 py-2 text-white hover:bg-red-600">
         Logout
     </button>
 </aside>

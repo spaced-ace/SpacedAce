@@ -1,8 +1,8 @@
 {{ block "multiple-choice-question" . }}
-<div class="w-[700px] p-6 flex flex-col gap-y-1 rounded-md border border-gray-300 items-start mb-20">
-    <span class="text-xl font-semibold overflow-auto whitespace-normal">{{ .Question }}</span>
+<div class="mb-20 flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
+    <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question }}</span>
     <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
-    <div class="flex flex-col w-full rounded-md border border-gray-200 p-2 gap-y-0.5 text-lg overflow-auto whitespace-normal">
+    <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
         <label class="overflow-auto whitespace-normal">
             <input type="radio" class="" name="answer" value="1">
             {{ .Option1 }}
