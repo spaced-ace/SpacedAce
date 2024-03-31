@@ -62,6 +62,13 @@ var mockQuiz = QuizWithMetaData{
 	},
 }
 
+var mockTrueOrFalseQuestion = models.NewTrueOrFalseQuestion(
+	"3",
+	"ae664251-9ee7-4ca6-9f16-ff072de61632",
+	3,
+	"Is the sun hot?",
+	true)
+
 func EditQuiz(c echo.Context) error {
 	cc := c.(*context.Context)
 
@@ -114,6 +121,15 @@ func PostGenerateQuestion(c echo.Context) error {
 		}
 
 		return c.Render(200, "multiple-choice-question", question)
+	}
+
+	if questionType == "true-or-false" {
+		question := QuestionWithMetaData{
+			EditMode: false,
+			Question: mockTrueOrFalseQuestion,
+		}
+
+		return c.Render(200, "true-or-false-question", question)
 	}
 
 	return c.NoContent(http.StatusTeapot)
