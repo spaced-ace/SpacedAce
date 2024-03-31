@@ -75,8 +75,8 @@
                 {{ range $question := .QuizWithMetaData.QuestionsWithMetaData }}
                     {{ if eq .Question.QuestionType 0 }}
                         {{ template "single-choice-question" $question }}
-{{/*                    {{ else if eq .Question.QuestionType 1 }}*/}}
-{{/*                        {{ template "multiple-choice-question" $question }}*/}}
+                    {{ else if eq .Question.QuestionType 1 }}
+                        {{ template "multiple-choice-question" $question }}
 {{/*                    {{ else if eq .Question.QuestionType 2 }}*/}}
 {{/*                        {{ template "true-or-false-question" $question }}*/}}
 {{/*                    {{ else if eq .Question.QuestionType 3 }}*/}}

@@ -34,6 +34,18 @@ var mockSingleChoiceQuestion = models.NewSingleChoiceQuestion(
 		{Value: "Madrid", Correct: false},
 	})
 
+var mockMultipleChoiceQuestion = models.NewMultipleChoiceQuestion(
+	"2",
+	"ae664251-9ee7-4ca6-9f16-ff072de61632",
+	2,
+	"Which of the following are European countries?",
+	[]models.Option{
+		{Value: "Canada", Correct: false},
+		{Value: "France", Correct: true},
+		{Value: "Germany", Correct: true},
+		{Value: "Brazil", Correct: false},
+	})
+
 var mockQuiz = QuizWithMetaData{
 	QuizInfo: models.QuizInfo{
 		Id:          "ae664251-9ee7-4ca6-9f16-ff072de61632",
@@ -93,6 +105,15 @@ func PostGenerateQuestion(c echo.Context) error {
 		}
 
 		return c.Render(200, "single-choice-question", question)
+	}
+
+	if questionType == "multiple-choice" {
+		question := QuestionWithMetaData{
+			EditMode: false,
+			Question: mockMultipleChoiceQuestion,
+		}
+
+		return c.Render(200, "multiple-choice-question", question)
 	}
 
 	return c.NoContent(http.StatusTeapot)
