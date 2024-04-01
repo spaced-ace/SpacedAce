@@ -67,6 +67,20 @@ type MultipleChoiceResponse struct {
 	CorrectOption string   `json:"correctOption"`
 }
 
+type SingleChoiceQuestion struct {
+	Id           string   `json:"id"`
+	QuestionType int      `json:"questionType"`
+	Question     string   `json:"question"`
+	Options      []string `json:"options"`
+	Answer       int      `json:"answer"`
+}
+
+type SingleChoiceQuestionData struct {
+	Order    int
+	Edit     bool
+	Question SingleChoiceQuestion
+}
+
 func main() {
 	e := echo.New()
 
@@ -83,23 +97,20 @@ func main() {
 	protected.Use(context.RequireSessionMiddleware)
 
 	// Public pages
-	public.GET("/", pages.Index)
-	public.GET("/login", pages.Login)
-	public.GET("/signup", pages.Signup)
+	public.GET("/", pages.IndexPage)
+	public.GET("/login", pages.LoginPage)
+	public.GET("/signup", pages.SignupPage)
 
 	// Protected pages
-	protected.GET("/my-quizzes", pages.MyQuizzes)
-	protected.GET("/generate", func(c echo.Context) error {
-		cc := c.(*context.Context)
+	protected.GET("/my-quizzes", pages.MyQuizzesPage)
 
-		pageData := struct {
-			Session *context.Session
-		}{
-			Session: cc.Session,
-		}
+	public.GET("/create-new-quiz", pages.CreateNewQuizPage) // TODO protected
+	public.POST("/quizzes/create", pages.PostCreateQuiz)    // TODO protected
 
-		return c.Render(200, "generate", pageData)
-	})
+	public.GET("/quizzes/:id/edit", pages.EditQuizPage)           // TODO protected
+	public.POST("/generate", pages.PostGenerateQuestion)          // TODO protected
+	public.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)           // TODO protected
+	public.DELETE("/questions/:questionId", pages.DeleteQuestion) // TODO protected
 
 	// API endpoints
 	public.POST("/login", func(c echo.Context) error {
@@ -194,7 +205,7 @@ func main() {
 		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
 		return c.String(http.StatusCreated, "signup successful")
 	})
-	protected.POST("logout", func(c echo.Context) error {
+	protected.POST("/logout", func(c echo.Context) error {
 		cc := c.(*context.Context)
 		if cc.Session != nil {
 			context.DeleteSession(cc.Session.Id)
@@ -211,6 +222,23 @@ func main() {
 		c.Response().Header().Set("HX-Redirect", "/")
 		//return c.Render(http.StatusOK, "index", nil)
 		return c.NoContent(http.StatusOK)
+	})
+
+	public.POST("/generate/single-choice", func(c echo.Context) error {
+		data := SingleChoiceQuestionData{
+			Order: 1,
+			Edit:  false,
+			Question: SingleChoiceQuestion{
+				Id:           "1",
+				QuestionType: 1,
+				Question:     "Mi Franciaország fővárosa?",
+				Options:      []string{"Párizs", "London", "Berlin", "Madrid"},
+				Answer:       0,
+			},
+		}
+
+		time.Sleep(3 * time.Second)
+		return c.Render(200, "single-choice-question", data)
 	})
 	protected.POST("multiple-choice-question", func(c echo.Context) error {
 		prompt := c.FormValue("prompt")

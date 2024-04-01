@@ -9,7 +9,7 @@ type IndexPageData struct {
 	Session *context.Session
 }
 
-func Index(c echo.Context) error {
+func IndexPage(c echo.Context) error {
 	cc := c.(*context.Context)
 
 	data := IndexPageData{

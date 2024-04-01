@@ -1,0 +1,95 @@
+{{ block "create-new-quiz" . }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/tailwindcss.css">
+    <meta charset="UTF-8">
+    <title>Spaced Ace</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body
+    hx-history="true"
+    hx-boost="true"
+    hx-push-url="true"
+    class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
+    {{ template "navbar" .Session }}
+    <div class="h-16 border-r w-[260px]"></div>
+    <div class="w-screen h-[calc(100dvh)] flex justify-center">
+        <form class="w-[700px] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
+            <span class="text-4xl font-bold">Create new</span>
+
+            <label for="title">
+                <input
+                    id="title"
+                    name="title"
+                    placeholder="My quiz"
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-4 py-2"/>
+            </label>
+
+            <label for="description">
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Description"
+                    type="text"
+                    rows="4"
+                    class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32"></textarea>
+            </label>
+
+            <hr class="w-full"/>
+
+            <label for="context">
+                <textarea
+                    id="context"
+                    name="context"
+                    placeholder="Context"
+                    type="text"
+                    class="max-h-96 w-full rounded-md border border-gray-300 px-4 py-2 min-h-48"></textarea>
+            </label>
+
+            <div id="generate-buttons" class="flex flex-shrink-0 gap-2">
+                <button
+                    hx-post="/quizzes/create?type=single-choice"
+                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
+                <button
+                    hx-post="/quizzes/create?type=multiple-choice"
+                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
+                <button
+                    hx-post="/quizzes/create?type=true-or-false"
+                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
+                <button
+                    hx-post="/quizzes/create?type=open-ended"
+                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Open-ended</button>
+            </div>
+
+            <div id="questions" class="flex w-full flex-col gap-y-2 pb-6">
+                {{ template "question-placeholder" . }}
+            </div>
+
+        </form>
+    </div>
+    <script>
+        const generateButtons = document.getElementById('generate-buttons')?.querySelectorAll('button');
+        const questions = document.getElementById('questions');
+
+        const placeholder = document.getElementById('question-placeholder');
+        placeholder.style.display = 'none';
+
+        generateButtons?.forEach(generateButton => {
+            generateButton.addEventListener('htmx:beforeSend', () => {
+                generateButtons?.forEach(button => button.disabled = true);
+                placeholder.style.display = 'flex';
+                questions.insertBefore(placeholder, null);
+                placeholder.scrollIntoView({ behavior: 'smooth'});
+            });
+
+            generateButton.addEventListener('htmx:responseError', () => {
+                generateButtons?.forEach(button => button.disabled = false);
+                placeholder.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
+{{ end }}

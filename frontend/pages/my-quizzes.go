@@ -9,7 +9,7 @@ type MyQuizzesPageData struct {
 	Session *context.Session
 }
 
-func MyQuizzes(c echo.Context) error {
+func MyQuizzesPage(c echo.Context) error {
 	cc := c.(*context.Context)
 
 	pageData := MyQuizzesPageData{

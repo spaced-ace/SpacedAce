@@ -11,38 +11,38 @@
     hx-history="false"
     hx-boost="true"
     hx-push-url="true"
-    class="w-screen flex flex-col whitespace-nowrap cursor-default">
+    class="flex w-screen cursor-default flex-col whitespace-nowrap">
     {{ template "navbar" .Session }}
     <div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
-        <form class="flex flex-col p-6 gap-y-4 w-[500px]">
+        <form class="flex flex-col gap-y-4 p-6 w-[500px]">
             <span class="text-center text-3xl font-bold">Login</span>
             <div class="flex flex-col items-start gap-y-1">
-                <label for="email" class="text-sm leading-5 font-medium">Email</label>
+                <label for="email" class="text-sm font-medium leading-5">Email</label>
                 <input
                     id="email"
                     name="email"
                     type="email"
                     placeholder="Email"
-                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+                    class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
             </div>
             <div class="flex flex-col items-start gap-y-1">
-                <label for="password" class="text-sm leading-5 font-medium">Password</label>
+                <label for="password" class="text-sm font-medium leading-5">Password</label>
                 <input
                     id="password"
                     name="password"
                     type="password"
                     placeholder="Password"
-                    class="w-full h-10 rounded-md border border-gray-300 px-4 py-2">
+                    class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
             </div>
             <button
                 type="submit"
                 hx-post="/login"
-                class="w-full h-10 rounded-md border border-black px-4 py-2 bg-black text-white">
+                class="h-10 w-full rounded-md border border-black bg-black px-4 py-2 text-white">
                 Login
             </button>
             <a
                 href="/signup"
-                class="w-full h-10 rounded-md border text-center px-4 py-2 bg-white text-black cursor-pointer">
+                class="h-10 w-full cursor-pointer rounded-md border bg-white px-4 py-2 text-center text-black">
                 Sign up
             </a>
         </form>
