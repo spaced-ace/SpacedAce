@@ -8,9 +8,9 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body
-    hx-history="false"
+    hx-history="true"
     hx-boost="true"
-    hx-push-url="false"
+    hx-push-url="true"
     class="w-screen h-[calc(100dvh)] flex flex-col flex-shrink-0 whitespace-nowrap cursor-default">
     {{ template "navbar" .Session }}
     <div class="h-16 border-r w-[260px]"></div>
@@ -56,7 +56,7 @@
                     hx-post="/quizzes/create?type=multiple-choice"
                     class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
                 <button
-                    hx-post="/quizzes/create?type=true-false"
+                    hx-post="/quizzes/create?type=true-or-false"
                     class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
                 <button
                     hx-post="/quizzes/create?type=open-ended"

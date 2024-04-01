@@ -10,7 +10,7 @@ type SignupPageData struct {
 	Session *context.Session
 }
 
-func Signup(c echo.Context) error {
+func SignupPage(c echo.Context) error {
 	cc := c.(*context.Context)
 	if cc.Session != nil {
 		return c.Redirect(http.StatusFound, "/my-quizzes")

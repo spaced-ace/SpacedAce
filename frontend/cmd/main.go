@@ -97,17 +97,17 @@ func main() {
 	protected.Use(context.RequireSessionMiddleware)
 
 	// Public pages
-	public.GET("/", pages.Index)
-	public.GET("/login", pages.Login)
-	public.GET("/signup", pages.Signup)
+	public.GET("/", pages.IndexPage)
+	public.GET("/login", pages.LoginPage)
+	public.GET("/signup", pages.SignupPage)
 
 	// Protected pages
-	protected.GET("/my-quizzes", pages.MyQuizzes)
+	protected.GET("/my-quizzes", pages.MyQuizzesPage)
 
-	public.GET("/create-new-quiz", pages.CreateNewQuiz)  // TODO protected
-	public.POST("/quizzes/create", pages.PostCreateQuiz) // TODO protected
+	public.GET("/create-new-quiz", pages.CreateNewQuizPage) // TODO protected
+	public.POST("/quizzes/create", pages.PostCreateQuiz)    // TODO protected
 
-	public.GET("/quizzes/:id/edit", pages.EditQuiz)      // TODO protected
+	public.GET("/quizzes/:id/edit", pages.EditQuizPage)  // TODO protected
 	public.POST("/generate", pages.PostGenerateQuestion) // TODO protected
 	public.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)  // TODO protected
 

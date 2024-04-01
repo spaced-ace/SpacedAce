@@ -69,7 +69,15 @@ var mockTrueOrFalseQuestion = models.NewTrueOrFalseQuestion(
 	"Is the sun hot?",
 	true)
 
-func EditQuiz(c echo.Context) error {
+var mockOpenEndedQuestion = models.NewOpenEndedQuestion(
+	"4",
+	"ae664251-9ee7-4ca6-9f16-ff072de61632",
+	4,
+	"What are the main benefits of using Go programming language?",
+	"",
+	"Go has a simple syntax which makes it easy to learn. It is statically typed and compiled, which helps in catching errors early. It also has built-in support for concurrent programming.")
+
+func EditQuizPage(c echo.Context) error {
 	cc := c.(*context.Context)
 
 	pageData := EditQuizPageData{
@@ -130,6 +138,15 @@ func PostGenerateQuestion(c echo.Context) error {
 		}
 
 		return c.Render(200, "true-or-false-question", question)
+	}
+
+	if questionType == "open-ended" {
+		question := QuestionWithMetaData{
+			EditMode: false,
+			Question: mockOpenEndedQuestion,
+		}
+
+		return c.Render(200, "open-ended-question", question)
 	}
 
 	return c.NoContent(http.StatusTeapot)

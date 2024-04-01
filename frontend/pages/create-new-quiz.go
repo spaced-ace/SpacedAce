@@ -12,7 +12,7 @@ type CreateNewQuizPageData struct {
 	Session *context.Session
 }
 
-func CreateNewQuiz(c echo.Context) error {
+func CreateNewQuizPage(c echo.Context) error {
 	cc := c.(*context.Context)
 
 	pageData := MyQuizzesPageData{

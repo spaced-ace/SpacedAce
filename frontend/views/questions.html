@@ -73,6 +73,21 @@
     </div>
 {{ end }}
 
+{{ block "open-ended-question" . }}
+    <div id="{{ .Question.Id }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
+        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Order }}) {{ .Question.Question }}</span>
+        <span class="text-sm text-gray-400">Answer the following question in 2 to 3 sentences</span>
+        <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
+            <label class="overflow-auto whitespace-normal">
+                <textarea
+                    name="answer"
+                    class="w-full h-[200px] border border-gray-200 rounded-md p-2"
+                    disabled>{{ .Question.Answer }}</textarea>
+            </label>
+        </div>
+    </div>
+{{ end }}
+
 {{ block "question-placeholder" . }}
 <div id="question-placeholder" class="flex w-full items-center justify-center rounded-md border h-[200px]">
     <div role="status">
