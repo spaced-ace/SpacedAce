@@ -180,3 +180,12 @@ func PatchUpdateQuiz(c echo.Context) error {
 
 	return c.NoContent(http.StatusBadRequest)
 }
+
+func DeleteQuestion(c echo.Context) error {
+	questionId := c.Param("questionId")
+	if questionId == "" {
+		return c.String(http.StatusBadRequest, "Question ID is required")
+	}
+
+	return c.NoContent(http.StatusOK)
+}

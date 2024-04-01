@@ -107,9 +107,10 @@ func main() {
 	public.GET("/create-new-quiz", pages.CreateNewQuizPage) // TODO protected
 	public.POST("/quizzes/create", pages.PostCreateQuiz)    // TODO protected
 
-	public.GET("/quizzes/:id/edit", pages.EditQuizPage)  // TODO protected
-	public.POST("/generate", pages.PostGenerateQuestion) // TODO protected
-	public.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)  // TODO protected
+	public.GET("/quizzes/:id/edit", pages.EditQuizPage)           // TODO protected
+	public.POST("/generate", pages.PostGenerateQuestion)          // TODO protected
+	public.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)           // TODO protected
+	public.DELETE("/questions/:questionId", pages.DeleteQuestion) // TODO protected
 
 	// API endpoints
 	public.POST("/login", func(c echo.Context) error {
