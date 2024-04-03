@@ -15,6 +15,7 @@ func main() {
 
 	public := e.Group("")
 	protected := e.Group("")
+	quiz := e.Group("/quizzes")
 	public.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
@@ -25,7 +26,11 @@ func main() {
 	public.DELETE("/delete-user/:id", auth.DeleteUserEndpoint)
 	protected.POST("/logout", auth.Logout)
 
-	public.GET("/quiz-infos", handlers.GetQuizInfos)
+	quiz.GET("/:id", handlers.GetQuizEndpoint)
+	quiz.PATCH("/:id", handlers.UpdateQuizEndpoint)
+	quiz.DELETE("/:id", handlers.DeleteQuizEndpoint)
+	quiz.GET("/user/:id", handlers.GetQuizzesOfUserEndpoint)
+	quiz.POST("/create", handlers.CreateQuizEndpoint)
 
 	public.POST("/multiple-choice", handlers.PostMultipleChoiceQuestion)
 
