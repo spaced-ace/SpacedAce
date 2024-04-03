@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS users_email ON users(email);
 CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
 	id UUID PRIMARY KEY,
-	user_id UUID REFERENCES users(id),
+	user_id UUID REFERENCES users(id) ON DELETE CASCADE,
 	valid_until TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS sessions_id ON sessions(id);
