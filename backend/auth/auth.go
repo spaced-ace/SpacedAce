@@ -146,8 +146,17 @@ func Register(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create user")
 	}
+	sessionId, err := CreateSession(newUser.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create session")
+	}
+	c.SetCookie(&http.Cookie{
+		Name:     "session",
+		Value:    sessionId,
+		HttpOnly: true,
+	})
 
-	return c.JSON(http.StatusOK, newUser)
+	return c.JSON(http.StatusOK, AuthResponse{User: newUser.Id, Session: sessionId})
 }
 
 func Logout(c echo.Context) error {
@@ -156,6 +165,22 @@ func Logout(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
 	err = DeleteSession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	return c.NoContent(http.StatusOK)
+}
+
+func DeleteUserEndpoint(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "login required")
+	}
+	userid, err := GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	err = DeleteUser(userid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}

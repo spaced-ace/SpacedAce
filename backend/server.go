@@ -22,6 +22,7 @@ func main() {
 	public.POST("/authenticate-user", auth.AuthenticateUser)
 	public.GET("/authenticated", auth.Authenticated)
 	public.POST("/create-user", auth.Register)
+	public.DELETE("/delete-user/:id", auth.DeleteUserEndpoint)
 	protected.POST("/logout", auth.Logout)
 
 	public.GET("/quiz-infos", handlers.GetQuizInfos)
