@@ -1,5 +1,6 @@
 FROM mistral:latest
 
+PARAMETER temperature 0.1
 TEMPLATE """[INST] {{ .System }}
 ## Task
 User:
