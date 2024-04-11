@@ -26,7 +26,7 @@ var (
 	QUIZ_VIEWER_ACCESS_ID = 2
 )
 
-func init() {
+func InitDb() {
 	utils.DB.MustExec(schema)
 }
 

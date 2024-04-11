@@ -1,5 +1,7 @@
 package models
 
+type Question struct{}
+
 type QuizInfo struct {
 	Id          string `json:"id"`
 	Title       string `json:"title"`

@@ -118,6 +118,151 @@ if [ $STATUSCODE -ne  200 ]; then
 fi
 echo ""
 
+tmp=$(mktemp)
+echo "--- A multiple-choice question should be generated ---"
+STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
+	-X POST \
+	-H "Cookie: session=$session" \
+	$uri/questions/multiple-choice \
+	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+multiple_q=$(cat $tmp | jq -r '.id')
+cat $tmp >&2
+echo ""
+
+echo "--- A multiple-choice question should be returned ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-H "Cookie: session=$session" \
+	$uri/questions/multiple-choice/$multiple_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A multiple-choice question should be modified ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X PATCH \
+	-H "Cookie: session=$session" \
+	-d '{"quizId":"'$quizid'", "question":"Modified, whatever it was","answers":["CABD", "ABCD"], "CorrectAnswers":["A", "B"]}' \
+	$uri/questions/multiple-choice/$multiple_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A multiple-choice question should be deleted ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X DELETE \
+	-H "Cookie: session=$session" \
+	$uri/questions/multiple-choice/$quizid/$multiple_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+tmp=$(mktemp)
+echo "--- A single-choice question should be generated ---"
+STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
+	-X POST \
+	-H "Cookie: session=$session" \
+	$uri/questions/single-choice \
+	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+single_q=$(cat $tmp | jq -r '.id')
+cat $tmp >&2
+echo ""
+
+echo $single_q
+echo "--- A single-choice question should be returned ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-H "Cookie: session=$session" \
+	$uri/questions/single-choice/$single_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A single-choice question should be modified ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X PATCH \
+	-H "Cookie: session=$session" \
+	-d '{"quizId":"'$quizid'", "question":"Modified, whatever it was","answers":["CABD", "ABCD"], "correctAnswer":"A"}' \
+	$uri/questions/single-choice/$single_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A single-choice question should be deleted ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X DELETE \
+	-H "Cookie: session=$session" \
+	$uri/questions/single-choice/$quizid/$single_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+tmp=$(mktemp)
+echo "--- A true-or-false question should be generated ---"
+STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
+	-X POST \
+	-H "Cookie: session=$session" \
+	$uri/questions/true-or-false \
+	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+tf_q=$(cat $tmp | jq -r '.id')
+cat $tmp >&2
+echo ""
+
+echo "--- A true-or-false question should be returned ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-H "Cookie: session=$session" \
+	$uri/questions/true-or-false/$tf_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A true-or-false question should be modified ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X PATCH \
+	-H "Cookie: session=$session" \
+	-d '{"QuizId":"'$quizid'", "Question":"Modified, whatever it was", "CorrectAnswer":true}' \
+	$uri/questions/true-or-false/$tf_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
+echo "--- A true-or-false question should be deleted ---"
+STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
+	-X DELETE \
+	-H "Cookie: session=$session" \
+	$uri/questions/true-or-false/$quizid/$tf_q)
+if [ $STATUSCODE -ne  200 ]; then
+	echo "Shoud have received 200 status code, got $STATUSCODE"
+  exit 1
+fi
+echo ""
+
 echo "--- Quiz should be deleted ---"
 STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \

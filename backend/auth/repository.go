@@ -37,9 +37,9 @@ CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
 CREATE INDEX IF NOT EXISTS sessions_id ON sessions(id);
 CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS sessions_valid_until ON sessions(valid_until);
-SELECT cron.schedule('10 * * * *', $$DELETE FROM sessions WHERE valid_until < now()$$);`
+SELECT cron.schedule('del_exp_sessions', '10 * * * *', $$DELETE FROM sessions WHERE valid_until < now()$$);`
 
-func init() {
+func InitDb() {
 	utils.DB.MustExec(schema)
 }
 
