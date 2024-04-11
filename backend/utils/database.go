@@ -28,7 +28,11 @@ func init() {
 	if port == "" {
 		port = "5432"
 	}
-	uri := "user=" + usr + " dbname=" + dbname + " password=" + pass + " port=" + port + " sslmode=disable"
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	uri := "user=" + usr + " dbname=" + dbname + " password=" + pass + " host=" + host + " port=" + port + " sslmode=disable"
 	db, err := sqlx.Connect("postgres", uri)
 
 	if err != nil {
