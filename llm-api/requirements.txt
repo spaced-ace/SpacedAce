@@ -2,3 +2,7 @@ fastapi
 uvicorn[standard]
 pydantic
 httpx
+langchain
+asyncpg
+pgvector
+returns

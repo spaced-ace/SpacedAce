@@ -1,60 +1,195 @@
 package handlers
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"spaced-ace-backend/api/models"
+	models "spaced-ace-backend/api/models"
+	"spaced-ace-backend/auth"
+	quiz "spaced-ace-backend/quiz"
 )
 
-type QuizzesResponseBody struct {
+type QuizzesResponse struct {
 	Quizzes []models.QuizInfo `json:"quizzes"`
 	Length  int               `json:"length"`
 }
 
-var quizzes = []models.QuizInfo{
-	{
-		Id:          "1",
-		Title:       "Quiz 1",
-		Description: "This is a quiz.",
-		CreatorId:   "ccc6874f-40ab-46b1-b8e4-64ad278eaff5",
-		CreatorName: "John Doe",
-	},
-	{
-		Id:          "2",
-		Title:       "Quiz 2",
-		Description: "This is a quiz.",
-		CreatorId:   "2c26874f-44ab-46b1-b8e4-64ad278ea55e",
-		CreatorName: "Jane Doe",
-	},
-	{
-		Id:          "3",
-		Title:       "Quiz 3",
-		Description: "This is a quiz.",
-		CreatorId:   "2c26874f-40ab-46b1-b8e4-64ad278eaff5",
-		CreatorName: "John Smith",
-	},
+type QuizRequestBody struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-func GetQuizInfos(c echo.Context) error {
-	creatorId := c.QueryParam("creatorId")
-	fmt.Println(creatorId)
+type Quiz struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	CreatorId   string `json:"creatorid"`
+	Description string `json:"description"`
+}
 
-	var filteredQuizzes []models.QuizInfo
-	if creatorId != "" {
-		for _, quiz := range quizzes {
-			if quiz.CreatorId == creatorId {
-				filteredQuizzes = append(filteredQuizzes, quiz)
-			}
+func init() {
+}
+
+func CreateQuizEndpoint(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	uid, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	user, err := auth.GetUserById(uid)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	var request = QuizRequestBody{}
+	if err = json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+	createdQuiz, err := quiz.CreateQuiz(uid, request.Name, request.Description)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	return c.JSON(http.StatusOK, models.QuizInfo{Id: createdQuiz.Id, Title: createdQuiz.Name, Description: createdQuiz.Description.String, CreatorName: user.Name, CreatorId: user.Id})
+}
+
+func GetQuizEndpoint(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	uid, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	quizId := c.Param("id")
+	_, err = quiz.GetQuizAccess(uid, quizId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "quiz not found")
 		}
-	} else {
-		filteredQuizzes = quizzes
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	quiz, err := quiz.GetQuizById(quizId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "quiz not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	userinfo, err := auth.GetUserById(uid)
+	if err != nil {
+		return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted"})
+	}
+	return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: userinfo.Name, CreatorId: userinfo.Id})
+}
+
+func GetQuizzesOfUserEndpoint(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	uid, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	quizAccesses, err := quiz.GetQuizAccessesOfUser(uid)
+	if err != nil {
+		fmt.Println("failed to get quiz accesses of user")
+		fmt.Println(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	var quizzes []models.QuizInfo
+	for _, acc := range *quizAccesses {
+		quiz, err := quiz.GetQuizById(acc.QuizId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		}
+		creator, err := auth.GetUserById(quiz.CreatorId.String)
+		if err != nil {
+			fmt.Println(err)
+			quizzes = append(quizzes, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted"})
+		} else {
+			quizzes = append(quizzes, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: creator.Name})
+		}
 	}
 
-	response := QuizzesResponseBody{
-		Quizzes: filteredQuizzes,
-		Length:  len(filteredQuizzes),
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
+	return c.JSON(http.StatusOK, QuizzesResponse{Quizzes: quizzes, Length: len(quizzes)})
+}
 
-	return c.JSON(http.StatusOK, response)
+func UpdateQuizEndpoint(c echo.Context) error {
+	request := QuizRequestBody{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	uid, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	quizId := c.Param("id")
+	role, err := quiz.GetQuizAccess(uid, quizId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "unauthorized")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	if role != 1 {
+		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+	}
+	err = quiz.UpdateQuiz(quizId, request.Name, request.Description)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	quiz, err := quiz.GetQuizById(quizId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	if !quiz.CreatorId.Valid {
+		return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted"})
+	}
+	creator, err := auth.GetUserById(quiz.CreatorId.String)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted"})
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: creator.Name, CreatorId: creator.Id})
+}
+
+func DeleteQuizEndpoint(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	uid, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	quizId := c.Param("id")
+	role, err := quiz.GetQuizAccess(uid, quizId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "unauthorized")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	if role != 1 {
+		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+	}
+	err = quiz.DeleteQuiz(quizId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	return c.JSON(http.StatusOK, "quiz deleted")
 }
