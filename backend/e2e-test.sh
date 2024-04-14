@@ -39,7 +39,7 @@ if [ $STATUSCODE -ne  200 ]; then
 fi
 cat $tmp >&2
 session=$(cat $tmp | jq -r '.session')
-userid=$(cat $tmp | jq -r '.user')
+userid=$(cat $tmp | jq -r '.user.id')
 echo ""
 
 echo "--- User should be authenticated ---"
