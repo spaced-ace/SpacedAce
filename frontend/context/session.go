@@ -1,22 +1,22 @@
 package context
 
 import (
-	"github.com/google/uuid"
+	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"time"
+	"spaced-ace/constants"
 )
 
 type User struct {
-	Id    string
-	Name  string
-	Email string
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type Session struct {
-	Id      string
-	User    User
-	Expires time.Time
+	Id   string `json:"session"`
+	User User   `json:"user"`
 }
 
 type Context struct {
@@ -24,36 +24,10 @@ type Context struct {
 	Session *Session
 }
 
-var sessions = make(map[string]Session)
-
-func getSessionFromContext(c echo.Context) *Session {
-	cookie, err := c.Cookie("session")
-	if err != nil {
-		return nil
-	}
-	return GetSession(cookie.Value)
-}
-
 func SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		session := getSessionFromContext(c)
-
-		// Invalid session id sent by the client
-		if session == nil {
-			cookie, _ := c.Cookie("session")
-			if cookie != nil {
-				cookie.Expires = time.Now().Add(-1 * time.Hour)
-				c.SetCookie(cookie)
-			}
-		}
-
-		// Session exists but has expired
-		if session != nil {
-			if session.Expires.Before(time.Now()) {
-				DeleteSession(session.Id)
-				session = nil
-			}
-		}
+		sessionCookie, _ := c.Cookie("session")
+		session, _ := getSession(sessionCookie)
 
 		cc := &Context{
 			Context: c,
@@ -64,10 +38,41 @@ func SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func getSession(sessionCookie *http.Cookie) (*Session, error) {
+	if sessionCookie != nil {
+		req, err := http.NewRequest("GET", constants.BACKEND_URL+"/authenticated", nil)
+		if err != nil {
+			return nil, err
+		}
+		req.AddCookie(sessionCookie)
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("Status code:" + resp.Status)
+		}
+
+		var session = Session{}
+		err = json.NewDecoder(resp.Body).Decode(&session)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("Session: ", session)
+		return &session, nil
+	}
+	return nil, fmt.Errorf("no session cookie")
+}
+
 func RequireSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cc := c.(*Context)
 		if cc.Session == nil {
+			fmt.Println("No session")
 			c.Response().Header().Set("HX-Redirect", "/login")
 			return c.Redirect(http.StatusFound, "/login")
 		}
@@ -75,25 +80,18 @@ func RequireSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func CreateSession(user User) *Session {
-	id := uuid.New().String()
-	session := Session{
-		Id:      id,
-		User:    user,
-		Expires: time.Now().Add(1 * time.Hour),
+func DeleteSession(sessionId string) error {
+	req, err := http.NewRequest("POST", constants.BACKEND_URL+"/logout", nil)
+	if err != nil {
+		return err
 	}
-	sessions[id] = session
-	return &session
-}
 
-func GetSession(id string) *Session {
-	session, ok := sessions[id]
-	if !ok {
-		return nil
-	}
-	return &session
-}
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: sessionId,
+	})
 
-func DeleteSession(id string) {
-	delete(sessions, id)
+	client := &http.Client{}
+	_, err = client.Do(req)
+	return err
 }

@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"io"
 	"net/http"
+	"spaced-ace/auth"
 	"spaced-ace/constants"
 	"spaced-ace/context"
 	"spaced-ace/pages"
@@ -35,30 +35,6 @@ type Question struct {
 	Option2  string
 	Option3  string
 	Option4  string
-}
-
-type LoginForm struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
-type LoginRequestBody struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type SignupForm struct {
-	Email         string `form:"email"`
-	Name          string `form:"name"`
-	Password      string `form:"password"`
-	PasswordAgain string `form:"passwordAgain"`
-}
-
-type SignupRequestBody struct {
-	Email         string `json:"email"`
-	Name          string `json:"name"`
-	Password      string `json:"password"`
-	PasswordAgain string `json:"passwordAgain"`
 }
 
 type MultipleChoiceResponse struct {
@@ -101,129 +77,39 @@ func main() {
 	public.GET("/login", pages.LoginPage)
 	public.GET("/signup", pages.SignupPage)
 
-	// Protected pages
+	// My quizzes page
 	protected.GET("/my-quizzes", pages.MyQuizzesPage)
 
-	public.GET("/create-new-quiz", pages.CreateNewQuizPage) // TODO protected
-	public.POST("/quizzes/create", pages.PostCreateQuiz)    // TODO protected
+	// Quiz creation page
+	protected.GET("/create-new-quiz", pages.CreateNewQuizPage)
+	protected.POST("/quizzes/create", pages.PostCreateQuiz)
 
-	public.GET("/quizzes/:id/edit", pages.EditQuizPage)           // TODO protected
-	public.POST("/generate", pages.PostGenerateQuestion)          // TODO protected
-	public.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)           // TODO protected
-	public.DELETE("/questions/:questionId", pages.DeleteQuestion) // TODO protected
+	// Question generation
+	protected.GET("/quizzes/:id/edit", pages.EditQuizPage)
+	protected.POST("/generate", pages.PostGenerateQuestion)
+	protected.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)
+	protected.DELETE("/questions/:questionId", pages.DeleteQuestion)
 
-	// API endpoints
-	public.POST("/login", func(c echo.Context) error {
-		var loginForm = LoginForm{}
-		if err := c.Bind(&loginForm); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		bodyMap := LoginRequestBody{
-			Email:    loginForm.Email,
-			Password: loginForm.Password,
-		}
-		bodyBytes, err := json.Marshal(bodyMap)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		bodyBuffer := bytes.NewBuffer(bodyBytes)
-
-		resp, err := http.Post(constants.BACKEND_URL+"/authenticate-user", "application/json", bodyBuffer)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return echo.NewHTTPError(resp.StatusCode, resp.Status)
-		}
-
-		// parse the response
-		var user context.User
-		err = json.NewDecoder(resp.Body).Decode(&user)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		userSession := context.CreateSession(user)
-		cookie := new(http.Cookie)
-		cookie.Name = "session"
-		cookie.Value = userSession.Id
-		cookie.Path = "/"
-		cookie.HttpOnly = true
-		cookie.Expires = userSession.Expires
-
-		c.SetCookie(cookie)
-		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
-		return c.String(http.StatusOK, "login successful")
-	})
-	public.POST("/signup", func(c echo.Context) error {
-		var signupForm = SignupForm{}
-		if err := c.Bind(&signupForm); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		bodyMap := SignupRequestBody{
-			Name:          signupForm.Name,
-			Email:         signupForm.Email,
-			Password:      signupForm.Password,
-			PasswordAgain: signupForm.PasswordAgain,
-		}
-		bodyBytes, err := json.Marshal(bodyMap)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		bodyBuffer := bytes.NewBuffer(bodyBytes)
-
-		resp, err := http.Post(constants.BACKEND_URL+"/create-user", "application/json", bodyBuffer)
-		fmt.Println(err)
-		fmt.Println(resp.Status)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return echo.NewHTTPError(resp.StatusCode, resp.Status)
-		}
-
-		// parse the response
-		var user context.User
-		err = json.NewDecoder(resp.Body).Decode(&user)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		userSession := context.CreateSession(user)
-		cookie := new(http.Cookie)
-		cookie.Name = "session"
-		cookie.Value = userSession.Id
-		cookie.Path = "/"
-		cookie.HttpOnly = true
-		cookie.Expires = userSession.Expires
-
-		c.SetCookie(cookie)
-		c.Response().Header().Set("HX-Redirect", "/my-quizzes")
-		return c.String(http.StatusCreated, "signup successful")
-	})
+	// Auth endpoints
+	public.POST("/login", auth.PostLogin)
+	public.POST("/signup", auth.PostRegister)
 	protected.POST("/logout", func(c echo.Context) error {
 		cc := c.(*context.Context)
 		if cc.Session != nil {
-			context.DeleteSession(cc.Session.Id)
+			_ = context.DeleteSession(cc.Session.Id)
 		}
 
-		cookie := new(http.Cookie)
-		cookie.Name = "session"
-		cookie.Value = ""
-		cookie.Path = "/"
-		cookie.HttpOnly = true
-		cookie.Expires = time.Now().Add(-1 * time.Hour)
+		sessionCookie, err := c.Cookie("session")
+		if err == nil {
+			sessionCookie.MaxAge = -1
+			c.SetCookie(sessionCookie)
+		}
 
-		c.SetCookie(cookie)
 		c.Response().Header().Set("HX-Redirect", "/")
-		//return c.Render(http.StatusOK, "index", nil)
 		return c.NoContent(http.StatusOK)
 	})
 
+	// Temporary question generator endpoints
 	public.POST("/generate/single-choice", func(c echo.Context) error {
 		data := SingleChoiceQuestionData{
 			Order: 1,

@@ -3,11 +3,13 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	bcrypt "golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
 type User struct {
@@ -29,7 +31,7 @@ type SignupBody struct {
 }
 type AuthResponse struct {
 	Session string `json:"session"`
-	User    string `json:"user"`
+	User    User   `json:"user"`
 }
 
 func init() {
@@ -60,6 +62,7 @@ func AuthenticateUser(c echo.Context) error {
 		Name:     "session",
 		Value:    session,
 		HttpOnly: true,
+		Expires:  time.Now().Add(59 * time.Minute),
 	})
 
 	var userResponse = User{
@@ -82,15 +85,22 @@ func Authenticated(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
+
+	dbUser, err := GetUserById(userId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
+
 	authResponse := AuthResponse{
 		Session: session.Value,
-		User:    userId,
+		User: User{
+			Id:    dbUser.Id,
+			Name:  dbUser.Name,
+			Email: dbUser.Email,
+		},
 	}
 	return c.JSON(http.StatusOK, authResponse)
 }
@@ -153,10 +163,21 @@ func Register(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "session",
 		Value:    sessionId,
+		Path:     "/",
 		HttpOnly: true,
+		Expires:  time.Now().Add(59 * time.Minute),
 	})
 
-	return c.JSON(http.StatusOK, AuthResponse{User: newUser.Id, Session: sessionId})
+	authResponse := AuthResponse{
+		Session: sessionId,
+		User: User{
+			Id:    newUser.Id,
+			Name:  newUser.Name,
+			Email: newUser.Email,
+		},
+	}
+
+	return c.JSON(http.StatusOK, authResponse)
 }
 
 func Logout(c echo.Context) error {

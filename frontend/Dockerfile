@@ -22,7 +22,12 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
+COPY api api
+COPY auth auth
 COPY cmd cmd
+COPY constants constants
+COPY context context
+COPY pages pages
 COPY views views
 
 COPY --from=tailwind /workdir/static static
