@@ -1,9 +1,12 @@
 package pages
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"spaced-ace/api/models"
+	"spaced-ace/constants"
 	"spaced-ace/context"
 )
 
@@ -93,6 +96,11 @@ type GenerateQuestionForm struct {
 	Context string `form:"context"`
 }
 
+type QuestionCreationRequestBody struct {
+	QuizId string `json:"quizId"`
+	Prompt string `json:"prompt"`
+}
+
 func PostGenerateQuestion(c echo.Context) error {
 	cc := c.(*context.Context)
 
@@ -113,40 +121,53 @@ func PostGenerateQuestion(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Context is required")
 	}
 
+	requestBody, err := json.Marshal(QuestionCreationRequestBody{QuizId: requestForm.QuizId, Prompt: requestForm.Context})
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Internal server error")
+	}
+
+	var req *http.Request
 	if questionType == "single-choice" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockSingleChoiceQuestion,
-		}
-
-		return c.Render(200, "single-choice-question", question)
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/single-choice", bytes.NewBuffer(requestBody))
 	}
-
 	if questionType == "multiple-choice" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockMultipleChoiceQuestion,
-		}
-
-		return c.Render(200, "multiple-choice-question", question)
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/multiple-choice", bytes.NewBuffer(requestBody))
 	}
-
 	if questionType == "true-or-false" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockTrueOrFalseQuestion,
-		}
-
-		return c.Render(200, "true-or-false-question", question)
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/true-or-false", bytes.NewBuffer(requestBody))
+	}
+	if questionType == "open-ended" {
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/open-ended", bytes.NewBuffer(requestBody))
 	}
 
-	if questionType == "open-ended" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockOpenEndedQuestion,
-		}
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: cc.Session.Id,
+	})
+	client := &http.Client{}
 
-		return c.Render(200, "open-ended-question", question)
+	resp, err := client.Do(req)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	defer resp.Body.Close()
+	var createdQuestion models.Question
+	err = json.NewDecoder(resp.Body).Decode(&createdQuestion)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Internal server error")
+	}
+
+	if questionType == "single-choice" {
+		return c.Render(200, "single-choice-question", createdQuestion)
+	}
+	if questionType == "multiple-choice" {
+		return c.Render(200, "multiple-choice-question", createdQuestion)
+	}
+	if questionType == "true-or-false" {
+		return c.Render(200, "true-or-false-question", createdQuestion)
+	}
+	if questionType == "open-ended" {
+		return c.Render(200, "open-ended-question", createdQuestion)
 	}
 
 	return c.NoContent(http.StatusTeapot)

@@ -79,6 +79,7 @@ func main() {
 
 	// My quizzes page
 	protected.GET("/my-quizzes", pages.MyQuizzesPage)
+	protected.DELETE("/quizzes/:quizId", pages.DeleteQuiz)
 
 	// Quiz creation page
 	protected.GET("/create-new-quiz", pages.CreateNewQuizPage)

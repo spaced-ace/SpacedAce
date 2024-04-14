@@ -63,6 +63,23 @@ func MyQuizzesPage(c echo.Context) error {
 	return c.Render(200, "my-quizzes", pageData)
 }
 
+func DeleteQuiz(c echo.Context) error {
+	cc := c.(*context.Context)
+	quizId := c.Param("quizId")
+
+	req, _ := http.NewRequest("DELETE", constants.BACKEND_URL+"/quizzes/"+quizId, nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: cc.Session.Id,
+	})
+	client := &http.Client{}
+
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	return c.NoContent(http.StatusOK)
+}
+
 func hashToColor(input string) string {
 	shaHash := sha256.New()
 	shaHash.Write([]byte(input))
@@ -95,7 +112,7 @@ func hashToColor(input string) string {
 }
 
 func generateColors(title string, id string) (string, string) {
-	fromColor := hashToColor(title)
+	fromColor := hashToColor(title + id)
 	toColor := hashToColor(id)
 
 	return fromColor, toColor
