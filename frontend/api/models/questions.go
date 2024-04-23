@@ -25,6 +25,14 @@ type SingleChoiceQuestion struct {
 	Options      []Option     `json:"options"`
 }
 
+type SingleChoiceQuestionResponseBody struct {
+	Id            string   `json:"id"`
+	QuizId        string   `json:"quizid"`
+	Question      string   `json:"question"`
+	Answers       []string `json:"answers"`
+	CorrectAnswer string   `json:"correctAnswer"`
+}
+
 func NewSingleChoiceQuestion(id string, quizId string, order int, question string, options []Option) SingleChoiceQuestion {
 	return SingleChoiceQuestion{
 		Id:           id,
@@ -45,6 +53,14 @@ type MultipleChoiceQuestion struct {
 	Options      []Option     `json:"options"`
 }
 
+type MultipleChoiceQuestionResponseBody struct {
+	Id             string   `json:"id"`
+	QuizId         string   `json:"quizid"`
+	Question       string   `json:"question"`
+	Answers        []string `json:"answers"`
+	CorrectAnswers []string `json:"correctAnswers"`
+}
+
 func NewMultipleChoiceQuestion(id string, quizId string, order int, question string, options []Option) MultipleChoiceQuestion {
 	return MultipleChoiceQuestion{
 		Id:           id,
@@ -63,6 +79,13 @@ type TrueOrFalseQuestion struct {
 	QuestionType QuestionType `json:"questionType"`
 	Question     string       `json:"question"`
 	Answer       bool         `json:"answer"`
+}
+
+type TrueOrFalseQuestionResponseBody struct {
+	Id            string `json:"id"`
+	QuizId        string `json:"quizid"`
+	Question      string `json:"question"`
+	CorrectAnswer bool   `json:"correct_answer"`
 }
 
 func NewTrueOrFalseQuestion(id string, quizId string, order int, question string, answer bool) TrueOrFalseQuestion {

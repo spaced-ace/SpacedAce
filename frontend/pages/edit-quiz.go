@@ -82,6 +82,15 @@ var mockOpenEndedQuestion = models.NewOpenEndedQuestion(
 	"",
 	"Go has a simple syntax which makes it easy to learn. It is statically typed and compiled, which helps in catching errors early. It also has built-in support for concurrent programming.")
 
+func stringInArray(target string, arr []string) bool {
+	for _, item := range arr {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
 func getQuiz(quizId string, sessionId string) (*QuizWithMetaData, error) {
 	if quizId == "" {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
@@ -260,29 +269,76 @@ func PostGenerateQuestion(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	defer resp.Body.Close()
-	var createdQuestion models.Question
-	err = json.NewDecoder(resp.Body).Decode(&createdQuestion)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Internal server error")
-	}
 
 	if resp.StatusCode != http.StatusOK {
 		return c.String(resp.StatusCode, "Error creating question")
 	}
 
-	fmt.Println("Created question:", createdQuestion)
-
 	if questionType == "single-choice" {
-		return c.Render(200, "single-choice-question", createdQuestion)
+		var response models.SingleChoiceQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
+		}
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.SingleChoiceQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.SingleChoice,
+				Question:     response.Question,
+				Options: []models.Option{
+					{Value: response.Answers[0], Correct: response.CorrectAnswer == "A"},
+					{Value: response.Answers[1], Correct: response.CorrectAnswer == "B"},
+					{Value: response.Answers[2], Correct: response.CorrectAnswer == "C"},
+					{Value: response.Answers[3], Correct: response.CorrectAnswer == "D"},
+				},
+			},
+		}
+		return c.Render(200, "single-choice-question", question)
 	}
 	if questionType == "multiple-choice" {
-		return c.Render(200, "multiple-choice-question", createdQuestion)
+		var response models.MultipleChoiceQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
+		}
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.MultipleChoiceQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.MultipleChoice,
+				Question:     response.Question,
+				Options: []models.Option{
+					{Value: response.Answers[0], Correct: stringInArray("A", response.CorrectAnswers)},
+					{Value: response.Answers[1], Correct: stringInArray("B", response.CorrectAnswers)},
+					{Value: response.Answers[2], Correct: stringInArray("C", response.CorrectAnswers)},
+					{Value: response.Answers[3], Correct: stringInArray("D", response.CorrectAnswers)},
+				},
+			},
+		}
+		return c.Render(200, "multiple-choice-question", question)
 	}
 	if questionType == "true-or-false" {
-		return c.Render(200, "true-or-false-question", createdQuestion)
-	}
-	if questionType == "open-ended" {
-		return c.Render(200, "open-ended-question", createdQuestion)
+		var response models.TrueOrFalseQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		fmt.Println("Response: ", response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
+		}
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.TrueOrFalseQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.TrueOrFalse,
+				Question:     response.Question,
+				Answer:       response.CorrectAnswer,
+			},
+		}
+		fmt.Println("Question: ", question)
+		return c.Render(200, "true-or-false-question", question)
 	}
 
 	return c.NoContent(http.StatusTeapot)
