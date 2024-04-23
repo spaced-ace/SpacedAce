@@ -158,5 +158,7 @@ func main() {
 		return c.Render(200, "multiple-choice-question", question)
 	})
 
+	public.GET("/not-found", pages.NotFoundPage)
+
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
