@@ -3,7 +3,9 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"io"
 	"net/http"
 	"spaced-ace/api/models"
 	"spaced-ace/constants"
@@ -80,14 +82,121 @@ var mockOpenEndedQuestion = models.NewOpenEndedQuestion(
 	"",
 	"Go has a simple syntax which makes it easy to learn. It is statically typed and compiled, which helps in catching errors early. It also has built-in support for concurrent programming.")
 
+func getQuiz(quizId string, sessionId string) (*QuizWithMetaData, error) {
+	if quizId == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
+	}
+
+	req, err := http.NewRequest("GET", constants.BACKEND_URL+"/quizzes/"+quizId, nil)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error creating request")
+	}
+
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: sessionId,
+	})
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error reading response body: "+err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, echo.NewHTTPError(resp.StatusCode, string(body))
+	}
+
+	var quizResponse models.Quiz
+	err = json.Unmarshal(body, &quizResponse)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body: "+err.Error())
+	}
+
+	quizWithMetaData := QuizWithMetaData{
+		QuizInfo: models.QuizInfo{
+			Id:          quizResponse.Id,
+			Title:       quizResponse.Title,
+			Description: quizResponse.Description,
+			CreatorId:   quizResponse.CreatorId,
+			CreatorName: quizResponse.CreatorName,
+		},
+		QuestionsWithMetaData: []QuestionWithMetaData{},
+	}
+	// TODO get questions and map them to QuestionWithMetaData
+	return &quizWithMetaData, nil
+}
+
+type UpdateQuizRequestBody struct {
+	Title       string `json:"name"`
+	Description string `json:"description"`
+}
+
+func updateQuiz(quizId string, sessionId string, title string, description string) (*models.QuizInfo, error) {
+	if quizId == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
+	}
+
+	requestBody, err := json.Marshal(UpdateQuizRequestBody{
+		Title:       title,
+		Description: description,
+	})
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error marshalling request body")
+	}
+
+	req, err := http.NewRequest("PATCH", constants.BACKEND_URL+"/quizzes/"+quizId, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error creating request")
+	}
+
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: sessionId,
+	})
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error reading response body: "+err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, echo.NewHTTPError(resp.StatusCode, string(body))
+	}
+
+	var quizInfo models.QuizInfo
+	err = json.Unmarshal(body, &quizInfo)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body: "+err.Error())
+	}
+
+	return &quizInfo, nil
+}
+
 func EditQuizPage(c echo.Context) error {
 	cc := c.(*context.Context)
+	quizId := c.Param("id")
+
+	quizWithMetaData, err := getQuiz(quizId, cc.Session.Id)
+	if err != nil {
+		return c.Redirect(http.StatusFound, "/not-found")
+	}
 
 	pageData := EditQuizPageData{
 		Session:          cc.Session,
-		QuizWithMetaData: mockQuiz,
+		QuizWithMetaData: *quizWithMetaData,
 	}
-
 	return c.Render(200, "edit-quiz", pageData)
 }
 
@@ -157,6 +266,12 @@ func PostGenerateQuestion(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Internal server error")
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return c.String(resp.StatusCode, "Error creating question")
+	}
+
+	fmt.Println("Created question:", createdQuestion)
+
 	if questionType == "single-choice" {
 		return c.Render(200, "single-choice-question", createdQuestion)
 	}
@@ -189,17 +304,19 @@ func PatchUpdateQuiz(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Quiz ID is required")
 	}
 
+	updatedQuizInfo, err := updateQuiz(requestForm.QuizId, c.(*context.Context).Session.Id, requestForm.Title, requestForm.Description)
+	if err != nil {
+		return c.String(err.(*echo.HTTPError).Code, err.Error())
+	}
+
 	if requestForm.Title != "" {
-		// Update the title
-		return c.Render(200, "quiz-title-field", mockQuiz.QuizInfo)
+		return c.Render(200, "quiz-title-field", updatedQuizInfo)
 	}
-
 	if requestForm.Description != "" {
-		// Update the description
-		return c.Render(200, "quiz-description-field", mockQuiz.QuizInfo)
+		return c.Render(200, "quiz-description-field", updatedQuizInfo)
 	}
 
-	return c.NoContent(http.StatusBadRequest)
+	return c.String(http.StatusBadRequest, "Title or description is required")
 }
 
 func DeleteQuestion(c echo.Context) error {

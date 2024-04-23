@@ -111,6 +111,13 @@
                 questions.lastElementChild?.scrollIntoView({ behavior: 'smooth'});
             });
         });
+
+        document.body.addEventListener('htmx:afterOnLoad', function(event) {
+            const detail = event.detail;
+            if (detail.xhr.status !== 200) {
+                alert('An error occurred: ' + detail.xhr.responseText);
+            }
+        });
     </script>
     </body>
     </html>
