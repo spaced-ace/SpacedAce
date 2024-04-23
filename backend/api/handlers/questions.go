@@ -33,7 +33,7 @@ type singleChoiceResponse struct {
 
 type trueOrFalseResponse struct {
 	Question      string `json:"question"`
-	CorrectAnswer bool   `json:"correct_answer"`
+	CorrectAnswer bool   `json:"correct_option"`
 }
 
 // #####
