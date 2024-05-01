@@ -27,60 +27,10 @@ type QuestionWithMetaData struct {
 	Question models.Question
 }
 
-var mockSingleChoiceQuestion = models.NewSingleChoiceQuestion(
-	"1",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	1,
-	"What is the capital of France?",
-	[]models.Option{
-		{Value: "Paris", Correct: true},
-		{Value: "London", Correct: false},
-		{Value: "Berlin", Correct: false},
-		{Value: "Madrid", Correct: false},
-	})
-
-var mockMultipleChoiceQuestion = models.NewMultipleChoiceQuestion(
-	"2",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	2,
-	"Which of the following are European countries?",
-	[]models.Option{
-		{Value: "Canada", Correct: false},
-		{Value: "France", Correct: true},
-		{Value: "Germany", Correct: true},
-		{Value: "Brazil", Correct: false},
-	})
-
-var mockQuiz = QuizWithMetaData{
-	QuizInfo: models.QuizInfo{
-		Id:          "ae664251-9ee7-4ca6-9f16-ff072de61632",
-		Title:       "My QuizWithMetaData",
-		Description: "This is a quiz",
-		CreatorId:   "73975759-99f9-46be-b84b-cfa4d2222112",
-		CreatorName: "John Doe",
-	},
-	QuestionsWithMetaData: []QuestionWithMetaData{
-		{
-			EditMode: false,
-			Question: mockSingleChoiceQuestion,
-		},
-	},
+type quizResponse struct {
+	models.QuizInfo
+	Questions []map[string]interface{}
 }
-
-var mockTrueOrFalseQuestion = models.NewTrueOrFalseQuestion(
-	"3",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	3,
-	"Is the sun hot?",
-	true)
-
-var mockOpenEndedQuestion = models.NewOpenEndedQuestion(
-	"4",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	4,
-	"What are the main benefits of using Go programming language?",
-	"",
-	"Go has a simple syntax which makes it easy to learn. It is statically typed and compiled, which helps in catching errors early. It also has built-in support for concurrent programming.")
 
 func stringInArray(target string, arr []string) bool {
 	for _, item := range arr {
@@ -121,23 +71,91 @@ func getQuiz(quizId string, sessionId string) (*QuizWithMetaData, error) {
 		return nil, echo.NewHTTPError(resp.StatusCode, string(body))
 	}
 
-	var quizResponse models.Quiz
-	err = json.Unmarshal(body, &quizResponse)
+	var response quizResponse
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body: "+err.Error())
 	}
 
+	questionsWithMetaData := make([]QuestionWithMetaData, len(response.Questions))
+	for i, question := range response.Questions {
+		questionsWithMetaData[i] = QuestionWithMetaData{
+			EditMode: false,
+		}
+
+		jsonData, err := json.Marshal(question)
+		if err != nil {
+			continue
+		}
+		questionType := models.ParseFloatToQuestionType(question["questionType"].(float64))
+
+		if questionType == models.SingleChoice {
+			var singleChoiceQuestion models.SingleChoiceQuestionResponseBody
+			err = json.Unmarshal(jsonData, &singleChoiceQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling single choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.SingleChoiceQuestion{
+				Id:           singleChoiceQuestion.Id,
+				QuizId:       singleChoiceQuestion.QuizId,
+				QuestionType: models.SingleChoice,
+				Question:     singleChoiceQuestion.Question,
+				Options: []models.Option{
+					{Value: singleChoiceQuestion.Answers[0], Correct: singleChoiceQuestion.CorrectAnswer == "A"},
+					{Value: singleChoiceQuestion.Answers[1], Correct: singleChoiceQuestion.CorrectAnswer == "B"},
+					{Value: singleChoiceQuestion.Answers[2], Correct: singleChoiceQuestion.CorrectAnswer == "C"},
+					{Value: singleChoiceQuestion.Answers[3], Correct: singleChoiceQuestion.CorrectAnswer == "D"},
+				},
+			}
+		}
+		if questionType == models.MultipleChoice {
+			var multipleChoiceQuestion models.MultipleChoiceQuestionResponseBody
+			err = json.Unmarshal(jsonData, &multipleChoiceQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling multiple choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.MultipleChoiceQuestion{
+				Id:           multipleChoiceQuestion.Id,
+				QuizId:       multipleChoiceQuestion.QuizId,
+				QuestionType: models.MultipleChoice,
+				Question:     multipleChoiceQuestion.Question,
+				Options: []models.Option{
+					{Value: multipleChoiceQuestion.Answers[0], Correct: stringInArray("A", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[1], Correct: stringInArray("B", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[2], Correct: stringInArray("C", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[3], Correct: stringInArray("D", multipleChoiceQuestion.CorrectAnswers)},
+				},
+			}
+		}
+		if questionType == models.TrueOrFalse {
+			var trueOrFalseQuestion models.TrueOrFalseQuestionResponseBody
+			err = json.Unmarshal(jsonData, &trueOrFalseQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling multiple choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.TrueOrFalseQuestion{
+				Id:           trueOrFalseQuestion.Id,
+				QuizId:       trueOrFalseQuestion.QuizId,
+				QuestionType: models.TrueOrFalse,
+				Question:     trueOrFalseQuestion.Question,
+				Answer:       trueOrFalseQuestion.CorrectAnswer,
+			}
+		}
+	}
+
 	quizWithMetaData := QuizWithMetaData{
 		QuizInfo: models.QuizInfo{
-			Id:          quizResponse.Id,
-			Title:       quizResponse.Title,
-			Description: quizResponse.Description,
-			CreatorId:   quizResponse.CreatorId,
-			CreatorName: quizResponse.CreatorName,
+			Id:          response.Id,
+			Title:       response.Title,
+			Description: response.Description,
+			CreatorId:   response.CreatorId,
+			CreatorName: response.CreatorName,
 		},
-		QuestionsWithMetaData: []QuestionWithMetaData{},
+		QuestionsWithMetaData: questionsWithMetaData,
 	}
-	// TODO get questions and map them to QuestionWithMetaData
 	return &quizWithMetaData, nil
 }
 

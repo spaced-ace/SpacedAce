@@ -87,6 +87,7 @@ func GetQuizEndpoint(c echo.Context) error {
 		questions = append(questions, models.SingleChoiceQuestion{
 			ID:            q.UUID,
 			QuizID:        q.QuizID,
+			QuestionType:  models.SingleChoice,
 			Question:      q.Question,
 			Answers:       q.Answers,
 			CorrectAnswer: q.CorrectAnswer,
@@ -97,6 +98,7 @@ func GetQuizEndpoint(c echo.Context) error {
 		questions = append(questions, models.MultipleChoiceQuestion{
 			ID:             q.UUID,
 			QuizID:         q.QuizID,
+			QuestionType:   models.MultipleChoice,
 			Question:       q.Question,
 			Answers:        q.Answers,
 			CorrectAnswers: q.CorrectAnswers,
@@ -107,6 +109,7 @@ func GetQuizEndpoint(c echo.Context) error {
 		questions = append(questions, models.TrueOrFalseQuestion{
 			ID:            q.UUID,
 			QuizID:        q.QuizID,
+			QuestionType:  models.TrueOrFalse,
 			Question:      q.Question,
 			CorrectAnswer: q.CorrectAnswer,
 		})
