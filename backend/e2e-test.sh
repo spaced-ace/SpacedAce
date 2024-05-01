@@ -1,4 +1,4 @@
-#!/usr/bin bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 # if debug is needed, uncomment the line below
@@ -24,7 +24,7 @@ echo ""
 echo "--- User should not be authenticated ---"
 STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" $uri/authenticated)
 if [ $STATUSCODE -ne  401 ]; then
-	echo "Shoud have received 401 status code, got $STATUSCODE"
+	echo "Should have received 401 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -34,7 +34,7 @@ tmp=$(mktemp)
 STATUSCODE=$(curl -s -X POST --output $tmp --write-out "%{http_code}" $uri/create-user \
 -d '{"name": "Alice", "email":"alice@gmail.com", "password":"123456789", "passwordAgain":"123456789"}') 
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 cat $tmp >&2
@@ -45,7 +45,7 @@ echo ""
 echo "--- User should be authenticated ---"
 STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" -H "Cookie: session=$session" $uri/authenticated)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -57,7 +57,7 @@ STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
 	-d '{"name":"test-quiz", "description":"test-desc"}' \
 	$uri/quizzes/create)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 cat $tmp >&2
@@ -67,7 +67,7 @@ echo ""
 echo "--- Quizinfo should be returned ---"
 STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" -H "Cookie: session=$session" $uri/quizzes/$quizid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -79,7 +79,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"name":"test-quiz-modified"}' \
 	$uri/quizzes/$quizid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -91,7 +91,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"description":"test-desc-modified"}' \
 	$uri/quizzes/$quizid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -103,7 +103,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"name":"test-name-mod2", "description":"test-desc-mod2"}' \
 	$uri/quizzes/$quizid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -113,7 +113,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/quizzes/user/$userid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -126,7 +126,7 @@ STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
 	$uri/questions/multiple-choice \
 	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 multiple_q=$(cat $tmp | jq -r '.id')
@@ -138,7 +138,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/multiple-choice/$multiple_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -150,7 +150,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"quizId":"'$quizid'", "question":"Modified, whatever it was","answers":["CABD", "ABCD"], "CorrectAnswers":["A", "B"]}' \
 	$uri/questions/multiple-choice/$multiple_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -161,7 +161,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/multiple-choice/$quizid/$multiple_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -174,7 +174,7 @@ STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
 	$uri/questions/single-choice \
 	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 single_q=$(cat $tmp | jq -r '.id')
@@ -187,7 +187,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/single-choice/$single_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -199,7 +199,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"quizId":"'$quizid'", "question":"Modified, whatever it was","answers":["CABD", "ABCD"], "correctAnswer":"A"}' \
 	$uri/questions/single-choice/$single_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -210,7 +210,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/single-choice/$quizid/$single_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -223,7 +223,7 @@ STATUSCODE=$(curl -s -o $tmp --write-out "%{http_code}" \
 	$uri/questions/true-or-false \
 	-d '{"quizId":"'$quizid'", "prompt":"Magyarország állam Közép-Európában, a Kárpát-medence közepén. 1989 óta parlamentáris köztársaság. Északról Szlovákia, északkeletről Ukrajna, keletről és délkeletről Románia, délről Szerbia, délnyugatról Horvátország és Szlovénia, nyugatról pedig Ausztria határolja."}')
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 tf_q=$(cat $tmp | jq -r '.id')
@@ -235,7 +235,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/true-or-false/$tf_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -247,7 +247,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-d '{"QuizId":"'$quizid'", "Question":"Modified, whatever it was", "CorrectAnswer":true}' \
 	$uri/questions/true-or-false/$tf_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -258,7 +258,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-H "Cookie: session=$session" \
 	$uri/questions/true-or-false/$quizid/$tf_q)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -269,7 +269,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-X DELETE \
 	$uri/quizzes/$quizid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
@@ -280,7 +280,7 @@ STATUSCODE=$(curl -s -o /dev/stderr --write-out "%{http_code}" \
 	-X DELETE \
 	$uri/delete-user/$userid)
 if [ $STATUSCODE -ne  200 ]; then
-	echo "Shoud have received 200 status code, got $STATUSCODE"
+	echo "Should have received 200 status code, got $STATUSCODE"
   exit 1
 fi
 echo ""
