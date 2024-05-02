@@ -79,6 +79,7 @@ func main() {
 
 	// My quizzes page
 	protected.GET("/my-quizzes", pages.MyQuizzesPage)
+	protected.DELETE("/quizzes/:quizId", pages.DeleteQuiz)
 
 	// Quiz creation page
 	protected.GET("/create-new-quiz", pages.CreateNewQuizPage)
@@ -156,6 +157,8 @@ func main() {
 		question := Question{Question: result.Question, Option1: result.Options[0], Option2: result.Options[1], Option3: result.Options[2], Option4: result.Options[3]}
 		return c.Render(200, "multiple-choice-question", question)
 	})
+
+	public.GET("/not-found", pages.NotFoundPage)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

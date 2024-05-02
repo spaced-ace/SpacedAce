@@ -33,7 +33,7 @@ type singleChoiceResponse struct {
 
 type trueOrFalseResponse struct {
 	Question      string `json:"question"`
-	CorrectAnswer bool   `json:"correct_answer"`
+	CorrectAnswer bool   `json:"correct_option"`
 }
 
 // #####
@@ -110,6 +110,7 @@ func CreateMultipleChoiceQuestionEndpoint(c echo.Context) error {
 	result := models.MultipleChoiceQuestion{
 		ID:             dbQuestion.UUID,
 		QuizID:         quizAccess.quizId,
+		QuestionType:   models.MultipleChoice,
 		Question:       generated.Question,
 		Answers:        generated.Options,
 		CorrectAnswers: generated.CorrectOptions,
@@ -165,6 +166,7 @@ func CreateSingleChoiceQuestionEndpoint(c echo.Context) error {
 	result := models.SingleChoiceQuestion{
 		ID:            dbQuestion.UUID,
 		QuizID:        quizAccess.quizId,
+		QuestionType:  models.SingleChoice,
 		Question:      generated.Question,
 		Answers:       generated.Options,
 		CorrectAnswer: generated.CorrectOption,
@@ -219,6 +221,7 @@ func CreateTrueOrFalseQuestionEndpoint(c echo.Context) error {
 	result := models.TrueOrFalseQuestion{
 		ID:            dbQuestion.UUID,
 		QuizID:        quizAccess.quizId,
+		QuestionType:  models.TrueOrFalse,
 		Question:      generated.Question,
 		CorrectAnswer: generated.CorrectAnswer,
 	}
@@ -241,6 +244,7 @@ func GetMultipleChoiceEndpoint(c echo.Context) error {
 	result := models.MultipleChoiceQuestion{
 		ID:             q.UUID,
 		QuizID:         q.QuizID,
+		QuestionType:   models.MultipleChoice,
 		Question:       q.Question,
 		Answers:        q.Answers,
 		CorrectAnswers: q.CorrectAnswers,
@@ -264,6 +268,7 @@ func GetSingleChoiceEndpoint(c echo.Context) error {
 	result := models.SingleChoiceQuestion{
 		ID:            q.UUID,
 		QuizID:        q.QuizID,
+		QuestionType:  models.SingleChoice,
 		Question:      q.Question,
 		Answers:       q.Answers,
 		CorrectAnswer: q.CorrectAnswer,
@@ -287,6 +292,7 @@ func GetTrueOrFalseEndpoint(c echo.Context) error {
 	result := models.TrueOrFalseQuestion{
 		ID:            q.UUID,
 		QuizID:        q.QuizID,
+		QuestionType:  models.TrueOrFalse,
 		Question:      q.Question,
 		CorrectAnswer: q.CorrectAnswer,
 	}
@@ -336,6 +342,7 @@ func UpdateMultipleChoiceQuestionEndpoint(c echo.Context) error {
 	result := models.MultipleChoiceQuestion{
 		ID:             questionToUpdate.UUID,
 		QuizID:         questionToUpdate.QuizID,
+		QuestionType:   models.MultipleChoice,
 		Question:       questionToUpdate.Question,
 		Answers:        questionToUpdate.Answers,
 		CorrectAnswers: questionToUpdate.CorrectAnswers,
@@ -385,6 +392,7 @@ func UpdateSingleChoiceQuestionEndpoint(c echo.Context) error {
 	result := models.SingleChoiceQuestion{
 		ID:            questionToUpdate.UUID,
 		QuizID:        questionToUpdate.QuizID,
+		QuestionType:  models.SingleChoice,
 		Question:      questionToUpdate.Question,
 		Answers:       questionToUpdate.Answers,
 		CorrectAnswer: questionToUpdate.CorrectAnswer,

@@ -7,7 +7,24 @@ const (
 	MultipleChoice
 	TrueOrFalse
 	OpenEnded
+	Unknown
 )
+
+func ParseFloatToQuestionType(floatValue float64) QuestionType {
+	intValue := int(floatValue)
+	switch intValue {
+	case 0:
+		return SingleChoice
+	case 1:
+		return MultipleChoice
+	case 2:
+		return TrueOrFalse
+	case 3:
+		return OpenEnded
+	default:
+		return Unknown
+	}
+}
 
 type Question interface{}
 
@@ -25,15 +42,13 @@ type SingleChoiceQuestion struct {
 	Options      []Option     `json:"options"`
 }
 
-func NewSingleChoiceQuestion(id string, quizId string, order int, question string, options []Option) SingleChoiceQuestion {
-	return SingleChoiceQuestion{
-		Id:           id,
-		QuizId:       quizId,
-		Order:        order,
-		QuestionType: SingleChoice,
-		Question:     question,
-		Options:      options,
-	}
+type SingleChoiceQuestionResponseBody struct {
+	Id            string       `json:"id"`
+	QuizId        string       `json:"quizid"`
+	QuestionType  QuestionType `json:"questionType"`
+	Question      string       `json:"question"`
+	Answers       []string     `json:"answers"`
+	CorrectAnswer string       `json:"correctAnswer"`
 }
 
 type MultipleChoiceQuestion struct {
@@ -45,15 +60,13 @@ type MultipleChoiceQuestion struct {
 	Options      []Option     `json:"options"`
 }
 
-func NewMultipleChoiceQuestion(id string, quizId string, order int, question string, options []Option) MultipleChoiceQuestion {
-	return MultipleChoiceQuestion{
-		Id:           id,
-		QuizId:       quizId,
-		Order:        order,
-		QuestionType: MultipleChoice,
-		Question:     question,
-		Options:      options,
-	}
+type MultipleChoiceQuestionResponseBody struct {
+	Id             string       `json:"id"`
+	QuizId         string       `json:"quizid"`
+	QuestionType   QuestionType `json:"questionType"`
+	Question       string       `json:"question"`
+	Answers        []string     `json:"answers"`
+	CorrectAnswers []string     `json:"correctAnswers"`
 }
 
 type TrueOrFalseQuestion struct {
@@ -65,15 +78,12 @@ type TrueOrFalseQuestion struct {
 	Answer       bool         `json:"answer"`
 }
 
-func NewTrueOrFalseQuestion(id string, quizId string, order int, question string, answer bool) TrueOrFalseQuestion {
-	return TrueOrFalseQuestion{
-		Id:           id,
-		QuizId:       quizId,
-		Order:        order,
-		QuestionType: TrueOrFalse,
-		Question:     question,
-		Answer:       answer,
-	}
+type TrueOrFalseQuestionResponseBody struct {
+	Id            string       `json:"id"`
+	QuizId        string       `json:"quizid"`
+	QuestionType  QuestionType `json:"questionType"`
+	Question      string       `json:"question"`
+	CorrectAnswer bool         `json:"correct_answer"`
 }
 
 type OpenEndedQuestion struct {
@@ -84,16 +94,4 @@ type OpenEndedQuestion struct {
 	Question     string       `json:"question"`
 	Context      string       `json:"context"`
 	Answer       string       `json:"answer"`
-}
-
-func NewOpenEndedQuestion(id string, quizId string, order int, question string, context string, answer string) OpenEndedQuestion {
-	return OpenEndedQuestion{
-		Id:           id,
-		QuizId:       quizId,
-		Order:        order,
-		QuestionType: OpenEnded,
-		Question:     question,
-		Context:      context,
-		Answer:       answer,
-	}
 }

@@ -1,11 +1,13 @@
 package pages
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"spaced-ace/api/models"
+	"spaced-ace/constants"
 	"spaced-ace/context"
-	"time"
 )
 
 type CreateNewQuizPageData struct {
@@ -22,19 +24,18 @@ func CreateNewQuizPage(c echo.Context) error {
 	return c.Render(200, "create-new-quiz", pageData)
 }
 
+type QuizRequestBody struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type CreateQuizRequestForm struct {
 	Title       string `form:"title"`
 	Description string `form:"description"`
-	Context     string `form:"context"`
 }
 
 func PostCreateQuiz(c echo.Context) error {
 	cc := c.(*context.Context)
-
-	questionType := cc.QueryParam("type")
-	if questionType != "single-choice" && questionType != "multiple-choice" && questionType != "true-or-false" && questionType != "open-ended" {
-		return c.String(http.StatusBadRequest, "Invalid question type")
-	}
 
 	var requestForm CreateQuizRequestForm
 	if err := c.Bind(&requestForm); err != nil {
@@ -47,18 +48,24 @@ func PostCreateQuiz(c echo.Context) error {
 	if requestForm.Description == "" {
 		return c.String(http.StatusBadRequest, "Description is required")
 	}
-	if requestForm.Context == "" {
-		return c.String(http.StatusBadRequest, "Context is required")
-	}
 
-	createdQuiz := models.Quiz{
-		QuizInfo: models.QuizInfo{
-			Id: "ae664251-9ee7-4ca6-9f16-ff072de61632",
-		},
-	}
+	requestBody, _ := json.Marshal(QuizRequestBody{
+		Name:        requestForm.Title,
+		Description: requestForm.Description,
+	})
 
-	time.Sleep(3 * time.Second)
+	req, _ := http.NewRequest("POST", constants.BACKEND_URL+"/quizzes/create", bytes.NewBuffer(requestBody))
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: cc.Session.Id,
+	})
+	client := &http.Client{}
 
-	c.Response().Header().Set("HX-Redirect", "/quizzes/"+createdQuiz.Id+"/edit")
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	var responseBody models.QuizInfo
+	_ = json.NewDecoder(resp.Body).Decode(&responseBody)
+
+	c.Response().Header().Set("HX-Redirect", "/quizzes/"+responseBody.Id+"/edit")
 	return c.NoContent(http.StatusCreated)
 }

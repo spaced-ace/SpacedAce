@@ -45,6 +45,7 @@
                         hx-on="click"
                         hx-target="#questions"
                         hx-swap="beforeend"
+                        hx-push-url="false"
                         hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
                         class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
                     <button
@@ -52,6 +53,7 @@
                         hx-on="click"
                         hx-target="#questions"
                         hx-swap="beforeend"
+                        hx-push-url="false"
                         hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
                         class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
                     <button
@@ -59,15 +61,9 @@
                         hx-on="click"
                         hx-target="#questions"
                         hx-swap="beforeend"
+                        hx-push-url="false"
                         hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
                         class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
-                    <button
-                        hx-post="/generate?type=open-ended"
-                        hx-on="click"
-                        hx-target="#questions"
-                        hx-swap="beforeend"
-                        hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
-                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Open-ended</button>
                 </div>
             </form>
 
@@ -110,6 +106,13 @@
                 placeholder.style.display = 'none';
                 questions.lastElementChild?.scrollIntoView({ behavior: 'smooth'});
             });
+        });
+
+        document.body.addEventListener('htmx:afterOnLoad', function(event) {
+            const detail = event.detail;
+            if (detail.xhr.status >= 400) {
+                alert('An error occurred: ' + detail.xhr.responseText);
+            }
         });
     </script>
     </body>

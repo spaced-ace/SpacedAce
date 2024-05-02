@@ -1,9 +1,14 @@
 package pages
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"io"
 	"net/http"
 	"spaced-ace/api/models"
+	"spaced-ace/constants"
 	"spaced-ace/context"
 )
 
@@ -22,75 +27,214 @@ type QuestionWithMetaData struct {
 	Question models.Question
 }
 
-var mockSingleChoiceQuestion = models.NewSingleChoiceQuestion(
-	"1",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	1,
-	"What is the capital of France?",
-	[]models.Option{
-		{Value: "Paris", Correct: true},
-		{Value: "London", Correct: false},
-		{Value: "Berlin", Correct: false},
-		{Value: "Madrid", Correct: false},
-	})
-
-var mockMultipleChoiceQuestion = models.NewMultipleChoiceQuestion(
-	"2",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	2,
-	"Which of the following are European countries?",
-	[]models.Option{
-		{Value: "Canada", Correct: false},
-		{Value: "France", Correct: true},
-		{Value: "Germany", Correct: true},
-		{Value: "Brazil", Correct: false},
-	})
-
-var mockQuiz = QuizWithMetaData{
-	QuizInfo: models.QuizInfo{
-		Id:          "ae664251-9ee7-4ca6-9f16-ff072de61632",
-		Title:       "My QuizWithMetaData",
-		Description: "This is a quiz",
-		CreatorId:   "73975759-99f9-46be-b84b-cfa4d2222112",
-		CreatorName: "John Doe",
-	},
-	QuestionsWithMetaData: []QuestionWithMetaData{
-		{
-			EditMode: false,
-			Question: mockSingleChoiceQuestion,
-		},
-	},
+type quizResponse struct {
+	models.QuizInfo
+	Questions []map[string]interface{}
 }
 
-var mockTrueOrFalseQuestion = models.NewTrueOrFalseQuestion(
-	"3",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	3,
-	"Is the sun hot?",
-	true)
+func stringInArray(target string, arr []string) bool {
+	for _, item := range arr {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
 
-var mockOpenEndedQuestion = models.NewOpenEndedQuestion(
-	"4",
-	"ae664251-9ee7-4ca6-9f16-ff072de61632",
-	4,
-	"What are the main benefits of using Go programming language?",
-	"",
-	"Go has a simple syntax which makes it easy to learn. It is statically typed and compiled, which helps in catching errors early. It also has built-in support for concurrent programming.")
+func getQuiz(quizId string, sessionId string) (*QuizWithMetaData, error) {
+	if quizId == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
+	}
+
+	req, err := http.NewRequest("GET", constants.BACKEND_URL+"/quizzes/"+quizId, nil)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error creating request")
+	}
+
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: sessionId,
+	})
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error reading response body: "+err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, echo.NewHTTPError(resp.StatusCode, string(body))
+	}
+
+	var response quizResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body: "+err.Error())
+	}
+
+	questionsWithMetaData := make([]QuestionWithMetaData, len(response.Questions))
+	for i, question := range response.Questions {
+		questionsWithMetaData[i] = QuestionWithMetaData{
+			EditMode: false,
+		}
+
+		jsonData, err := json.Marshal(question)
+		if err != nil {
+			continue
+		}
+		questionType := models.ParseFloatToQuestionType(question["questionType"].(float64))
+
+		if questionType == models.SingleChoice {
+			var singleChoiceQuestion models.SingleChoiceQuestionResponseBody
+			err = json.Unmarshal(jsonData, &singleChoiceQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling single choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.SingleChoiceQuestion{
+				Id:           singleChoiceQuestion.Id,
+				QuizId:       singleChoiceQuestion.QuizId,
+				QuestionType: models.SingleChoice,
+				Question:     singleChoiceQuestion.Question,
+				Options: []models.Option{
+					{Value: singleChoiceQuestion.Answers[0], Correct: singleChoiceQuestion.CorrectAnswer == "A"},
+					{Value: singleChoiceQuestion.Answers[1], Correct: singleChoiceQuestion.CorrectAnswer == "B"},
+					{Value: singleChoiceQuestion.Answers[2], Correct: singleChoiceQuestion.CorrectAnswer == "C"},
+					{Value: singleChoiceQuestion.Answers[3], Correct: singleChoiceQuestion.CorrectAnswer == "D"},
+				},
+			}
+		}
+		if questionType == models.MultipleChoice {
+			var multipleChoiceQuestion models.MultipleChoiceQuestionResponseBody
+			err = json.Unmarshal(jsonData, &multipleChoiceQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling multiple choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.MultipleChoiceQuestion{
+				Id:           multipleChoiceQuestion.Id,
+				QuizId:       multipleChoiceQuestion.QuizId,
+				QuestionType: models.MultipleChoice,
+				Question:     multipleChoiceQuestion.Question,
+				Options: []models.Option{
+					{Value: multipleChoiceQuestion.Answers[0], Correct: stringInArray("A", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[1], Correct: stringInArray("B", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[2], Correct: stringInArray("C", multipleChoiceQuestion.CorrectAnswers)},
+					{Value: multipleChoiceQuestion.Answers[3], Correct: stringInArray("D", multipleChoiceQuestion.CorrectAnswers)},
+				},
+			}
+		}
+		if questionType == models.TrueOrFalse {
+			var trueOrFalseQuestion models.TrueOrFalseQuestionResponseBody
+			err = json.Unmarshal(jsonData, &trueOrFalseQuestion)
+			if err != nil {
+				fmt.Println("Error unmarshalling multiple choice question: ", err)
+				continue
+			}
+			questionsWithMetaData[i].Question = models.TrueOrFalseQuestion{
+				Id:           trueOrFalseQuestion.Id,
+				QuizId:       trueOrFalseQuestion.QuizId,
+				QuestionType: models.TrueOrFalse,
+				Question:     trueOrFalseQuestion.Question,
+				Answer:       trueOrFalseQuestion.CorrectAnswer,
+			}
+		}
+	}
+
+	quizWithMetaData := QuizWithMetaData{
+		QuizInfo: models.QuizInfo{
+			Id:          response.Id,
+			Title:       response.Title,
+			Description: response.Description,
+			CreatorId:   response.CreatorId,
+			CreatorName: response.CreatorName,
+		},
+		QuestionsWithMetaData: questionsWithMetaData,
+	}
+	return &quizWithMetaData, nil
+}
+
+type UpdateQuizRequestBody struct {
+	Title       string `json:"name"`
+	Description string `json:"description"`
+}
+
+func updateQuiz(quizId string, sessionId string, title string, description string) (*models.QuizInfo, error) {
+	if quizId == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
+	}
+
+	requestBody, err := json.Marshal(UpdateQuizRequestBody{
+		Title:       title,
+		Description: description,
+	})
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error marshalling request body")
+	}
+
+	req, err := http.NewRequest("PATCH", constants.BACKEND_URL+"/quizzes/"+quizId, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error creating request")
+	}
+
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: sessionId,
+	})
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error reading response body: "+err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, echo.NewHTTPError(resp.StatusCode, string(body))
+	}
+
+	var quizInfo models.QuizInfo
+	err = json.Unmarshal(body, &quizInfo)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body: "+err.Error())
+	}
+
+	return &quizInfo, nil
+}
 
 func EditQuizPage(c echo.Context) error {
 	cc := c.(*context.Context)
+	quizId := c.Param("id")
+
+	quizWithMetaData, err := getQuiz(quizId, cc.Session.Id)
+	if err != nil {
+		return c.Redirect(http.StatusFound, "/not-found")
+	}
 
 	pageData := EditQuizPageData{
 		Session:          cc.Session,
-		QuizWithMetaData: mockQuiz,
+		QuizWithMetaData: *quizWithMetaData,
 	}
-
 	return c.Render(200, "edit-quiz", pageData)
 }
 
 type GenerateQuestionForm struct {
 	QuizId  string `form:"quizId"`
 	Context string `form:"context"`
+}
+
+type QuestionCreationRequestBody struct {
+	QuizId string `json:"quizId"`
+	Prompt string `json:"prompt"`
 }
 
 func PostGenerateQuestion(c echo.Context) error {
@@ -113,40 +257,106 @@ func PostGenerateQuestion(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Context is required")
 	}
 
-	if questionType == "single-choice" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockSingleChoiceQuestion,
-		}
+	requestBody, err := json.Marshal(QuestionCreationRequestBody{QuizId: requestForm.QuizId, Prompt: requestForm.Context})
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Internal server error")
+	}
 
+	var req *http.Request
+	if questionType == "single-choice" {
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/single-choice", bytes.NewBuffer(requestBody))
+	}
+	if questionType == "multiple-choice" {
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/multiple-choice", bytes.NewBuffer(requestBody))
+	}
+	if questionType == "true-or-false" {
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/true-or-false", bytes.NewBuffer(requestBody))
+	}
+	if questionType == "open-ended" {
+		req, _ = http.NewRequest("POST", constants.BACKEND_URL+"/questions/open-ended", bytes.NewBuffer(requestBody))
+	}
+
+	req.AddCookie(&http.Cookie{
+		Name:  "session",
+		Value: cc.Session.Id,
+	})
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return c.String(resp.StatusCode, "Error creating question")
+	}
+
+	if questionType == "single-choice" {
+		var response models.SingleChoiceQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
+		}
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.SingleChoiceQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.SingleChoice,
+				Question:     response.Question,
+				Options: []models.Option{
+					{Value: response.Answers[0], Correct: response.CorrectAnswer == "A"},
+					{Value: response.Answers[1], Correct: response.CorrectAnswer == "B"},
+					{Value: response.Answers[2], Correct: response.CorrectAnswer == "C"},
+					{Value: response.Answers[3], Correct: response.CorrectAnswer == "D"},
+				},
+			},
+		}
 		return c.Render(200, "single-choice-question", question)
 	}
-
 	if questionType == "multiple-choice" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockMultipleChoiceQuestion,
+		var response models.MultipleChoiceQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
 		}
-
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.MultipleChoiceQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.MultipleChoice,
+				Question:     response.Question,
+				Options: []models.Option{
+					{Value: response.Answers[0], Correct: stringInArray("A", response.CorrectAnswers)},
+					{Value: response.Answers[1], Correct: stringInArray("B", response.CorrectAnswers)},
+					{Value: response.Answers[2], Correct: stringInArray("C", response.CorrectAnswers)},
+					{Value: response.Answers[3], Correct: stringInArray("D", response.CorrectAnswers)},
+				},
+			},
+		}
 		return c.Render(200, "multiple-choice-question", question)
 	}
-
 	if questionType == "true-or-false" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockTrueOrFalseQuestion,
+		var response models.TrueOrFalseQuestionResponseBody
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		fmt.Println("Response: ", response)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error parsing response body")
 		}
-
+		question := QuestionWithMetaData{
+			EditMode: true,
+			Question: models.TrueOrFalseQuestion{
+				Id:           response.Id,
+				QuizId:       response.QuizId,
+				QuestionType: models.TrueOrFalse,
+				Question:     response.Question,
+				Answer:       response.CorrectAnswer,
+			},
+		}
+		fmt.Println("Question: ", question)
 		return c.Render(200, "true-or-false-question", question)
-	}
-
-	if questionType == "open-ended" {
-		question := QuestionWithMetaData{
-			EditMode: false,
-			Question: mockOpenEndedQuestion,
-		}
-
-		return c.Render(200, "open-ended-question", question)
 	}
 
 	return c.NoContent(http.StatusTeapot)
@@ -168,17 +378,19 @@ func PatchUpdateQuiz(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Quiz ID is required")
 	}
 
+	updatedQuizInfo, err := updateQuiz(requestForm.QuizId, c.(*context.Context).Session.Id, requestForm.Title, requestForm.Description)
+	if err != nil {
+		return c.String(err.(*echo.HTTPError).Code, err.Error())
+	}
+
 	if requestForm.Title != "" {
-		// Update the title
-		return c.Render(200, "quiz-title-field", mockQuiz.QuizInfo)
+		return c.Render(200, "quiz-title-field", updatedQuizInfo)
 	}
-
 	if requestForm.Description != "" {
-		// Update the description
-		return c.Render(200, "quiz-description-field", mockQuiz.QuizInfo)
+		return c.Render(200, "quiz-description-field", updatedQuizInfo)
 	}
 
-	return c.NoContent(http.StatusBadRequest)
+	return c.String(http.StatusBadRequest, "Title or description is required")
 }
 
 func DeleteQuestion(c echo.Context) error {

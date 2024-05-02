@@ -1,6 +1,6 @@
 package models
 
-type Question struct{}
+type Question interface{}
 
 type QuizInfo struct {
 	Id          string `json:"id"`
