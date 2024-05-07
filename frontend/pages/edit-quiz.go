@@ -7,13 +7,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
-	"spaced-ace/api/models"
 	"spaced-ace/constants"
 	"spaced-ace/context"
+	"spaced-ace/models"
 )
 
 type EditQuizPageData struct {
-	Session          *context.Session
+	Session          *models.Session
 	QuizWithMetaData QuizWithMetaData
 }
 
@@ -212,7 +212,7 @@ func updateQuiz(quizId string, sessionId string, title string, description strin
 }
 
 func EditQuizPage(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 	quizId := c.Param("id")
 
 	quizWithMetaData, err := getQuiz(quizId, cc.Session.Id)
@@ -238,7 +238,7 @@ type QuestionCreationRequestBody struct {
 }
 
 func PostGenerateQuestion(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 
 	questionType := cc.QueryParam("type")
 	if questionType != "single-choice" && questionType != "multiple-choice" && questionType != "true-or-false" && questionType != "open-ended" {
@@ -378,7 +378,7 @@ func PatchUpdateQuiz(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Quiz ID is required")
 	}
 
-	updatedQuizInfo, err := updateQuiz(requestForm.QuizId, c.(*context.Context).Session.Id, requestForm.Title, requestForm.Description)
+	updatedQuizInfo, err := updateQuiz(requestForm.QuizId, c.(*context.AppContext).Session.Id, requestForm.Title, requestForm.Description)
 	if err != nil {
 		return c.String(err.(*echo.HTTPError).Code, err.Error())
 	}

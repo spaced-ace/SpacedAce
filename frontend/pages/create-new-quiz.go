@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"spaced-ace/api/models"
 	"spaced-ace/constants"
 	"spaced-ace/context"
+	"spaced-ace/models"
 )
 
 type CreateNewQuizPageData struct {
-	Session *context.Session
+	Session *models.Session
 }
 
 func CreateNewQuizPage(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 
 	pageData := MyQuizzesPageData{
 		Session: cc.Session,
@@ -35,7 +35,7 @@ type CreateQuizRequestForm struct {
 }
 
 func PostCreateQuiz(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 
 	var requestForm CreateQuizRequestForm
 	if err := c.Bind(&requestForm); err != nil {

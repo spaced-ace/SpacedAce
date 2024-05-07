@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"spaced-ace/api/models"
 	"spaced-ace/constants"
 	"spaced-ace/context"
+	"spaced-ace/models"
 	"strconv"
 )
 
@@ -24,12 +24,12 @@ type quizzesResponse struct {
 }
 
 type MyQuizzesPageData struct {
-	Session *context.Session
+	Session *models.Session
 	Quizzes []quiz
 }
 
 func MyQuizzesPage(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 	userId := cc.Session.User.Id
 
 	req, _ := http.NewRequest("GET", constants.BACKEND_URL+"/quizzes/user/"+userId, nil)
@@ -64,7 +64,7 @@ func MyQuizzesPage(c echo.Context) error {
 }
 
 func DeleteQuiz(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 	quizId := c.Param("quizId")
 
 	req, _ := http.NewRequest("DELETE", constants.BACKEND_URL+"/quizzes/"+quizId, nil)

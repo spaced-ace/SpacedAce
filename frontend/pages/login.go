@@ -4,14 +4,15 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"spaced-ace/context"
+	"spaced-ace/models"
 )
 
 type LoginPageData struct {
-	Session *context.Session
+	Session *models.Session
 }
 
 func LoginPage(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 	if cc.Session != nil {
 		return c.Redirect(http.StatusFound, "/my-quizzes")
 	}

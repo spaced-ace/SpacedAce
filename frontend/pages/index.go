@@ -3,14 +3,15 @@ package pages
 import (
 	"github.com/labstack/echo/v4"
 	"spaced-ace/context"
+	"spaced-ace/models"
 )
 
 type IndexPageData struct {
-	Session *context.Session
+	Session *models.Session
 }
 
 func IndexPage(c echo.Context) error {
-	cc := c.(*context.Context)
+	cc := c.(*context.AppContext)
 
 	data := IndexPageData{
 		Session: cc.Session,
