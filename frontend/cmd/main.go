@@ -2,11 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"html/template"
-	"io"
 	"net/http"
 	"spaced-ace/api"
 	"spaced-ace/constants"
@@ -14,27 +11,12 @@ import (
 	"strings"
 )
 
-type Template struct {
-	tmpl *template.Template
-}
-
-func newTemplate() *Template {
-	return &Template{
-		tmpl: template.Must(template.ParseGlob("views/*.html")),
-	}
-}
-
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	fmt.Printf("Rendering `%s`, data: %+v\n", name, data)
-	return t.tmpl.ExecuteTemplate(w, name, data)
-}
-
 func main() {
 	e := echo.New()
 
-	e.Renderer = newTemplate()
 	e.Use(middleware.Logger())
 	e.Use(context.SessionMiddleware)
+	e.Renderer = api.NewTemplate()
 
 	// Static files
 	e.Static("/static", "static")
@@ -50,10 +32,14 @@ func main() {
 			message = extractErrorMessage(he)
 		}
 
-		err = c.Render(code, "error-message", map[string]string{
-			"Message": message,
-		})
-		if err != nil {
+		data := api.NewPageTemplate(
+			nil,
+			map[string]string{
+				"Message": message,
+			},
+		)
+
+		if err = c.Render(code, "error-message", data); err != nil {
 			c.Error(err)
 		}
 	}

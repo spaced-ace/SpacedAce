@@ -28,7 +28,7 @@ COPY cmd cmd
 COPY constants constants
 COPY context context
 COPY models models
-COPY pages pages
+COPY api/pages pages
 COPY service service
 COPY views views
 

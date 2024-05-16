@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"spaced-ace/auth"
 	"spaced-ace/context"
-	"spaced-ace/pages"
 )
 
 func RegisterRoutes(e *echo.Echo) {
@@ -15,27 +14,27 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.Use(context.RequireSessionMiddleware)
 
 	// Public pages
-	public.GET("/", pages.IndexPage)
-	public.GET("/login", pages.LoginPage)
-	public.GET("/signup", pages.SignupPage)
+	public.GET("/", handleIndexPage)
+	public.GET("/login", handleLoginPage)
+	public.GET("/signup", handleSignupPage)
 
 	// My quizzes page
-	protected.GET("/my-quizzes", pages.MyQuizzesPage)
-	protected.DELETE("/quizzes/:quizId", pages.DeleteQuiz)
+	protected.GET("/my-quizzes", handleMyQuizzesPage)
+	protected.DELETE("/quizzes/:quizId", handleDeleteQuiz)
 
 	// Take quiz page
-	protected.GET("/quizzes/:quizId/preview", pages.QuizPreviewPage)
+	protected.GET("/quizzes/:quizId/preview", handleQuizPreviewPage)
 	//protected.GET("/quizzes/:quizId/take", pages.TakeQuizPage)
 
 	// Quiz creation page
-	protected.GET("/create-new-quiz", pages.CreateNewQuizPage)
-	protected.POST("/quizzes/create", pages.PostCreateQuiz)
+	protected.GET("/create-new-quiz", handleCreateNewQuizPage)
+	protected.POST("/quizzes/create", handleCreateQuiz)
 
 	// Question generation
-	protected.GET("/quizzes/:id/edit", pages.EditQuizPage)
-	protected.POST("/generate", pages.PostGenerateQuestion)
-	protected.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)
-	protected.DELETE("/questions/:questionId", pages.DeleteQuestion)
+	protected.GET("/quizzes/:id/edit", handleEditQuizPage)
+	protected.POST("/generate", handleGenerateQuestion)
+	protected.PATCH("/quizzes/:id", handleUpdateQuiz)
+	protected.DELETE("/questions/:questionId", handleDeleteQuestion)
 
 	// Auth endpoints
 	public.POST("/login", auth.PostLogin)
@@ -66,5 +65,5 @@ func RegisterRoutes(e *echo.Echo) {
 		return c.NoContent(http.StatusOK)
 	})
 
-	public.GET("/not-found", pages.NotFoundPage)
+	public.GET("/not-found", handleNotFoundPage)
 }

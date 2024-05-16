@@ -1,0 +1,53 @@
+{{ block "layout" . }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/tailwindcss.css">
+    <meta charset="UTF-8">
+    <title>Spaced Ace</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="/static/script.js"></script>
+</head>
+<body
+    hx-history="true"
+    hx-boost="true"
+    hx-push-url="true"
+    hx-target="main"
+    class="flex h-dvh w-screen cursor-default flex-col">
+    {{ template "navbar" .PageData.Session }}
+    <div id="page-container" class="flex h-[calc(100dvh-4rem)] w-full">
+        <div id="error-notification" class="h-32 w-72 bg-red-500 bottom-0 fixed z-100"></div>
+        {{ template "sidebar" .PageData.Session }}
+        <main class="flex h-full w-full overflow-auto">
+            {{ if eq .TemplateName "create-new-quiz" }}
+                {{ template "create-new-quiz" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "edit-quiz" }}
+                {{ template "edit-quiz" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "generate" }}
+                {{ template "generate" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "index" }}
+                {{ template "index" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "layout" }}
+                {{ template "layout" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "login" }}
+                {{ template "login" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "my-quizzes" }}
+                {{ template "my-quizzes" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "not-found" }}
+                {{ template "not-found" .PageData.Data }}
+            {{ end }}
+            {{ if eq .TemplateName "signup" }}
+                {{ template "signup" .PageData.Data }}
+            {{ end }}
+        </main>
+    </div>
+</body>
+</html>
+{{ end }}

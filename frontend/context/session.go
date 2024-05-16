@@ -31,6 +31,8 @@ func SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		cc.Session = session
+		//c.Set("cc", cc)
+		cc.Set("cc", cc)
 		return next(cc)
 	}
 }
