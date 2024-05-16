@@ -1,16 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"io"
 	"net/http"
-	"spaced-ace/auth"
+	"spaced-ace/api"
 	"spaced-ace/constants"
 	"spaced-ace/context"
-	"spaced-ace/pages"
+	"strings"
 )
 
 type Template struct {
@@ -38,64 +39,34 @@ func main() {
 	// Static files
 	e.Static("/static", "static")
 
-	public := e.Group("")
+	api.RegisterRoutes(e)
 
-	protected := e.Group("")
-	protected.Use(context.RequireSessionMiddleware)
-
-	// Public pages
-	public.GET("/", pages.IndexPage)
-	public.GET("/login", pages.LoginPage)
-	public.GET("/signup", pages.SignupPage)
-
-	// My quizzes page
-	protected.GET("/my-quizzes", pages.MyQuizzesPage)
-	protected.DELETE("/quizzes/:quizId", pages.DeleteQuiz)
-
-	// Take quiz page
-	protected.GET("/quizzes/:quizId/preview", pages.QuizPreviewPage)
-	//protected.GET("/quizzes/:quizId/take", pages.TakeQuizPage)
-
-	// Quiz creation page
-	protected.GET("/create-new-quiz", pages.CreateNewQuizPage)
-	protected.POST("/quizzes/create", pages.PostCreateQuiz)
-
-	// Question generation
-	protected.GET("/quizzes/:id/edit", pages.EditQuizPage)
-	protected.POST("/generate", pages.PostGenerateQuestion)
-	protected.PATCH("/quizzes/:id", pages.PatchUpdateQuiz)
-	protected.DELETE("/questions/:questionId", pages.DeleteQuestion)
-
-	// Auth endpoints
-	public.POST("/login", auth.PostLogin)
-	public.POST("/signup", auth.PostRegister)
-	protected.POST("/logout", func(c echo.Context) error {
-		c.Response().Header().Set("HX-Redirect", "/")
-
-		cc, ok := c.(*context.AppContext)
-		if !ok {
-			c.Logger().Printf("Cannot cast echo.Context to context.AppContext")
-			return c.NoContent(http.StatusOK)
-		}
-		if cc.Session != nil {
-			if err := cc.ApiService.DeleteSession(); err != nil {
-				c.SetCookie(&http.Cookie{
-					Name: "session",
-				})
-				return c.NoContent(http.StatusOK)
-			}
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		code := http.StatusInternalServerError
+		message := "internal server error"
+		var he *echo.HTTPError
+		if errors.As(err, &he) {
+			code = he.Code
+			message = extractErrorMessage(he)
 		}
 
-		sessionCookie, err := c.Cookie("session")
-		if err == nil {
-			sessionCookie.MaxAge = -1
-			c.SetCookie(sessionCookie)
+		err = c.Render(code, "error-message", map[string]string{
+			"Message": message,
+		})
+		if err != nil {
+			c.Error(err)
 		}
-
-		return c.NoContent(http.StatusOK)
-	})
-
-	public.GET("/not-found", pages.NotFoundPage)
+	}
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
+}
+
+func extractErrorMessage(he *echo.HTTPError) string {
+	parts := strings.Split(he.Error(), ", ")
+	for _, part := range parts {
+		if strings.HasPrefix(part, "message=") {
+			return strings.TrimPrefix(part, "message=")
+		}
+	}
+	return "unknown error"
 }
