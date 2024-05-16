@@ -27,7 +27,9 @@ COPY auth auth
 COPY cmd cmd
 COPY constants constants
 COPY context context
+COPY models models
 COPY pages pages
+COPY service service
 COPY views views
 
 COPY --from=tailwind /workdir/static static
