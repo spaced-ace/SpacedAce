@@ -1,4 +1,9 @@
 // htmx.logAll();
+
+window.placeholder = () => document.getElementById('question-placeholder');
+window.generateButtons = () => document.getElementById('generate-buttons')?.querySelectorAll('button')
+window.questions = () => document.getElementById('questions');
+
 window.hideNotification = () => {
     const errorNotification = document.getElementById('error-notification');
     errorNotification.classList.remove('opacity-100');
@@ -15,31 +20,23 @@ htmx.onLoad(body => {
             setTimeout(() => hideNotification(), 2000);
         }
     });
-})
-// document.body.addEventListener('htmx:load', () => {
-//     htmx.logAll();
-//
-//     const generateButtons = document.getElementById('generate-buttons')?.querySelectorAll('button');
-//     const questions = document.getElementById('questions');
-//
-//     const placeholder = document.getElementById('question-placeholder');
-//     if (placeholder?.style != null) {
-//         placeholder.style.display = 'none';
-//     }
-//
-//     generateButtons?.forEach(generateButton => {
-//         generateButton.addEventListener('htmx:beforeSend', () => {
-//             generateButtons?.forEach(button => button.disabled = true);
-//             placeholder.style.display = 'flex';
-//             questions.insertBefore(placeholder, null);
-//             placeholder.scrollIntoView({ behavior: 'smooth'});
-//         });
-//
-//         generateButton.addEventListener('htmx:afterOnLoad', () => {
-//             generateButtons?.forEach(button => button.disabled = false);
-//             placeholder.style.display = 'none';
-//             questions.lastElementChild?.scrollIntoView({ behavior: 'smooth'});
-//         });
-//     });
-//
-// });
+
+    document.body.addEventListener('htmx:beforeSend', event => {
+        const requestPath = event.detail.pathInfo.requestPath;
+        if (requestPath.match(/\/generate\?type=/)) {
+            questions().appendChild(placeholder());
+            placeholder().style.display = 'flex';
+            placeholder().scrollIntoView({ behavior: 'smooth'})
+            generateButtons()?.forEach(x => x.disabled = true);
+        }
+    });
+
+    document.body.addEventListener('htmx:afterOnLoad', event => {
+        const requestPath = event.detail.pathInfo.requestPath;
+        if (requestPath.match(/\/generate\?type=/)) {
+            placeholder().style.display = 'none';
+            generateButtons()?.forEach(x => x.disabled = false);
+        }
+    });
+
+});

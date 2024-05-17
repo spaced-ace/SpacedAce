@@ -1,6 +1,6 @@
 {{ block "edit-quiz" . }}
     <div class="h-full w-full flex justify-center">
-        <div class="w-[700px] h-[calc(100dvh-4rem)] flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
+        <div class="w-[700px] h-full flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
             <div class="flex gap-x-1 items-center">
                 <img hx-get="/my-quizzes" src="/static/icons/arrow-left.svg" alt="icon" class="h-8 w-8">
                 <span class="text-4xl font-bold">Edit quiz</span>
@@ -26,35 +26,29 @@
                             class="max-h-96 w-full rounded-md border border-gray-300 px-4 py-2 min-h-48"></textarea>
                 </label>
 
-                <div id="generate-buttons" class="flex flex-shrink-0 gap-2">
+                <div
+                    id="generate-buttons"
+                    hx-target="#questions"
+                    hx-swap="beforeend"
+                    hx-push-url="false"
+                    hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
+                    class="flex flex-shrink-0 gap-2">
                     <button
-                            hx-post="/generate?type=single-choice"
-                            hx-on="click"
-                            hx-target="#questions"
-                            hx-swap="beforeend"
-                            hx-push-url="false"
-                            hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
-                            class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
+                        hx-post="/generate?type=single-choice"
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Single choice</button>
                     <button
-                            hx-post="/generate?type=multiple-choice"
-                            hx-on="click"
-                            hx-target="#questions"
-                            hx-swap="beforeend"
-                            hx-push-url="false"
-                            hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
-                            class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
+                        hx-post="/generate?type=multiple-choice"
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">Multiple choice</button>
                     <button
-                            hx-post="/generate?type=true-or-false"
-                            hx-on="click"
-                            hx-target="#questions"
-                            hx-swap="beforeend"
-                            hx-push-url="false"
-                            hx-vals='{ "quizId": "{{ .QuizWithMetaData.QuizInfo.Id }}" }'
-                            class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
+                        hx-post="/generate?type=true-or-false"
+                        class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-950 disabled:cursor-not-allowed">True or False</button>
                 </div>
             </form>
 
-            <div id="questions" class="flex w-full flex-col gap-y-2 pb-6">
+            <div
+                id="questions"
+                hx-push-url="false"
+                class="flex h-min w-full flex-col gap-y-2 pb-6 flex-grow-0 flex-shrink-0 overflow-y-auto">
                 {{ range $question := .QuizWithMetaData.QuestionsWithMetaData }}
                     {{ if eq .Question.QuestionType 0 }}
                         {{ template "single-choice-question" $question }}
@@ -83,6 +77,7 @@
             type="text"
             value="{{ .Title }}"
             hx-patch="/quizzes/{{ .Id }}"
+            hx-push-url="false"
             hx-trigger="blur"
             hx-target="#title-label"
             hx-vals='{ "quizId": "{{ .Id }}" }'
@@ -100,6 +95,7 @@
             type="text"
             rows="4"
             hx-patch="/quizzes/{{ .Id }}"
+            hx-push-url="false"
             hx-trigger="blur"
             hx-target="#description-label"
             hx-vals='{ "quizId": "{{ .Id }}" }'

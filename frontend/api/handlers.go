@@ -127,24 +127,24 @@ func handleGenerateQuestion(c echo.Context) error {
 
 	questionType := cc.QueryParam("type")
 	if questionType != "single-choice" && questionType != "multiple-choice" && questionType != "true-or-false" && questionType != "open-ended" {
-		return c.String(http.StatusBadRequest, "Invalid question type")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid question type")
 	}
 
 	var requestForm GenerateQuestionForm
 	if err := c.Bind(&requestForm); err != nil {
-		return c.String(http.StatusBadRequest, "Invalid request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
 	}
 
 	if requestForm.QuizId == "" {
-		return c.String(http.StatusBadRequest, "Quiz ID is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
 	}
 	if requestForm.Context == "" {
-		return c.String(http.StatusBadRequest, "Context is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Context is required")
 	}
 
 	requestBody, err := json.Marshal(QuestionCreationRequestBody{QuizId: requestForm.QuizId, Prompt: requestForm.Context})
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Internal server error")
+		return echo.NewHTTPError(http.StatusBadRequest, "Internal server error")
 	}
 
 	var req *http.Request
@@ -169,12 +169,12 @@ func handleGenerateQuestion(c echo.Context) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return c.String(resp.StatusCode, "Error creating question")
+		return echo.NewHTTPError(resp.StatusCode, "Error creating question")
 	}
 
 	if questionType == "single-choice" {
@@ -198,7 +198,12 @@ func handleGenerateQuestion(c echo.Context) error {
 				},
 			},
 		}
-		return c.Render(200, "single-choice-question", question)
+
+		data := NewComponentTemplate(
+			cc.Session,
+			question,
+		)
+		return c.Render(200, "single-choice-question", data)
 	}
 	if questionType == "multiple-choice" {
 		var response models.MultipleChoiceQuestionResponseBody
@@ -221,7 +226,11 @@ func handleGenerateQuestion(c echo.Context) error {
 				},
 			},
 		}
-		return c.Render(200, "multiple-choice-question", question)
+		data := NewComponentTemplate(
+			cc.Session,
+			question,
+		)
+		return c.Render(200, "multiple-choice-question", data)
 	}
 	if questionType == "true-or-false" {
 		var response models.TrueOrFalseQuestionResponseBody
@@ -240,8 +249,11 @@ func handleGenerateQuestion(c echo.Context) error {
 				Answer:       response.CorrectAnswer,
 			},
 		}
-		fmt.Println("Question: ", question)
-		return c.Render(200, "true-or-false-question", question)
+		data := NewComponentTemplate(
+			cc.Session,
+			question,
+		)
+		return c.Render(200, "true-or-false-question", data)
 	}
 
 	return c.NoContent(http.StatusTeapot)
