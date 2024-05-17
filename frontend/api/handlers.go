@@ -92,14 +92,14 @@ func handleCreateQuiz(c echo.Context) error {
 
 	var requestForm CreateQuizRequestForm
 	if err := c.Bind(&requestForm); err != nil {
-		return c.String(http.StatusBadRequest, "Invalid request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
 	}
 
 	if requestForm.Title == "" {
-		return c.String(http.StatusBadRequest, "Title is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Title is required")
 	}
 	if requestForm.Description == "" {
-		return c.String(http.StatusBadRequest, "Description is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Description is required")
 	}
 
 	requestBody, _ := json.Marshal(QuizRequestBody{
@@ -181,7 +181,7 @@ func handleGenerateQuestion(c echo.Context) error {
 		var response models.SingleChoiceQuestionResponseBody
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "Error parsing response body")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body")
 		}
 		question := QuestionWithMetaData{
 			EditMode: true,
@@ -209,7 +209,7 @@ func handleGenerateQuestion(c echo.Context) error {
 		var response models.MultipleChoiceQuestionResponseBody
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "Error parsing response body")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body")
 		}
 		question := QuestionWithMetaData{
 			EditMode: true,
@@ -237,7 +237,7 @@ func handleGenerateQuestion(c echo.Context) error {
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		fmt.Println("Response: ", response)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "Error parsing response body")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error parsing response body")
 		}
 		question := QuestionWithMetaData{
 			EditMode: true,
@@ -263,16 +263,16 @@ func handleUpdateQuiz(c echo.Context) error {
 
 	var requestForm UpdateQuizRequestForm
 	if err := c.Bind(&requestForm); err != nil {
-		return c.String(http.StatusBadRequest, "Invalid request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
 	}
 
 	if requestForm.QuizId == "" {
-		return c.String(http.StatusBadRequest, "Quiz ID is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Quiz ID is required")
 	}
 
 	updatedQuizInfo, err := updateQuiz(requestForm.QuizId, c.(*context.AppContext).Session.Id, requestForm.Title, requestForm.Description)
 	if err != nil {
-		return c.String(err.(*echo.HTTPError).Code, err.Error())
+		return err
 	}
 
 	if requestForm.Title != "" {
@@ -284,12 +284,12 @@ func handleUpdateQuiz(c echo.Context) error {
 		return c.Render(200, "quiz-description-field", data)
 	}
 
-	return c.String(http.StatusBadRequest, "Title or description is required")
+	return echo.NewHTTPError(http.StatusBadRequest, "Title or description is required")
 }
 func handleDeleteQuestion(c echo.Context) error {
 	questionId := c.Param("questionId")
 	if questionId == "" {
-		return c.String(http.StatusBadRequest, "Question ID is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "Question ID is required")
 	}
 
 	return c.NoContent(http.StatusOK)
