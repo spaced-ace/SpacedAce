@@ -8,6 +8,9 @@ module.exports = {
     {
       pattern: /to-(red|orange|amber|yellow|green|blue|purple|pink|lime|emerald|teal|cyan|indigo|violet|fuchsia|rose)-\d{3}/,
     },
+    {
+      pattern: /opacity-\d+$/
+    }
   ],
   theme: {
   },

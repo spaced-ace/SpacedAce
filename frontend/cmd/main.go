@@ -39,6 +39,7 @@ func main() {
 			},
 		)
 
+		c.Response().Header().Set("HX-Push-Url", "false")
 		if err = c.Render(code, "error-message", data); err != nil {
 			c.Error(err)
 		}

@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Spaced Ace</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/response-targets.js"></script>
     <script src="/static/script.js"></script>
 </head>
 <body
@@ -13,10 +14,22 @@
     hx-boost="true"
     hx-push-url="true"
     hx-target="main"
+    hx-ext="response-targets"
+    hx-target-error="#error-message"
     class="flex h-dvh w-screen cursor-default flex-col">
     {{ template "navbar" .PageData.Session }}
     <div id="page-container" class="flex h-[calc(100dvh-4rem)] w-full">
-        <div id="error-notification" class="h-32 w-72 bg-red-500 bottom-0 fixed z-100"></div>
+        <div id="error-notification"
+             class="hidden flex-col h-[200px] w-[500px] rounded-t bg-red-500 absolute bottom-0 left-1/2 transform -translate-x-1/2 z-100 py-1 px-2 shadow opacity-0 transition-opacity duration-2000 ease-in-out">
+            <div class="flex w-full h-8 gap-x-2 items-center flex-shrink-0 flex-grow-0">
+                <span class="text-xl font-semibold text-white">Notification</span>
+                <div class="w-full"></div>
+                <svg xmlns="http://www.w3.org/2000/svg" onclick="hideNotification()" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-10 h-10">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <div id="error-message"></div>
+        </div>
         {{ template "sidebar" .PageData.Session }}
         <main class="flex h-full w-full overflow-auto">
             {{ if eq .TemplateName "create-new-quiz" }}
