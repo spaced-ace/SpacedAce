@@ -28,8 +28,8 @@ COPY cmd cmd
 COPY constants constants
 COPY context context
 COPY models models
-COPY api/pages pages
 COPY service service
+COPY utils utils
 COPY views views
 
 COPY --from=tailwind /workdir/static static
