@@ -5,7 +5,7 @@
         <img
             src="/static/icons/x-mark.svg"
             alt="delete question"
-            hx-delete="/questions/{{ .Question.Id }}"
+            hx-delete="/questions/{{ .Question.Id }}?type=single-choice&quizId={{ .Question.QuizId }}"
             hx-target="#question-{{ .Question.Id }}"
             hx-swap="outerHTML"
             class="h-6 w-6 cursor-pointer stroke-red-500"> 
@@ -36,7 +36,7 @@
         <img
             src="/static/icons/x-mark.svg"
             alt="delete question"
-            hx-delete="/questions/{{ .Question.Id }}"
+            hx-delete="/questions/{{ .Question.Id }}?type=multiple-choice&quizId={{ .Question.QuizId }}"
             hx-target="#question-{{ .Question.Id }}"
             hx-swap="outerHTML"
             class="h-6 w-6 cursor-pointer stroke-red-500">
@@ -67,7 +67,7 @@
             <img
                 src="/static/icons/x-mark.svg"
                 alt="delete question"
-                hx-delete="/questions/{{ .Question.Id }}"
+                hx-delete="/questions/{{ .Question.Id }}?type=true-or-false&quizId={{ .Question.QuizId }}"
                 hx-target="#question-{{ .Question.Id }}"
                 hx-swap="outerHTML"
                 class="h-6 w-6 cursor-pointer stroke-red-500">

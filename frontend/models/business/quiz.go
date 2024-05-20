@@ -1,4 +1,4 @@
-package models
+package business
 
 type QuizInfo struct {
 	Id          string `json:"id"`
@@ -10,5 +10,14 @@ type QuizInfo struct {
 
 type Quiz struct {
 	QuizInfo
-	Questions []Question
+	Questions []interface{}
+}
+type QuestionWithMetaData struct {
+	EditMode bool
+	Question interface{}
+}
+
+type QuizWithMetaData struct {
+	QuizInfo              QuizInfo
+	QuestionsWithMetaData []QuestionWithMetaData
 }

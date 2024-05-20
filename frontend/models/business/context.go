@@ -1,4 +1,4 @@
-package models
+package business
 
 type User struct {
 	Id    string `json:"id"`

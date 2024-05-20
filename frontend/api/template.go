@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
-	"spaced-ace/models"
+	"spaced-ace/models/business"
 )
 
 type Template struct {
@@ -40,7 +40,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 type PageData struct {
-	Session *models.Session
+	Session *business.Session
 	Data    interface{}
 }
 type PageRenderData struct {
@@ -56,19 +56,19 @@ const (
 )
 
 type TemplateData struct {
-	Session    *models.Session
+	Session    *business.Session
 	RenderType RenderType
 	Data       interface{}
 }
 
-func NewPageTemplate(session *models.Session, data interface{}) *TemplateData {
+func NewPageTemplate(session *business.Session, data interface{}) *TemplateData {
 	return &TemplateData{
 		Session:    session,
 		RenderType: Page,
 		Data:       data,
 	}
 }
-func NewComponentTemplate(session *models.Session, data interface{}) *TemplateData {
+func NewComponentTemplate(session *business.Session, data interface{}) *TemplateData {
 	return &TemplateData{
 		Session:    session,
 		RenderType: Component,

@@ -3,13 +3,13 @@ package context
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"spaced-ace/models"
+	"spaced-ace/models/business"
 	"spaced-ace/service"
 )
 
 type AppContext struct {
 	echo.Context
-	Session    *models.Session
+	Session    *business.Session
 	ApiService *service.ApiService
 }
 

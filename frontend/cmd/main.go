@@ -14,12 +14,12 @@ import (
 func main() {
 	e := echo.New()
 
+	// Static files
+	e.Static("/static", "static")
+
 	e.Use(middleware.Logger())
 	e.Use(context.SessionMiddleware)
 	e.Renderer = api.NewTemplate()
-
-	// Static files
-	e.Static("/static", "static")
 
 	api.RegisterRoutes(e)
 
