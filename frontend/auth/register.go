@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"spaced-ace/constants"
-	"spaced-ace/context"
+	"spaced-ace/models/business"
 )
 
 type SignupForm struct {
@@ -54,7 +54,7 @@ func PostRegister(c echo.Context) error {
 	}
 
 	// parse the response
-	var user context.User
+	var user business.User
 	err = json.NewDecoder(resp.Body).Decode(&user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
