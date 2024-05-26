@@ -59,6 +59,9 @@
             {{ if eq .TemplateName "signup" }}
                 {{ template "signup" .PageData.Data }}
             {{ end }}
+            {{ if eq .TemplateName "take-quiz-page" }}
+                {{ template "take-quiz-page" .PageData.Data }}
+            {{ end }}
         </main>
     </div>
 </body>

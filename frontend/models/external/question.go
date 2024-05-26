@@ -31,11 +31,13 @@ func (q SingleChoiceQuestionResponseBody) MapToBusiness() (*business.SingleChoic
 	}
 
 	return &business.SingleChoiceQuestion{
-		Id:           q.Id,
-		QuizId:       q.QuizId,
-		Order:        0,
-		QuestionType: models.SingleChoice,
-		Question:     q.Question,
+		CommonQuestionProperties: business.CommonQuestionProperties{
+			Id:           q.Id,
+			QuizId:       q.QuizId,
+			Order:        0,
+			QuestionType: models.SingleChoice,
+			Question:     q.Question,
+		},
 		Options: []business.Option{
 			{Value: q.Answers[0], Correct: q.CorrectAnswer == "A"},
 			{Value: q.Answers[1], Correct: q.CorrectAnswer == "B"},
@@ -63,11 +65,13 @@ func (q MultipleChoiceQuestionResponseBody) MapToBusiness() (*business.MultipleC
 	}
 
 	return &business.MultipleChoiceQuestion{
-		Id:           q.Id,
-		QuizId:       q.QuizId,
-		Order:        0,
-		QuestionType: models.MultipleChoice,
-		Question:     q.Question,
+		CommonQuestionProperties: business.CommonQuestionProperties{
+			Id:           q.Id,
+			QuizId:       q.QuizId,
+			Order:        0,
+			QuestionType: models.MultipleChoice,
+			Question:     q.Question,
+		},
 		Options: []business.Option{
 			{Value: q.Answers[0], Correct: utils.StringInArray("A", q.CorrectAnswers)},
 			{Value: q.Answers[1], Correct: utils.StringInArray("B", q.CorrectAnswers)},
@@ -87,11 +91,13 @@ type TrueOrFalseQuestionResponseBody struct {
 
 func (q TrueOrFalseQuestionResponseBody) MapToBusiness() (*business.TrueOrFalseQuestion, error) {
 	return &business.TrueOrFalseQuestion{
-		Id:           q.Id,
-		QuizId:       q.QuizId,
-		Order:        0,
-		QuestionType: models.TrueOrFalse,
-		Question:     q.Question,
-		Answer:       q.CorrectAnswer,
+		CommonQuestionProperties: business.CommonQuestionProperties{
+			Id:           q.Id,
+			QuizId:       q.QuizId,
+			Order:        0,
+			QuestionType: models.TrueOrFalse,
+			Question:     q.Question,
+		},
+		Answer: q.CorrectAnswer,
 	}, nil
 }

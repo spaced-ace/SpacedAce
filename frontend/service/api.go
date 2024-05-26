@@ -112,6 +112,18 @@ func (a *ApiService) GetQuiz(quizId string) (*business.Quiz, error) {
 			questions = append(questions, question)
 		}
 
+		if questionType == models.MultipleChoice {
+			var questionDto external.MultipleChoiceQuestionResponseBody
+			if err := json.Unmarshal(rawQuestion, &questionDto); err != nil {
+				continue
+			}
+			question, err := questionDto.MapToBusiness()
+			if err != nil {
+				continue
+			}
+			questions = append(questions, question)
+		}
+
 		if questionType == models.TrueOrFalse {
 			var questionDto external.TrueOrFalseQuestionResponseBody
 			if err := json.Unmarshal(rawQuestion, &questionDto); err != nil {
