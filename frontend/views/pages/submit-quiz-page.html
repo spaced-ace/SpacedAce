@@ -1,0 +1,20 @@
+{{ block "submit-quiz-page" . }}
+<div class="h-full w-full flex flex-col items-center pt-8 gap-y-2">
+    <div class="flex w-[700px] items-end">
+        <span class="text-2xl font-semibold text-nowrap">Results</span>
+    </div>
+    <div
+        id="answers"
+        class="flex h-min flex-col gap-y-2 pb-6 flex-grow-0 flex-shrink-0 overflow-y-auto">
+        {{ range $answer := .Answers }}
+            {{ if eq $answer.QuestionType 0 }}
+                {{ template "single-choice-answer" $answer }}
+            {{ else if eq $answer.QuestionType 1 }}
+                {{ template "multiple-choice-answer" $answer }}
+            {{ else if eq $answer.QuestionType 2 }}
+                {{ template "true-or-false-answer" $answer }}
+            {{ end }}
+        {{ end }}
+    </div>
+</div>
+{{ end }}

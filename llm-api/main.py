@@ -20,6 +20,8 @@ def init_model() -> str:
 def init_base_url() -> str:
     return os.environ.get('OLLAMA_URL', 'http://ollama:11434')
 
+def init_mock_response() -> str:
+    return os.environ.get('MOCK_RESPONSE', 'false')
 
 def get_db_config() -> dict:
     return {
@@ -33,7 +35,7 @@ def get_db_config() -> dict:
 
 MODEL = init_model()
 BASE_URL = init_base_url()
-
+MOCK_RESPONSE = init_mock_response()
 
 def ollama_request_data(prompt: str, template: str, system: str) -> dict:
     return {
@@ -63,6 +65,13 @@ async def close_resources():
 
 @app.post('/multiple-choice/create')
 async def multiple_choice_create(context: Prompt) -> MulipleChoice:
+    if MOCK_RESPONSE:
+        return MulipleChoice(
+            question='What is the capital of France?',
+            options=['Paris', 'London', 'Berlin', 'Madrid'],
+            correct_options=['A'],
+        )
+    
     res = await client.post(
         f'{BASE_URL}/api/generate',
         json=ollama_request_data(
@@ -79,6 +88,13 @@ async def multiple_choice_create(context: Prompt) -> MulipleChoice:
 
 @app.post('/single-choice/create')
 async def single_choice_create(context: Prompt) -> SingleChoice:
+    if MOCK_RESPONSE:
+        return SingleChoice(
+            question='What is the capital of France?',
+            options=['Paris', 'London', 'Berlin', 'Madrid'],
+            correct_option='A',
+        )
+
     res = await client.post(
         f'{BASE_URL}/api/generate',
         json=ollama_request_data(
@@ -95,6 +111,11 @@ async def single_choice_create(context: Prompt) -> SingleChoice:
 
 @app.post('/true-or-false/create')
 async def true_or_false_create(context: Prompt) -> TrueOrFalse:
+    if MOCK_RESPONSE:
+        return TrueOrFalse(
+            question='Budapest is the capital of Hungary.', correct_option=True
+        )
+
     res = await client.post(
         f'{BASE_URL}/api/generate',
         json=ollama_request_data(

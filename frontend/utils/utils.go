@@ -3,6 +3,8 @@ package utils
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"net/url"
 	"strconv"
 )
 
@@ -51,4 +53,16 @@ func GenerateColors(title string, id string) (string, string) {
 	toColor := HashToColor(id)
 
 	return fromColor, toColor
+}
+
+func FindInFormData(formData url.Values, name, value string) bool {
+	fmt.Printf("FindInFormData data: %+v, name: %s, value:%s\n", formData, name, value)
+	for key, values := range formData {
+		for _, v := range values {
+			if key == name && v == value {
+				return true
+			}
+		}
+	}
+	return false
 }

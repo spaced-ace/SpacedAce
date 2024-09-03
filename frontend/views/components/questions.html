@@ -1,27 +1,34 @@
 {{ block "single-choice-question" . }}
 <div id="question-{{ .Question.Id }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
     <div class="flex w-full items-start gap-x-2 justify-between">
-        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Order }}) {{ .Question.Question }}</span>
+        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Question }}</span>
+        {{ if .EditMode }}
         <img
             src="/static/icons/x-mark.svg"
             alt="delete question"
             hx-delete="/questions/{{ .Question.Id }}?type=single-choice&quizId={{ .Question.QuizId }}"
             hx-target="#question-{{ .Question.Id }}"
             hx-swap="outerHTML"
-            class="h-6 w-6 cursor-pointer stroke-red-500"> 
+            class="h-6 w-6 cursor-pointer stroke-red-500">
+        {{ end }}
     </div>
     <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
     <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
+        {{ $editMode := .EditMode }}
+        {{ $questionId := .Question.Id}}
         {{ range $index, $option := .Question.Options }}
-            <label class="overflow-auto whitespace-normal">
+            <label class="px-2 rounded-md border overflow-auto whitespace-normal border-transparent bg-transparent">
                 <input
                     type="radio"
-                    name="answer"
-                    disabled
-                    {{ if eq $option.Correct true }}
-                        checked
+                    name="{{ $questionId }}"
+                    {{ if $editMode }} disabled
+                    {{ if eq $option.Correct true }} checked {{ end }}
                     {{ end }}
-                    value="{{ $index }}">
+                    {{ if eq $index 0 }}value="A"{{end}}
+                    {{ if eq $index 1 }}value="B"{{end}}
+                    {{ if eq $index 2 }}value="C"{{end}}
+                    {{ if eq $index 3 }}value="D"{{end}}
+                    >
                 {{ $option.Value }}
             </label>
         {{ end }}
@@ -32,7 +39,8 @@
 {{ block "multiple-choice-question" . }}
 <div id="question-{{ .Question.Id }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
     <div class="flex w-full items-start gap-x-2 justify-between">
-        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Order }}) {{ .Question.Question }}</span>
+        <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Question }}</span>
+        {{ if .EditMode }}
         <img
             src="/static/icons/x-mark.svg"
             alt="delete question"
@@ -40,19 +48,25 @@
             hx-target="#question-{{ .Question.Id }}"
             hx-swap="outerHTML"
             class="h-6 w-6 cursor-pointer stroke-red-500">
+        {{ end }}
     </div>
     <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
     <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
+        {{ $editMode := .EditMode }}
+        {{ $questionId := .Question.Id}}
         {{ range $index, $option := .Question.Options }}
-            <label class="overflow-auto whitespace-normal">
+            <label class="px-2 rounded-md border overflow-auto whitespace-normal border-transparent bg-transparent">
                 <input
                     type="checkbox"
-                    name="answer"
-                    disabled
-                    {{ if eq $option.Correct true }}
-                        checked
+                    name="{{ $questionId }}"
+                    {{ if $editMode }} disabled
+                    {{ if eq $option.Correct true }} checked {{ end }}
                     {{ end }}
-                    value="{{ $index }}">
+                    {{ if eq $index 0 }}value="A"{{end}}
+                    {{ if eq $index 1 }}value="B"{{end}}
+                    {{ if eq $index 2 }}value="C"{{end}}
+                    {{ if eq $index 3 }}value="D"{{end}}
+                >
                 {{ $option.Value }}
             </label>
         {{ end }}
@@ -63,7 +77,8 @@
 {{ block "true-or-false-question" . }}
     <div id="question-{{ .Question.Id }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
         <div class="flex w-full items-start gap-x-2 justify-between">
-            <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Order }}) {{ .Question.Question }}</span>
+            <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .Question.Question }}</span>
+            {{ if .EditMode }}
             <img
                 src="/static/icons/x-mark.svg"
                 alt="delete question"
@@ -71,27 +86,28 @@
                 hx-target="#question-{{ .Question.Id }}"
                 hx-swap="outerHTML"
                 class="h-6 w-6 cursor-pointer stroke-red-500">
+            {{ end }}
         </div>
         <span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
         <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
-            <label class="overflow-auto whitespace-normal">
+            {{ $editMode := .EditMode }}
+            {{ $questionId := .Question.Id}}
+            <label class="px-2 rounded-md border overflow-auto whitespace-normal border-transparent bg-transparent">
                 <input
                     type="radio"
-                    name="true"
-                    disabled
-                    {{ if eq .Question.Answer true }}
-                        checked
+                    name="{{ .Question.Id }}"
+                    {{ if $editMode }} disabled
+                    {{ if eq .Question.Answer true }}checked{{ end }}
                     {{ end }}
                     value="true">
                 true
             </label>
-            <label class="overflow-auto whitespace-normal">
+            <label class="px-2 rounded-md border overflow-auto whitespace-normal border-transparent bg-transparent">
                 <input
                     type="radio"
-                    name="false"
-                    disabled
-                    {{ if eq .Question.Answer false }}
-                        checked
+                    name="{{ .Question.Id }}"
+                    {{ if $editMode }} disabled
+                    {{ if eq .Question.Answer false }}checked{{ end }}
                     {{ end }}
                     value="false">
                 false
@@ -116,7 +132,7 @@
         <div class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
             <label class="overflow-auto whitespace-normal">
                 <textarea
-                    name="answer"
+                    name="{{ .Question.Id }}"
                     class="w-full rounded-md border border-gray-200 p-2 min-h-[200px] max-h-[300px]"
                     disabled>{{ .Question.Answer }}</textarea>
             </label>

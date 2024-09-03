@@ -23,6 +23,7 @@ func main() {
 	protected := e.Group("")
 	quiz := e.Group("/quizzes")
 	questions := e.Group("/questions")
+	quizSessions := e.Group("/quiz-sessions")
 	public.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
@@ -53,6 +54,8 @@ func main() {
 	questions.GET("/true-or-false/:id", handlers.GetTrueOrFalseEndpoint)
 	questions.PATCH("/true-or-false/:id", handlers.UpdateTrueOrFalseQuestionEndpoint)
 	questions.DELETE("/true-or-false/:quizId/:id", handlers.DeleteTrueOrFalseQuestionEndpoint)
+
+	quizSessions.POST("/start", handlers.StartQuizSession)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

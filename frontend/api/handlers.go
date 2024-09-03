@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models"
+	"spaced-ace/models/business"
 	"spaced-ace/models/request"
 	"spaced-ace/utils"
 )
@@ -61,7 +62,10 @@ func handleGenerateQuestion(c echo.Context) error {
 			}
 			data := NewComponentTemplate(
 				cc.Session,
-				question,
+				business.QuestionWithMetaData{
+					EditMode: true,
+					Question: question,
+				},
 			)
 			return c.Render(200, "single-choice-question", data)
 		}
@@ -73,7 +77,10 @@ func handleGenerateQuestion(c echo.Context) error {
 			}
 			data := NewComponentTemplate(
 				cc.Session,
-				question,
+				business.QuestionWithMetaData{
+					EditMode: true,
+					Question: question,
+				},
 			)
 			return c.Render(200, "multiple-choice-question", data)
 		}
@@ -85,7 +92,10 @@ func handleGenerateQuestion(c echo.Context) error {
 			}
 			data := NewComponentTemplate(
 				cc.Session,
-				question,
+				business.QuestionWithMetaData{
+					EditMode: true,
+					Question: question,
+				},
 			)
 			return c.Render(200, "true-or-false-question", data)
 		}
