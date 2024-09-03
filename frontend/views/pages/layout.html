@@ -16,15 +16,15 @@
     hx-target="main"
     hx-ext="response-targets"
     hx-target-error="#error-message"
-    class="flex h-dvh w-screen cursor-default flex-col">
+    class="flex w-screen cursor-default flex-col h-dvh">
     {{ template "navbar" .PageData.Session }}
     <div id="page-container" class="flex h-[calc(100dvh-4rem)] w-full">
         <div id="error-notification"
-             class="hidden flex-col h-[200px] w-[500px] rounded-t bg-red-500 absolute bottom-0 left-1/2 transform -translate-x-1/2 z-100 py-1 px-2 shadow opacity-0 transition-opacity duration-2000 ease-in-out">
-            <div class="flex w-full h-8 gap-x-2 items-center flex-shrink-0 flex-grow-0">
+             class="absolute bottom-0 left-1/2 hidden -translate-x-1/2 transform flex-col rounded-t bg-red-500 px-2 py-1 opacity-0 shadow transition-opacity ease-in-out h-[200px] w-[500px] z-100 duration-2000">
+            <div class="flex h-8 w-full flex-shrink-0 flex-grow-0 items-center gap-x-2">
                 <span class="text-xl font-semibold text-white">Notification</span>
                 <div class="w-full"></div>
-                <svg xmlns="http://www.w3.org/2000/svg" onclick="hideNotification()" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-10 h-10">
+                <svg xmlns="http://www.w3.org/2000/svg" onclick="hideNotification()" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="h-10 w-10">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
             </div>

@@ -2,8 +2,8 @@
     <form
         hx-post="/quizzes/{{.QuizWithMetaData.QuizInfo.Id}}/submit"
         hx-push-url="false"
-        class="h-full w-full flex flex-col items-center pt-8 gap-y-2">
-        <div class="flex w-[700px] items-end">
+        class="flex h-full w-full flex-col items-center gap-y-2 pt-8">
+        <div class="flex items-end w-[700px]">
             <span class="text-2xl font-semibold text-nowrap">Take quiz</span>
             <div class="w-full"></div>
             <button
@@ -14,7 +14,7 @@
         </div>
         <div
             id="questions"
-            class="flex h-min flex-col gap-y-2 pb-6 flex-grow-0 flex-shrink-0 overflow-y-auto">
+            class="flex h-min flex-shrink-0 flex-grow-0 flex-col gap-y-2 overflow-y-auto pb-6">
             {{ range $question := .QuizWithMetaData.QuestionsWithMetaData }}
                 {{ if eq .Question.QuestionType 0 }}
                     {{ template "single-choice-question" $question }}
@@ -26,7 +26,7 @@
                     {{ template "open-ended-question" $question }}
                 {{ end }}
             {{ end }}
-            <div class="flex w-[700px] justify-end">
+            <div class="flex justify-end w-[700px]">
                 <button
                     type="submit"
                     class="h-10 rounded-md border border-black bg-black px-4 py-2 text-white">

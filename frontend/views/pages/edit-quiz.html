@@ -1,7 +1,7 @@
 {{ block "edit-quiz" . }}
-    <div class="h-full w-full flex justify-center">
-        <div class="w-[700px] h-full flex flex-col flex-shrink-0 gap-y-2 justify-start py-6">
-            <div class="flex gap-x-1 items-center">
+    <div class="flex h-full w-full justify-center">
+        <div class="flex h-full flex-shrink-0 flex-col justify-start gap-y-2 py-6 w-[700px]">
+            <div class="flex items-center gap-x-1">
                 <img hx-get="/my-quizzes" src="/static/icons/arrow-left.svg" alt="icon" class="h-8 w-8">
                 <span class="text-4xl font-bold">Edit quiz</span>
             </div>
@@ -48,7 +48,7 @@
             <div
                 id="questions"
                 hx-push-url="false"
-                class="flex h-min w-full flex-col gap-y-2 pb-6 flex-grow-0 flex-shrink-0 overflow-y-auto">
+                class="flex h-min w-full flex-shrink-0 flex-grow-0 flex-col gap-y-2 overflow-y-auto pb-6">
                 {{ range $question := .QuizWithMetaData.QuestionsWithMetaData }}
                     {{ if eq .Question.QuestionType 0 }}
                         {{ template "single-choice-question" $question }}
