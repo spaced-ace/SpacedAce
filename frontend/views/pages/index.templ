@@ -1,0 +1,39 @@
+package pages
+
+import "spaced-ace/views/components"
+
+templ IndexPage() {
+	<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/tailwindcss.css">
+        <meta charset="UTF-8">
+        <title>Spaced Ace</title>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/response-targets.js"></script>
+        <script src="/static/script.js"></script>
+    </head>
+    <body
+        class="flex w-screen flex-col items-center"
+    >
+        @components.Navbar()
+
+        <div class="h-[256px] w-full"></div>
+
+        <div class="flex h-full w-full items-center justify-center">
+            <div class="flex flex-col items-center gap-y-2">
+                <div>Welcome to</div>
+                <span class="text-4xl font-bold">Spaced Ace</span>
+                <p class="overflow-auto whitespace-normal text-center text-lg text-gray-500 max-w-[600px]">
+                    The modern
+                    <span class="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text font-semibold text-transparent">AI-powered</span>
+                    E-learning platform. Create, study, and master any subject with our intuitive web app.
+                </p>
+                @components.LinkButton("Get Started", "/generate", components.ButtonColorWhite)
+            </div>
+        </div>
+
+        <div class="h-[256px] w-full"></div>
+    </body>
+    </html>
+}

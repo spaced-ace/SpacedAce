@@ -1,0 +1,8 @@
+package components
+
+templ LinkLabel(text, url string) {
+	<a
+	    class="sticky h-min rounded-md px-4 py-2 text-base font-bold text-nowrap hover:bg-gray-100"
+	    href={templ.SafeURL(url)}
+	>{text}</a>
+}

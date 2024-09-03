@@ -7,8 +7,6 @@
         {{ with . }}
             <a hx-get="/my-quizzes" class="cursor-pointer text-lg font-semibold">{{ .User.Name }}</a>
             <div
-
-                    
                 hx-post="/logout"
                 hx-headers='{"Hx-Request": "false"}'
                 class="flex flex-shrink-0 flex-grow-0 cursor-pointer items-center gap-x-1 rounded-md bg-red-700 px-4 py-2 text-white">
