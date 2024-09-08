@@ -8,6 +8,7 @@ import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
 	"spaced-ace/utils"
+	"spaced-ace/views/pages"
 	"strconv"
 )
 
@@ -38,11 +39,7 @@ type SubmitQuizPageData struct {
 }
 
 func handleIndexPage(c echo.Context) error {
-	data := NewPageTemplate(
-		c.(*context.AppContext).Session,
-		IndexPageData{},
-	)
-	return c.Render(200, "index", data)
+	return TemplRender(c, 200, pages.IndexPage())
 }
 func handleCreateNewQuizPage(c echo.Context) error {
 	data := NewPageTemplate(
@@ -87,12 +84,17 @@ func handleLoginPage(c echo.Context) error {
 	if cc.Session != nil {
 		return c.Redirect(http.StatusFound, "/my-quizzes")
 	}
-
-	data := NewPageTemplate(
-		cc.Session,
-		LoginPageData{},
-	)
-	return c.Render(200, "login", data)
+	//
+	//data := NewPageTemplate(
+	//	cc.Session,
+	//	LoginPageData{},
+	//)
+	viewModel := pages.LoginPageViewModel{
+		Errors: map[string]string{
+			"email": "email is invalid",
+		},
+	}
+	return TemplRender(c, 200, pages.LoginPage(viewModel))
 }
 func handleMyQuizzesPage(c echo.Context) error {
 	cc := c.(*context.AppContext)
