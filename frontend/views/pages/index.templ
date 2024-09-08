@@ -5,9 +5,12 @@ import (
     "spaced-ace/views/layout"
 )
 
+type IndexPageViewModel struct {
+    HxRequest bool
+}
 
-templ IndexPage() {
-    @layout.Layout() {
+templ IndexPage(viewModel IndexPageViewModel) {
+    @layout.Layout(viewModel.HxRequest) {
         <div id="index-page" class="flex flex-col items-center">
             @components.Navbar()
 

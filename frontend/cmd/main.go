@@ -22,7 +22,11 @@ func main() {
 	//e.Renderer = api.NewTemplate()
 
 	e.GET("/", func(c echo.Context) error {
-		return api.TemplRender(c, http.StatusOK, pages.IndexPage())
+
+		viewModel := pages.IndexPageViewModel{
+			HxRequest: c.Request().Header.Get("HX-Request") == "true",
+		}
+		return api.TemplRender(c, http.StatusOK, pages.IndexPage(viewModel))
 	})
 
 	api.RegisterRoutes(e)

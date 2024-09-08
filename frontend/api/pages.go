@@ -39,7 +39,11 @@ type SubmitQuizPageData struct {
 }
 
 func handleIndexPage(c echo.Context) error {
-	return TemplRender(c, 200, pages.IndexPage())
+	viewModel := pages.IndexPageViewModel{
+		HxRequest: c.Request().Header.Get("HX-Request") == "true",
+	}
+
+	return TemplRender(c, 200, pages.IndexPage(viewModel))
 }
 func handleCreateNewQuizPage(c echo.Context) error {
 	data := NewPageTemplate(
@@ -84,15 +88,9 @@ func handleLoginPage(c echo.Context) error {
 	if cc.Session != nil {
 		return c.Redirect(http.StatusFound, "/my-quizzes")
 	}
-	//
-	//data := NewPageTemplate(
-	//	cc.Session,
-	//	LoginPageData{},
-	//)
 	viewModel := pages.LoginPageViewModel{
-		Errors: map[string]string{
-			"email": "email is invalid",
-		},
+		HxRequest: c.Request().Header.Get("HX-Request") == "true",
+		Errors:    map[string]string{},
 	}
 	return TemplRender(c, 200, pages.LoginPage(viewModel))
 }
@@ -187,11 +185,10 @@ func handleSignupPage(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/my-quizzes")
 	}
 
-	data := NewPageTemplate(
-		cc.Session,
-		SignupPageData{},
-	)
-	return c.Render(200, "signup", data)
+	viewModel := pages.SignupPageViewModel{
+		HxRequest: c.Request().Header.Get("HX-Request") == "true",
+	}
+	return TemplRender(c, 200, pages.SignupPage(viewModel))
 }
 func handleSubmitQuiz(c echo.Context) error {
 	cc := c.(*context.AppContext)

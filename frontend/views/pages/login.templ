@@ -6,18 +6,21 @@ import (
 )
 
 type LoginPageViewModel struct {
-    Errors map[string]string
+    HxRequest bool
+    Errors    map[string]string
 }
 
 templ LoginPage(viewModel LoginPageViewModel) {
-	@layout.Layout() {
+	@layout.Layout(viewModel.HxRequest) {
 	    @components.Navbar()
 
         <div class="flex h-full w-full flex-col items-center justify-center">
             <form class="flex flex-col gap-y-4 p-6 w-[500px]">
                 <span class="text-center text-3xl font-bold">Login</span>
 
-                @components.EMailInput(components.EMailInputProps{})
+                @components.EMailInput(components.EMailInputProps{
+                    Error: viewModel.Errors["email"],
+                })
 
                 @components.TextInput(components.TextInputProps{
                     Name: "password",
