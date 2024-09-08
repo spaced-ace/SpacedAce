@@ -1,0 +1,42 @@
+package components
+
+type ButtonColor int
+
+const (
+    ButtonColorBlack = iota
+    ButtonColorWhite = 1
+)
+
+templ LinkButton(text, url string, color ButtonColor) {
+    <a
+        if color == ButtonColorBlack {
+            class="h-min text-center rounded-md bg-black px-4 py-2 text-base font-semibold text-white text-nowrap hover:bg-black/90"
+        }
+        else {
+            class="h-min rounded-md text-center border border-gray-300 bg-white px-4 py-2 text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        }
+        href={templ.SafeURL(url)}
+    >{text}</a>
+}
+
+type SubmitButtonProps struct {
+    Text string
+    HxGet string
+    HxPost string
+    HxPut string
+    HxPatch string
+    HxDelete string
+}
+
+templ SubmitButton(props SubmitButtonProps) {
+    <button
+        type="submit"
+        if props.HxGet != "" { hx-get={props.HxGet}}
+        if props.HxPost != "" { hx-post={props.HxPost}}
+        if props.HxPut != "" { hx-put={props.HxPut}}
+        if props.HxPatch != "" { hx-patch={props.HxPatch}}
+        if props.HxDelete != "" { hx-delete={props.HxDelete}}
+        class="h-min text-center rounded-md bg-black px-4 py-2 text-base font-semibold text-white text-nowrap hover:bg-black/90">
+        {props.Text}
+    </button>
+}

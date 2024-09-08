@@ -1,0 +1,48 @@
+package components
+
+type EMailInputProps struct {
+    Value string
+    Error string
+}
+
+templ EMailInput(props EMailInputProps) {
+    <div class="flex flex-col items-start gap-y-1">
+        <label for="email" class="text-sm font-medium leading-5">Email</label>
+        <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={props.Value}
+            class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
+        if props.Error != "" {
+            <span class="text-sm text-red-500 pl-2">{props.Error}</span>
+        }
+    </div>
+}
+
+type TextInputProps struct {
+    Name string
+    Label string
+    Placeholder string
+    Value string
+    Type string
+    Error string
+}
+
+templ TextInput(props TextInputProps) {
+    <div class="flex flex-col items-start gap-y-1">
+        <label for={props.Name} class="text-sm font-medium leading-5">{props.Label}</label>
+        <input
+            id={props.Name}
+            name={props.Name}
+            if props.Type !="" {type={props.Type}}
+            type="text"
+            value={props.Value}
+            placeholder={props.Placeholder}
+            class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
+        if props.Error != "" {
+            <span class="text-sm text-red-500 pl-2">{props.Error}</span>
+        }
+    </div>
+}
