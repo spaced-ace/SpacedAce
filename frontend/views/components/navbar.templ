@@ -1,7 +1,9 @@
 package components
 
 templ Navbar() {
-	<nav class="sticky top-0 flex h-16 w-full items-center gap-x-2 bg-white px-2 max-w-[1440px]">
+	<nav
+	    hx-push-url="true"
+	    class="sticky top-0 flex h-16 w-full items-center gap-x-2 bg-white px-2 max-w-[1440px]">
 	    @Logo()
 
 	    <div class="w-full"></div>

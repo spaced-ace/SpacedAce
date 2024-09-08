@@ -1,12 +1,10 @@
 package main
 
 import (
-	"errors"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
-	"spaced-ace/api"
 	"spaced-ace/constants"
 	"spaced-ace/views/pages"
 	"strings"
@@ -28,27 +26,27 @@ func main() {
 
 	//api.RegisterRoutes(e)
 
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		code := http.StatusInternalServerError
-		message := "internal server error"
-		var he *echo.HTTPError
-		if errors.As(err, &he) {
-			code = he.Code
-			message = extractErrorMessage(he)
-		}
-
-		data := api.NewPageTemplate(
-			nil,
-			map[string]string{
-				"Message": message,
-			},
-		)
-
-		c.Response().Header().Set("HX-Push-Url", "false")
-		if err = c.Render(code, "error-message", data); err != nil {
-			c.Error(err)
-		}
-	}
+	//e.HTTPErrorHandler = func(err error, c echo.Context) {
+	//	code := http.StatusInternalServerError
+	//	message := "internal server error"
+	//	var he *echo.HTTPError
+	//	if errors.As(err, &he) {
+	//		code = he.Code
+	//		message = extractErrorMessage(he)
+	//	}
+	//
+	//	data := api.NewPageTemplate(
+	//		nil,
+	//		map[string]string{
+	//			"Message": message,
+	//		},
+	//	)
+	//
+	//	c.Response().Header().Set("HX-Push-Url", "false")
+	//	if err = c.Render(code, "error-message", data); err != nil {
+	//		c.Error(err)
+	//	}
+	//}
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
