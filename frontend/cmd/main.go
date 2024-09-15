@@ -22,7 +22,6 @@ func main() {
 	//e.Renderer = api.NewTemplate()
 
 	e.GET("/", func(c echo.Context) error {
-
 		viewModel := pages.IndexPageViewModel{
 			HxRequest: c.Request().Header.Get("HX-Request") == "true",
 		}

@@ -103,24 +103,18 @@ func handleMyQuizzesPage(c echo.Context) error {
 		return err
 	}
 
-	var quizzes []quiz
+	var quizInfosWithColors []business.QuizInfoWithColors
 	for _, q := range quizInfos {
-		fromColor, toColor := utils.GenerateColors(q.Title, q.Id)
-
-		quizzes = append(quizzes, quiz{
-			QuizInfo:  q,
-			FromColor: fromColor,
-			ToColor:   toColor,
-		})
+		quizInfosWithColors = append(
+			quizInfosWithColors,
+			business.NewQuizInfoWithColors(q),
+		)
 	}
 
-	data := NewPageTemplate(
-		cc.Session,
-		MyQuizzesPageData{
-			Quizzes: quizzes,
-		},
-	)
-	return c.Render(200, "my-quizzes", data)
+	viewModel := pages.MyQuizzesPageViewModel{
+		QuizInfosWithColors: quizInfosWithColors,
+	}
+	return TemplRender(c, 200, pages.MyQuizzesPage(viewModel))
 }
 func handleNotFoundPage(c echo.Context) error {
 	data := NewPageTemplate(

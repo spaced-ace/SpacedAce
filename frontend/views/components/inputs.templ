@@ -46,3 +46,30 @@ templ TextInput(props TextInputProps) {
         }
     </div>
 }
+
+type SearchBarProps struct {
+    Name string
+    Placeholder string
+    HxPost string
+    Value string
+}
+
+templ SearchBar(props SearchBarProps) {
+    <div class="h-12 w-full">
+        <form
+            hx-post={props.HxPost}
+            class="flex h-full w-full bg-white flex-shrink-0 items-center rounded-md border px-2 focus-within:border-gray-400 hover:border-gray-300 hover:focus-within:border-gray-400">
+            <img src="/static/icons/search.svg" alt="icon" class="h-5 w-5">
+
+            <label for={props.Name} class="h-full w-full px-2">
+                <input
+                    id={props.Name}
+                    name={props.Name}
+                    placeholder={props.Placeholder}
+                    type="search"
+                    value={props.Value}
+                    class="h-full w-full focus:outline-none focus:ring-0"/>
+            </label>
+        </form>
+    </div>
+}

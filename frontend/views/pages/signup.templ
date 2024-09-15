@@ -47,8 +47,9 @@ templ SignupPage(viewModel SignupPageViewModel) {
                         Error: viewModel.Errors["password_again"],
                     })
 
-                    @components.SubmitButton(components.SubmitButtonProps{
+                    @components.Button(components.ButtonProps{
                         Text: "Sign up",
+                        Type: "submit",
                         HxPost: "/signup",
                     })
 

@@ -1,0 +1,26 @@
+package components
+
+import "spaced-ace/models/business"
+
+type QuizListProps struct {
+    QuizInfoWithColors     []business.QuizInfoWithColors
+    AllowEdit              bool
+    AllowDelete            bool
+    AllowManagingLearnList bool
+}
+
+templ QuizList(props QuizListProps) {
+    <div
+        id="quizzes"
+        class="w-full h-full flex gap-4 flex-wrap pt-1 pb-6 items-start justify-start content-start overflow-y-scroll flex-grow-0"
+    >
+        for _, q := range props.QuizInfoWithColors {
+            @QuizListItem(QuizListItemProps{
+                QuizInfoWithColors: q,
+                AllowEdit: true,
+                AllowDelete: true,
+                AllowManagingLearnList: true,
+            })
+        }
+    </div>
+}

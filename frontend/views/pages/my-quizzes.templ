@@ -1,0 +1,51 @@
+package pages
+
+import "spaced-ace/models/business"
+import "spaced-ace/views/layout"
+import "spaced-ace/views/components"
+
+type MyQuizzesPageViewModel struct {
+    HxRequest bool
+    QuizInfosWithColors []business.QuizInfoWithColors
+}
+
+templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
+    @layout.Layout(viewModel.HxRequest) {
+        <div id="my-quizzes-page" class="flex h-full w-full justify-center">
+            <div id="content-container" class="flex h-full w-full max-w-[1440px]">
+                <div id="sidebar" class="h-full flex-shrink-0 bg-red-500 w-[260px]"></div>
+                <div id="main-content" class="flex h-full w-full flex-col p-6 gap-y-8">
+                    <div class="flex w-full items-center gap-x-2">
+                        <span class="text-nowrap font-bold text-2xl">My Quizzes</span>
+
+                        <div class="w-full bg-pink-500"></div>
+
+                        @components.LinkButton("+ Create new", "/create-new-quiz", components.ButtonColorBlack)
+
+                        @components.Button(components.ButtonProps{
+                            Text: "Manage Learn List",
+                            Color: components.ButtonColorWhite,
+                            HxPost: "/my-quizzes/manage-learn-list",
+                            Attributes: map[string]any{
+                                "asd": "asd2",
+                            },
+                        })
+                    </div>
+
+                    @components.SearchBar(components.SearchBarProps{
+                        Name: "query",
+                        Placeholder: "Search...",
+                        HxPost: "/my-exams",
+                    })
+
+                    @components.QuizList(components.QuizListProps{
+                        QuizInfoWithColors: viewModel.QuizInfosWithColors,
+                        AllowEdit: true,
+                        AllowDelete: true,
+                        AllowManagingLearnList: true,
+                    })
+                </div>
+            </div>
+        </div>
+    }
+}

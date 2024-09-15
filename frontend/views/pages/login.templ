@@ -29,8 +29,9 @@ templ LoginPage(viewModel LoginPageViewModel) {
                     Type: "password",
                 })
 
-                @components.SubmitButton(components.SubmitButtonProps{
+                @components.Button(components.ButtonProps{
                     Text: "Submit",
+                    Type: "submit",
                     HxPost: "/login",
                 })
 

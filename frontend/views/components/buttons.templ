@@ -10,33 +10,43 @@ const (
 templ LinkButton(text, url string, color ButtonColor) {
     <a
         if color == ButtonColorBlack {
-            class="h-min text-center rounded-md bg-black px-4 py-2 text-base font-semibold text-white text-nowrap hover:bg-black/90"
+            class="h-min rounded-md bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
         }
         else {
-            class="h-min rounded-md text-center border border-gray-300 bg-white px-4 py-2 text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+            class="h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
         }
         href={templ.SafeURL(url)}
     >{text}</a>
 }
 
-type SubmitButtonProps struct {
-    Text string
-    HxGet string
-    HxPost string
-    HxPut string
-    HxPatch string
-    HxDelete string
+type ButtonProps struct {
+    Text       string
+    Type       string
+    HxGet      string
+    HxPost     string
+    HxPut      string
+    HxPatch    string
+    HxDelete   string
+    Color      ButtonColor
+    Attributes templ.Attributes
 }
 
-templ SubmitButton(props SubmitButtonProps) {
+templ Button(props ButtonProps) {
     <button
-        type="submit"
+        type={props.Type}
         if props.HxGet != "" { hx-get={props.HxGet}}
         if props.HxPost != "" { hx-post={props.HxPost}}
         if props.HxPut != "" { hx-put={props.HxPut}}
         if props.HxPatch != "" { hx-patch={props.HxPatch}}
         if props.HxDelete != "" { hx-delete={props.HxDelete}}
-        class="h-min text-center rounded-md bg-black px-4 py-2 text-base font-semibold text-white text-nowrap hover:bg-black/90">
+        if props.Color == ButtonColorBlack {
+            class="h-min rounded-md bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
+        }
+        else {
+            class="h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        }
+        {props.Attributes...}
+        >
         {props.Text}
     </button>
 }
