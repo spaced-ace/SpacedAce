@@ -112,6 +112,8 @@ func handleMyQuizzesPage(c echo.Context) error {
 	}
 
 	viewModel := pages.MyQuizzesPageViewModel{
+		Username:            cc.Session.User.Name,
+		HxRequest:           c.Request().Header.Get("HX-Request") == "true",
 		QuizInfosWithColors: quizInfosWithColors,
 	}
 	return TemplRender(c, 200, pages.MyQuizzesPage(viewModel))
