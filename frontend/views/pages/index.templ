@@ -5,16 +5,12 @@ import (
     "spaced-ace/views/layout"
 )
 
-type IndexPageViewModel struct {
-    HxRequest bool
-}
-
-templ IndexPage(viewModel IndexPageViewModel) {
-    @layout.Layout(viewModel.HxRequest) {
-        <div id="index-page" class="flex flex-col items-center">
+templ IndexPage() {
+    @layout.HtmlLayout() {
+        <main class="flex flex-col items-center h-full w-full overflow-auto">
             @components.Navbar()
 
-            <div class="h-[256px] w-full"></div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
 
             <div class="flex h-full w-full items-center justify-center">
                 <div class="flex flex-col items-center gap-y-2">
@@ -29,7 +25,7 @@ templ IndexPage(viewModel IndexPageViewModel) {
                 </div>
             </div>
 
-            <div class="h-[256px] w-full"></div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
 
             <div class="flex flex-col w-full items-center gap-y-3">
                 <span class="font-semibold text-5xl">Features</span>
@@ -38,7 +34,7 @@ templ IndexPage(viewModel IndexPageViewModel) {
                 </svg>
             </div>
 
-            <div class="h-[256px] w-full"></div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
             @components.IndexPageFeature(
                 "Feature name",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris .",
@@ -49,7 +45,7 @@ templ IndexPage(viewModel IndexPageViewModel) {
                 </svg>
             }
 
-            <div class="h-[256px] w-full"></div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
             @components.IndexPageFeature(
                 "Feature name",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris .",
@@ -60,7 +56,7 @@ templ IndexPage(viewModel IndexPageViewModel) {
                 </svg>
             }
 
-            <div class="h-[256px] w-full"></div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
             @components.IndexPageFeature(
                 "Feature name",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris .",
@@ -71,7 +67,7 @@ templ IndexPage(viewModel IndexPageViewModel) {
                 </svg>
             }
 
-            <div class="h-[256px] w-full"></div>
-        </div>
+            <div class="h-[256px] w-full flex-shrink-0"></div>
+        </main>
     }
 }

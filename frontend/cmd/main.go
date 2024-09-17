@@ -19,13 +19,14 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(context.SessionMiddleware)
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 5, // Compression level: 1 (fastest, least compression) to 9 (slowest, max compression)
+	}))
+
 	//e.Renderer = api.NewTemplate()
 
 	e.GET("/", func(c echo.Context) error {
-		viewModel := pages.IndexPageViewModel{
-			HxRequest: c.Request().Header.Get("HX-Request") == "true",
-		}
-		return api.TemplRender(c, http.StatusOK, pages.IndexPage(viewModel))
+		return api.TemplRender(c, http.StatusOK, pages.IndexPage())
 	})
 
 	api.RegisterRoutes(e)

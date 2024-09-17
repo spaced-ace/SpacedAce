@@ -6,37 +6,38 @@ import (
 )
 
 type LoginPageViewModel struct {
-    HxRequest bool
     Errors    map[string]string
 }
 
 templ LoginPage(viewModel LoginPageViewModel) {
-	@layout.Layout(viewModel.HxRequest) {
-	    @components.Navbar()
+	@layout.HtmlLayout() {
+	    <main class="h-full w-full">
+            @components.Navbar()
 
-        <div class="flex h-full w-full flex-col items-center justify-center">
-            <form class="flex flex-col gap-y-4 p-6 w-[500px]">
-                <span class="text-center text-3xl font-bold">Login</span>
+            <div class="flex h-full w-full flex-col items-center justify-center">
+                <form class="flex flex-col gap-y-4 p-6 w-[500px]">
+                    <span class="text-center text-3xl font-bold">Login</span>
 
-                @components.EMailInput(components.EMailInputProps{
-                    Error: viewModel.Errors["email"],
-                })
+                    @components.EMailInput(components.EMailInputProps{
+                        Error: viewModel.Errors["email"],
+                    })
 
-                @components.TextInput(components.TextInputProps{
-                    Name: "password",
-                    Label: "Password",
-                    Placeholder: "Password",
-                    Type: "password",
-                })
+                    @components.TextInput(components.TextInputProps{
+                        Name: "password",
+                        Label: "Password",
+                        Placeholder: "Password",
+                        Type: "password",
+                    })
 
-                @components.Button(components.ButtonProps{
-                    Text: "Submit",
-                    Type: "submit",
-                    HxPost: "/login",
-                })
+                    @components.Button(components.ButtonProps{
+                        Text: "Submit",
+                        Type: "submit",
+                        HxPost: "/login",
+                    })
 
-                @components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)
-            </form>
-        </div>
+                    @components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)
+                </form>
+            </div>
+	    </main>
 	}
 }

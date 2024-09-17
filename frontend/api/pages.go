@@ -8,6 +8,8 @@ import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
 	"spaced-ace/utils"
+	"spaced-ace/views/components"
+	"spaced-ace/views/layout"
 	"spaced-ace/views/pages"
 	"strconv"
 )
@@ -39,11 +41,7 @@ type SubmitQuizPageData struct {
 }
 
 func handleIndexPage(c echo.Context) error {
-	viewModel := pages.IndexPageViewModel{
-		HxRequest: c.Request().Header.Get("HX-Request") == "true",
-	}
-
-	return TemplRender(c, 200, pages.IndexPage(viewModel))
+	return TemplRender(c, 200, pages.IndexPage())
 }
 func handleCreateNewQuizPage(c echo.Context) error {
 	data := NewPageTemplate(
@@ -88,13 +86,18 @@ func handleLoginPage(c echo.Context) error {
 	if cc.Session != nil {
 		return c.Redirect(http.StatusFound, "/my-quizzes")
 	}
+
 	viewModel := pages.LoginPageViewModel{
-		HxRequest: c.Request().Header.Get("HX-Request") == "true",
-		Errors:    map[string]string{},
+		Errors: map[string]string{},
 	}
 	return TemplRender(c, 200, pages.LoginPage(viewModel))
 }
 func handleMyQuizzesPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
 	cc := c.(*context.AppContext)
 	userId := cc.Session.User.Id
 
@@ -112,8 +115,6 @@ func handleMyQuizzesPage(c echo.Context) error {
 	}
 
 	viewModel := pages.MyQuizzesPageViewModel{
-		Username:            cc.Session.User.Name,
-		HxRequest:           c.Request().Header.Get("HX-Request") == "true",
 		QuizInfosWithColors: quizInfosWithColors,
 	}
 	return TemplRender(c, 200, pages.MyQuizzesPage(viewModel))
@@ -182,7 +183,7 @@ func handleSignupPage(c echo.Context) error {
 	}
 
 	viewModel := pages.SignupPageViewModel{
-		HxRequest: c.Request().Header.Get("HX-Request") == "true",
+		Errors: map[string]string{},
 	}
 	return TemplRender(c, 200, pages.SignupPage(viewModel))
 }
@@ -350,4 +351,33 @@ func handleSubmitQuiz(c echo.Context) error {
 		},
 	)
 	return c.Render(http.StatusOK, "submit-quiz-page", data)
+}
+
+func handleNonHXRequest(c echo.Context) error {
+	activeUrl := c.Request().URL.Path
+	sideBarProps, err := createSideBarProps(c, activeUrl)
+	if err != nil {
+		return err
+	}
+
+	props := layout.AuthenticatedLayoutProps{
+		SideBarProps: *sideBarProps,
+	}
+	return TemplRender(c, 200, layout.AuthenticatedLayout(props))
+}
+
+func createSideBarProps(c echo.Context, activeUrl string) (*components.SidebarProps, error) {
+	cc := c.(*context.AppContext)
+	userId := cc.Session.User.Id
+
+	quizInfos, err := cc.ApiService.GetQuizzesInfos(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &components.SidebarProps{
+		Username:  cc.Session.User.Name,
+		ActiveUrl: activeUrl,
+		QuizInfos: quizInfos,
+	}, nil
 }
