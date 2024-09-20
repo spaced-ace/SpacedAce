@@ -44,11 +44,12 @@ func handleIndexPage(c echo.Context) error {
 	return TemplRender(c, 200, pages.IndexPage())
 }
 func handleCreateNewQuizPage(c echo.Context) error {
-	data := NewPageTemplate(
-		c.(*context.AppContext).Session,
-		CreateNewQuizPageData{},
-	)
-	return c.Render(200, "create-new-quiz", data)
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	return TemplRender(c, 200, pages.CreateNewQuizPage(pages.CreateNewQuizPageViewModel{}))
 }
 func handleEditQuizPage(c echo.Context) error {
 	cc := c.(*context.AppContext)

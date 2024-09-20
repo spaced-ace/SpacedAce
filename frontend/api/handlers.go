@@ -8,6 +8,7 @@ import (
 	"spaced-ace/models/business"
 	"spaced-ace/models/request"
 	"spaced-ace/utils"
+	"spaced-ace/views/forms"
 )
 
 func handleCreateQuiz(c echo.Context) error {
@@ -18,16 +19,21 @@ func handleCreateQuiz(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
 	}
 
+	errors := map[string]string{}
 	if requestForm.Title == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Title is required")
+		errors["title"] = "Title is required"
 	}
 	if requestForm.Description == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Description is required")
+		errors["description"] = "Description is required"
+	}
+	if len(errors) > 0 {
+		return TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
 	}
 
 	quizInfo, err := cc.ApiService.CreateQuiz(requestForm.Title, requestForm.Description)
 	if err != nil {
-		return echo.NewHTTPError(500, "Error creating a quiz: "+err.Error())
+		errors["other"] = "Error creating a quiz: " + err.Error()
+		return TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
 	}
 
 	c.Response().Header().Set("HX-Redirect", "/quizzes/"+quizInfo.Id+"/edit")

@@ -1,11 +1,6 @@
 package pages
 
-import "spaced-ace/models/business"
 import "spaced-ace/views/components"
-
-type MyQuizzesPageViewModel struct {
-    QuizInfosWithColors []business.QuizInfoWithColors
-}
 
 templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
     <main class="flex h-full w-full flex-col p-6 gap-y-8">

@@ -1,10 +1,13 @@
 package pages
 
-import "spaced-ace/views/layout"
-
-type CreateNewQuizPageViewModel struct {}
+import "spaced-ace/views/forms"
+import "spaced-ace/models/request"
 
 templ CreateNewQuizPage(viewModel CreateNewQuizPageViewModel) {
-    @layout.HtmlLayout() {
-    }
+    <main class="flex h-full w-full justify-center p-6">
+        @forms.CreateQuizForm(
+            request.CreateQuizRequestForm{},
+            map[string]string{},
+        )
+    </main>
 }

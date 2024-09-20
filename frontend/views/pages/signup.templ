@@ -5,10 +5,6 @@ import (
 	"spaced-ace/views/components"
 )
 
-type SignupPageViewModel struct {
-    Errors map[string]string
-}
-
 templ SignupPage(viewModel SignupPageViewModel) {
     @layout.HtmlLayout() {
         <main class="h-full w-full">

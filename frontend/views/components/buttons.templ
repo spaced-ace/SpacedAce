@@ -5,15 +5,25 @@ type ButtonColor int
 const (
     ButtonColorBlack = iota
     ButtonColorWhite = 1
+    ButtonColorRed = 2
+    ButtonColorBlue = 4
 )
 
 templ LinkButton(text, url string, color ButtonColor) {
     <a
+        hx-target="main"
+        hx-swap="outerHTML"
         if color == ButtonColorBlack {
-            class="h-min rounded-md bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
+            class="flex-grow h-min rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
         }
-        else {
-            class="h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        if color == ButtonColorWhite {
+            class="flex-grow h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        }
+        if color == ButtonColorRed {
+            class="flex-grow h-min rounded-md border border-red-800 bg-red-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-red-700"
+        }
+        if color == ButtonColorBlue {
+            class="flex-grow h-min rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700"
         }
         href={templ.SafeURL(url)}
     >{text}</a>
@@ -40,10 +50,16 @@ templ Button(props ButtonProps) {
         if props.HxPatch != "" { hx-patch={props.HxPatch}}
         if props.HxDelete != "" { hx-delete={props.HxDelete}}
         if props.Color == ButtonColorBlack {
-            class="h-min rounded-md bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
+            class="flex-grow h-min rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90"
         }
-        else {
-            class="h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        if props.Color == ButtonColorWhite {
+            class="flex-grow h-min rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100"
+        }
+        if props.Color == ButtonColorRed {
+            class="flex-grow h-min rounded-md border border-red-800 bg-red-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-red-700"
+        }
+        if props.Color == ButtonColorBlue {
+            class="flex-grow h-min rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700"
         }
         {props.Attributes...}
         >

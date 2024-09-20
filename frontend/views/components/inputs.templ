@@ -1,5 +1,7 @@
 package components
 
+import "fmt"
+
 type EMailInputProps struct {
     Value string
     Error string
@@ -14,9 +16,15 @@ templ EMailInput(props EMailInputProps) {
             type="email"
             placeholder="Email"
             value={props.Value}
-            class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
+            if props.Error == "" {
+                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2"
+            }
+            else {
+                class="h-10 w-full rounded-md border border-red-500 px-4 py-2"
+            }
+            >
         if props.Error != "" {
-            <span class="text-sm text-red-500 pl-2">{props.Error}</span>
+            <span class="pl-2 text-sm text-red-500">{props.Error}</span>
         }
     </div>
 }
@@ -40,9 +48,15 @@ templ TextInput(props TextInputProps) {
             type="text"
             value={props.Value}
             placeholder={props.Placeholder}
-            class="h-10 w-full rounded-md border border-gray-300 px-4 py-2">
+            if props.Error == "" {
+                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2"
+            }
+            else {
+                class="h-10 w-full rounded-md border border-red-500 px-4 py-2"
+            }
+            >
         if props.Error != "" {
-            <span class="text-sm text-red-500 pl-2">{props.Error}</span>
+            <span class="pl-2 text-sm text-red-500">{props.Error}</span>
         }
     </div>
 }
@@ -58,7 +72,7 @@ templ SearchBar(props SearchBarProps) {
     <div class="h-12 w-full">
         <form
             hx-post={props.HxPost}
-            class="flex h-full w-full bg-white flex-shrink-0 items-center rounded-md border px-2 focus-within:border-gray-400 hover:border-gray-300 hover:focus-within:border-gray-400">
+            class="flex h-full w-full flex-shrink-0 items-center rounded-md border bg-white px-2 focus-within:border-gray-400 hover:border-gray-300 hover:focus-within:border-gray-400">
             <img src="/static/icons/search.svg" alt="icon" class="h-5 w-5">
 
             <label for={props.Name} class="h-full w-full px-2">
@@ -71,5 +85,37 @@ templ SearchBar(props SearchBarProps) {
                     class="h-full w-full focus:outline-none focus:ring-0"/>
             </label>
         </form>
+    </div>
+}
+
+type TextAreaProps struct {
+    Name string
+    Label string
+    Placeholder string
+    Rows int
+    Value string
+    Error string
+}
+
+templ TextArea(props TextAreaProps) {
+    <div class="flex flex-col items-start gap-y-1">
+        <label for={props.Name} class="text-sm font-medium leading-5">{props.Label}</label>
+        <textarea
+            id={props.Name}
+            name={props.Name}
+            type="text"
+            rows={fmt.Sprintf("%d",props.Rows)}
+            placeholder={props.Placeholder}
+            if props.Error == "" {
+                class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32"
+            }
+            else {
+                class="max-h-64 w-full rounded-md border border-red-500 px-4 py-2 min-h-32"
+            }>
+            {props.Value}
+        </textarea>
+        if props.Error != "" {
+            <span class="pl-2 text-sm text-red-500">{props.Error}</span>
+        }
     </div>
 }
