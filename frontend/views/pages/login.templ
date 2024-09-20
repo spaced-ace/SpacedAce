@@ -3,6 +3,7 @@ package pages
 import (
     "spaced-ace/views/layout"
 	"spaced-ace/views/components"
+	"spaced-ace/views/forms"
 )
 
 templ LoginPage(viewModel LoginPageViewModel) {
@@ -11,28 +12,9 @@ templ LoginPage(viewModel LoginPageViewModel) {
             @components.Navbar()
 
             <div class="flex h-full w-full flex-col items-center justify-center">
-                <form class="flex flex-col gap-y-4 p-6 w-[500px]">
-                    <span class="text-center text-3xl font-bold">Login</span>
-
-                    @components.EMailInput(components.EMailInputProps{
-                        Error: viewModel.Errors["email"],
-                    })
-
-                    @components.TextInput(components.TextInputProps{
-                        Name: "password",
-                        Label: "Password",
-                        Placeholder: "Password",
-                        Type: "password",
-                    })
-
-                    @components.Button(components.ButtonProps{
-                        Text: "Submit",
-                        Type: "submit",
-                        HxPost: "/login",
-                    })
-
-                    @components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)
-                </form>
+                @forms.LoginForm(
+                    viewModel.Errors,
+                )
             </div>
 	    </main>
 	}

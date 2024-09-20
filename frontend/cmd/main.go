@@ -7,6 +7,7 @@ import (
 	"spaced-ace/api"
 	"spaced-ace/constants"
 	"spaced-ace/context"
+	"spaced-ace/render"
 	"spaced-ace/views/pages"
 	"strings"
 )
@@ -26,7 +27,7 @@ func main() {
 	//e.Renderer = api.NewTemplate()
 
 	e.GET("/", func(c echo.Context) error {
-		return api.TemplRender(c, http.StatusOK, pages.IndexPage())
+		return render.TemplRender(c, http.StatusOK, pages.IndexPage())
 	})
 
 	api.RegisterRoutes(e)

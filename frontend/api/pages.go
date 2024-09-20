@@ -7,6 +7,7 @@ import (
 	"spaced-ace/context"
 	"spaced-ace/models"
 	"spaced-ace/models/business"
+	"spaced-ace/render"
 	"spaced-ace/utils"
 	"spaced-ace/views/components"
 	"spaced-ace/views/layout"
@@ -41,7 +42,7 @@ type SubmitQuizPageData struct {
 }
 
 func handleIndexPage(c echo.Context) error {
-	return TemplRender(c, 200, pages.IndexPage())
+	return render.TemplRender(c, 200, pages.IndexPage())
 }
 func handleCreateNewQuizPage(c echo.Context) error {
 	hxRequest := c.Request().Header.Get("HX-Request") == "true"
@@ -49,7 +50,7 @@ func handleCreateNewQuizPage(c echo.Context) error {
 		return handleNonHXRequest(c)
 	}
 
-	return TemplRender(c, 200, pages.CreateNewQuizPage(pages.CreateNewQuizPageViewModel{}))
+	return render.TemplRender(c, 200, pages.CreateNewQuizPage(pages.CreateNewQuizPageViewModel{}))
 }
 func handleEditQuizPage(c echo.Context) error {
 	cc := c.(*context.AppContext)
@@ -91,7 +92,7 @@ func handleLoginPage(c echo.Context) error {
 	viewModel := pages.LoginPageViewModel{
 		Errors: map[string]string{},
 	}
-	return TemplRender(c, 200, pages.LoginPage(viewModel))
+	return render.TemplRender(c, 200, pages.LoginPage(viewModel))
 }
 func handleMyQuizzesPage(c echo.Context) error {
 	hxRequest := c.Request().Header.Get("HX-Request") == "true"
@@ -118,7 +119,7 @@ func handleMyQuizzesPage(c echo.Context) error {
 	viewModel := pages.MyQuizzesPageViewModel{
 		QuizInfosWithColors: quizInfosWithColors,
 	}
-	return TemplRender(c, 200, pages.MyQuizzesPage(viewModel))
+	return render.TemplRender(c, 200, pages.MyQuizzesPage(viewModel))
 }
 func handleNotFoundPage(c echo.Context) error {
 	data := NewPageTemplate(
@@ -186,7 +187,7 @@ func handleSignupPage(c echo.Context) error {
 	viewModel := pages.SignupPageViewModel{
 		Errors: map[string]string{},
 	}
-	return TemplRender(c, 200, pages.SignupPage(viewModel))
+	return render.TemplRender(c, 200, pages.SignupPage(viewModel))
 }
 func handleSubmitQuiz(c echo.Context) error {
 	cc := c.(*context.AppContext)
@@ -364,7 +365,7 @@ func handleNonHXRequest(c echo.Context) error {
 	props := layout.AuthenticatedLayoutProps{
 		SideBarProps: *sideBarProps,
 	}
-	return TemplRender(c, 200, layout.AuthenticatedLayout(props))
+	return render.TemplRender(c, 200, layout.AuthenticatedLayout(props))
 }
 
 func createSideBarProps(c echo.Context, activeUrl string) (*components.SidebarProps, error) {

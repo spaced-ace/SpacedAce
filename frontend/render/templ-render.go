@@ -1,4 +1,4 @@
-package api
+package render
 
 import (
 	"github.com/a-h/templ"

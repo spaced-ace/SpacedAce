@@ -7,6 +7,7 @@ import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
 	"spaced-ace/models/request"
+	"spaced-ace/render"
 	"spaced-ace/utils"
 	"spaced-ace/views/forms"
 )
@@ -27,13 +28,13 @@ func handleCreateQuiz(c echo.Context) error {
 		errors["description"] = "Description is required"
 	}
 	if len(errors) > 0 {
-		return TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
+		return render.TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
 	}
 
 	quizInfo, err := cc.ApiService.CreateQuiz(requestForm.Title, requestForm.Description)
 	if err != nil {
 		errors["other"] = "Error creating a quiz: " + err.Error()
-		return TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
+		return render.TemplRender(c, 200, forms.CreateQuizForm(requestForm, errors))
 	}
 
 	c.Response().Header().Set("HX-Redirect", "/quizzes/"+quizInfo.Id+"/edit")
