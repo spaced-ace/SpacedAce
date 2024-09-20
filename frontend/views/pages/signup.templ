@@ -3,6 +3,8 @@ package pages
 import (
     "spaced-ace/views/layout"
 	"spaced-ace/views/components"
+	"spaced-ace/views/forms"
+	"spaced-ace/models/request"
 )
 
 templ SignupPage(viewModel SignupPageViewModel) {
@@ -11,47 +13,11 @@ templ SignupPage(viewModel SignupPageViewModel) {
             @components.Navbar()
 
             <div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
-                        <form class="flex flex-col gap-y-4 p-6 w-[500px]">
-
-                            <span class="text-center text-3xl font-bold">Sign up</span>
-
-                            @components.TextInput(components.TextInputProps{
-                                Name: "name",
-                                Label: "Name",
-                                Placeholder: "John Doe",
-                                Type: "text",
-                                Error: viewModel.Errors["name"],
-                            })
-
-                            @components.EMailInput(components.EMailInputProps{
-                                Error: viewModel.Errors["email"],
-                            })
-
-                            @components.TextInput(components.TextInputProps{
-                                Name: "password",
-                                Label: "Password",
-                                Placeholder: "Password",
-                                Type: "password",
-                                Error: viewModel.Errors["password"],
-                            })
-
-                            @components.TextInput(components.TextInputProps{
-                                Name: "password_again",
-                                Label: "Password again",
-                                Placeholder: "Password",
-                                Type: "password",
-                                Error: viewModel.Errors["password_again"],
-                            })
-
-                            @components.Button(components.ButtonProps{
-                                Text: "Sign up",
-                                Type: "submit",
-                                HxPost: "/signup",
-                            })
-
-                            @components.LinkButton("Already have an account?", "/login", components.ButtonColorWhite)
-                        </form>
-                    </div>
+                @forms.SignUpForm(
+                    request.SignupForm{},
+                    map[string]string{},
+                )
+            </div>
         </main>
     }
 }

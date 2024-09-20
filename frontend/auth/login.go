@@ -6,14 +6,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"spaced-ace/constants"
+	"spaced-ace/models/request"
 	"spaced-ace/render"
 	"spaced-ace/views/forms"
 )
-
-type LoginForm struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
 
 type LoginRequestBody struct {
 	Email    string `json:"email"`
@@ -23,7 +19,7 @@ type LoginRequestBody struct {
 func PostLogin(c echo.Context) error {
 	errors := map[string]string{}
 
-	var loginForm = LoginForm{}
+	var loginForm = request.LoginForm{}
 	if err := c.Bind(&loginForm); err != nil {
 		errors["other"] = err.Error()
 		return render.TemplRender(c, 200, forms.LoginForm(errors))
