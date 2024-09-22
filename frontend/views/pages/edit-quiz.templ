@@ -1,0 +1,65 @@
+package pages
+
+import "fmt"
+import "spaced-ace/views/forms"
+import "spaced-ace/models/request"
+
+templ EditQuizPage(viewModel EditQuizPageViewModel) {
+    <main class="flex h-full w-full flex-col gap-y-8 p-6">
+        <div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
+            <span
+                hx-get="/my-quizzes"
+                hx-push-url="true"
+                hx-target="main"
+                hx-swap="outerHTML"
+                class="cursor-pointer text-base font-semibold text-nowrap hover:underline">My quizzes
+            </span>
+
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+
+            <span
+                hx-get={fmt.Sprintf("/quizzes/%s/edit", viewModel.Quiz.Id)}
+                hx-push-url="true"
+                hx-target="main"
+                hx-swap="outerHTML"
+                class="cursor-pointer text-base font-semibold text-nowrap hover:underline">{viewModel.Quiz.Title}
+            </span>
+        </div>
+
+        <div id="forms" class="flex flex-col gap-y-4 overflow-y-auto">
+            <div class="flex w-full justify-center">
+                @forms.UpdateQuizForm(
+                    request.UpdateQuizRequestForm{
+                        QuizId: viewModel.Quiz.Id,
+                        Title: viewModel.Quiz.Title,
+                        Description: viewModel.Quiz.Description,
+                    },
+                    map[string]string{},
+                    map[string]string{},
+                )
+            </div>
+
+            <div class="flex w-full justify-center">
+                <hr class="w-[700px]"/>
+            </div>
+
+            <div class="flex w-full flex-col items-center">
+                @forms.GenerateQuestionForm(
+                    false,
+                    request.GenerateQuestionForm{
+                        QuizId: viewModel.Quiz.Id,
+                    },
+                    map[string]string{},
+                )
+
+                <div
+                    id="questions"
+                    class="flex w-full flex-col">
+                </div>
+            </div>
+        </div>
+
+    </main>
+}

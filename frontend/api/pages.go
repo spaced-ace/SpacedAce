@@ -53,6 +53,11 @@ func handleCreateNewQuizPage(c echo.Context) error {
 	return render.TemplRender(c, 200, pages.CreateNewQuizPage(pages.CreateNewQuizPageViewModel{}))
 }
 func handleEditQuizPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
 	cc := c.(*context.AppContext)
 	quizId := c.Param("id")
 
@@ -61,27 +66,10 @@ func handleEditQuizPage(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/not-found")
 	}
 
-	var questionsWithMetaData []business.QuestionWithMetaData
-	for _, q := range quiz.Questions {
-		questionsWithMetaData = append(
-			questionsWithMetaData,
-			business.QuestionWithMetaData{
-				EditMode: true,
-				Question: q,
-			},
-		)
+	viewModel := pages.EditQuizPageViewModel{
+		Quiz: quiz,
 	}
-
-	data := NewPageTemplate(
-		c.(*context.AppContext).Session,
-		EditQuizPageData{
-			QuizWithMetaData: business.QuizWithMetaData{
-				QuizInfo:              quiz.QuizInfo,
-				QuestionsWithMetaData: questionsWithMetaData,
-			},
-		},
-	)
-	return c.Render(200, "edit-quiz", data)
+	return render.TemplRender(c, 200, pages.EditQuizPage(viewModel))
 }
 func handleLoginPage(c echo.Context) error {
 	cc := c.(*context.AppContext)

@@ -95,6 +95,7 @@ type TextAreaProps struct {
     Rows int
     Value string
     Error string
+    Disabled bool
 }
 
 templ TextArea(props TextAreaProps) {
@@ -106,8 +107,11 @@ templ TextArea(props TextAreaProps) {
             type="text"
             rows={fmt.Sprintf("%d",props.Rows)}
             placeholder={props.Placeholder}
+            if props.Disabled {
+                disabled
+            }
             if props.Error == "" {
-                class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32 hover:bg-gray-100"
+                class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32 hover:bg-gray-100 disabled:text-white disabled:cursor-not-allowed disabled:border-gray-600 disabled:bg-gray-400 disabled:opacity-50"
             }
             else {
                 class="max-h-64 w-full rounded-md border border-red-500 px-4 py-2 min-h-32 hover:bg-red-100"

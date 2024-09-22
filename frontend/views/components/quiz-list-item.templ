@@ -16,12 +16,17 @@ templ QuizListItem(props QuizListItemProps) {
         class="flex flex-col rounded-md border bg-gray-100 w-[350px] group min-w-[350px] h-[265px] hover:bg-gray-200">
         <div class={fmt.Sprintf("h-full w-full rounded-t-md group bg-gradient-to-br from-%s to-%s flex justify-end", props.QuizInfoWithColors.FromColor, props.QuizInfoWithColors.ToColor)}>
             <div class="hidden h-min items-start justify-start gap-x-2 p-2 group-hover:flex">
-                <a href={templ.SafeURL(fmt.Sprintf("quizzes/%s/edit", props.QuizInfoWithColors.QuizInfo.Id))} hx-push-url="true" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                <span
+                    hx-get={fmt.Sprintf("quizzes/%s/edit", props.QuizInfoWithColors.QuizInfo.Id)}
+                    hx-push-url="true"
+                    hx-swap="outerHTML"
+                    hx-target="main"
+                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
                     <img
                         src="/static/icons/pencil.svg"
                         alt="icon"
                         class="h-5 w-5">
-                </a>
+                </span>
                 <div class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
                     <img
                         hx-delete={fmt.Sprintf("/quizzes/%s", props.QuizInfoWithColors.QuizInfo.Id)}
