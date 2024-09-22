@@ -8,8 +8,8 @@ type EMailInputProps struct {
 }
 
 templ EMailInput(props EMailInputProps) {
-    <div class="flex flex-col items-start gap-y-1">
-        <label for="email" class="text-sm font-medium leading-5">Email</label>
+    <div class="flex flex-col items-start gap-y-1 group">
+        <label for="email" class="w-full text-sm font-bold leading-6">Email</label>
         <input
             id="email"
             name="email"
@@ -17,10 +17,10 @@ templ EMailInput(props EMailInputProps) {
             placeholder="Email"
             value={props.Value}
             if props.Error == "" {
-                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2"
+                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2 group-hover:bg-gray-100"
             }
             else {
-                class="h-10 w-full rounded-md border border-red-500 px-4 py-2"
+                class="h-10 w-full rounded-md border border-red-500 px-4 py-2 group-hover:bg-red-100"
             }
             >
         if props.Error != "" {
@@ -40,7 +40,7 @@ type TextInputProps struct {
 
 templ TextInput(props TextInputProps) {
     <div class="flex flex-col items-start gap-y-1">
-        <label for={props.Name} class="text-sm font-medium leading-5">{props.Label}</label>
+        <label for={props.Name} class="w-full text-sm font-bold leading-6">{props.Label}</label>
         <input
             id={props.Name}
             name={props.Name}
@@ -49,10 +49,10 @@ templ TextInput(props TextInputProps) {
             value={props.Value}
             placeholder={props.Placeholder}
             if props.Error == "" {
-                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2"
+                class="h-10 w-full rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-100"
             }
             else {
-                class="h-10 w-full rounded-md border border-red-500 px-4 py-2"
+                class="h-10 w-full rounded-md border border-red-500 px-4 py-2 hover:bg-red-100"
             }
             >
         if props.Error != "" {
@@ -72,17 +72,17 @@ templ SearchBar(props SearchBarProps) {
     <div class="h-12 w-full">
         <form
             hx-post={props.HxPost}
-            class="flex h-full w-full flex-shrink-0 items-center rounded-md border bg-white px-2 focus-within:border-gray-400 hover:border-gray-300 hover:focus-within:border-gray-400">
+            class="flex h-full w-full flex-shrink-0 items-center rounded-md border bg-white px-2 focus-within:border-gray-400 hover:bg-gray-100 group">
             <img src="/static/icons/search.svg" alt="icon" class="h-5 w-5">
 
-            <label for={props.Name} class="h-full w-full px-2">
+            <label for={props.Name} class="h-full w-full px-2 group-hover:bg-gray-100">
                 <input
                     id={props.Name}
                     name={props.Name}
                     placeholder={props.Placeholder}
                     type="search"
                     value={props.Value}
-                    class="h-full w-full focus:outline-none focus:ring-0"/>
+                    class="h-full w-full focus:outline-none focus:ring-0 group-hover:bg-gray-100"/>
             </label>
         </form>
     </div>
@@ -99,7 +99,7 @@ type TextAreaProps struct {
 
 templ TextArea(props TextAreaProps) {
     <div class="flex flex-col items-start gap-y-1">
-        <label for={props.Name} class="text-sm font-medium leading-5">{props.Label}</label>
+        <label for={props.Name} class="w-full text-sm font-bold leading-6">{props.Label}</label>
         <textarea
             id={props.Name}
             name={props.Name}
@@ -107,10 +107,10 @@ templ TextArea(props TextAreaProps) {
             rows={fmt.Sprintf("%d",props.Rows)}
             placeholder={props.Placeholder}
             if props.Error == "" {
-                class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32"
+                class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32 hover:bg-gray-100"
             }
             else {
-                class="max-h-64 w-full rounded-md border border-red-500 px-4 py-2 min-h-32"
+                class="max-h-64 w-full rounded-md border border-red-500 px-4 py-2 min-h-32 hover:bg-red-100"
             }>
             {props.Value}
         </textarea>
