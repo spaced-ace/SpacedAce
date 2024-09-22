@@ -6,8 +6,8 @@ import "spaced-ace/models/request"
 templ CreateNewQuizPage(viewModel CreateNewQuizPageViewModel) {
     <main class="flex h-full w-full justify-center p-6">
         @forms.CreateQuizForm(
-            request.CreateQuizRequestForm{},
-            map[string]string{},
+            viewModel.Values
+            viewModel.Errors,
         )
     </main>
 }
