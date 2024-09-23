@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models"
-	"spaced-ace/models/business"
 	"spaced-ace/models/request"
 	"spaced-ace/render"
 	"spaced-ace/utils"
+	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
 )
 
@@ -99,6 +99,7 @@ func handleGenerateQuestion(c echo.Context) error {
 		errors["context"] = "Context is required"
 	}
 
+	// TODO do not return only the question, but an enabled generate question form with oob and the question
 	switch questionType {
 	case models.SingleChoiceQuestion:
 		{
@@ -108,15 +109,7 @@ func handleGenerateQuestion(c echo.Context) error {
 				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
 			}
 
-			// TODO send a single choice question component which has a generate form with oob to reset the inputs
-			data := NewComponentTemplate(
-				cc.Session,
-				business.QuestionWithMetaData{
-					EditMode: true,
-					Question: question,
-				},
-			)
-			return c.Render(200, "single-choice-question", data)
+			return render.TemplRender(c, 200, components.SingleChoiceQuestion(*question, true))
 		}
 	case models.MultipleChoiceQuestion:
 		{
@@ -126,34 +119,19 @@ func handleGenerateQuestion(c echo.Context) error {
 				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
 			}
 
-			// TODO send a multiple choice question component which has a generate form with oob to reset the inputs
-			data := NewComponentTemplate(
-				cc.Session,
-				business.QuestionWithMetaData{
-					EditMode: true,
-					Question: question,
-				},
-			)
-			return c.Render(200, "multiple-choice-question", data)
+			return render.TemplRender(c, 200, components.MultipleChoiceQuestion(*question, true))
 		}
-	case models.TrueOrFalseQuestion:
+	default:
 		{
 			question, err := cc.ApiService.GenerateTrueOrFalseQuestion(requestForm.QuizId, requestForm.Context)
 			if err != nil {
-				return err
+				errors["other"] = "Error generating question: " + err.Error()
+				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
 			}
-			data := NewComponentTemplate(
-				cc.Session,
-				business.QuestionWithMetaData{
-					EditMode: true,
-					Question: question,
-				},
-			)
-			return c.Render(200, "true-or-false-question", data)
+
+			return render.TemplRender(c, 200, components.TrueOrFalseQuestion(*question, true))
 		}
 	}
-
-	return echo.NewHTTPError(400, "Invalid question type")
 }
 
 func handleUpdateQuiz(c echo.Context) error {

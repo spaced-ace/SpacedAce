@@ -3,6 +3,8 @@ package pages
 import "fmt"
 import "spaced-ace/views/forms"
 import "spaced-ace/models/request"
+import "spaced-ace/models/business"
+import "spaced-ace/views/components"
 
 templ EditQuizPage(viewModel EditQuizPageViewModel) {
     <main class="flex h-full w-full flex-col gap-y-8 p-6">
@@ -56,7 +58,17 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
 
                 <div
                     id="questions"
-                    class="flex w-full flex-col">
+                    class="flex w-[700px] flex-col gap-y-2">
+                        for _, q := range viewModel.Quiz.Questions {
+                            switch question := q.(type) {
+                            case *business.SingleChoiceQuestion:
+                                @components.SingleChoiceQuestion(*question, true)
+                            case *business.MultipleChoiceQuestion:
+                                @components.MultipleChoiceQuestion(*question, true)
+                            case *business.TrueOrFalseQuestion:
+                                @components.TrueOrFalseQuestion(*question, true)
+                            }
+                        }
                 </div>
             </div>
         </div>
