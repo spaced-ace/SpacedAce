@@ -3,9 +3,12 @@ package components
 import "spaced-ace/models/business"
 import "fmt"
 
-templ SingleChoiceQuestion(question business.SingleChoiceQuestion, allowDeleting bool) {
+templ SingleChoiceQuestion(question *business.SingleChoiceQuestion, allowDeleting, replacePlaceholderWithOOB bool) {
     <div
         id={fmt.Sprintf(`question-%s`, question.Id)}
+        if replacePlaceholderWithOOB {
+            hx-swap-oob="outerHTML:#placeholder-question"
+        }
         class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6">
         <div class="flex w-full items-start justify-between gap-x-2">
             <span class="overflow-auto whitespace-normal text-xl font-semibold">{question.Question}</span>
@@ -50,9 +53,12 @@ templ SingleChoiceQuestion(question business.SingleChoiceQuestion, allowDeleting
     </div>
 }
 
-templ MultipleChoiceQuestion(question business.MultipleChoiceQuestion, allowDeleting bool) {
+templ MultipleChoiceQuestion(question *business.MultipleChoiceQuestion, allowDeleting, replacePlaceholderWithOOB bool) {
     <div
         id={fmt.Sprintf(`question-%s`, question.Id)}
+        if replacePlaceholderWithOOB {
+            hx-swap-oob="outerHTML:#placeholder-question"
+        }
         class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6">
         <div class="flex w-full items-start justify-between gap-x-2">
             <span class="overflow-auto whitespace-normal text-xl font-semibold">{question.Question}</span>
@@ -97,9 +103,12 @@ templ MultipleChoiceQuestion(question business.MultipleChoiceQuestion, allowDele
     </div>
 }
 
-templ TrueOrFalseQuestion(question business.TrueOrFalseQuestion, allowDeleting bool) {
+templ TrueOrFalseQuestion(question *business.TrueOrFalseQuestion, allowDeleting, replacePlaceholderWithOOB bool) {
     <div
         id={fmt.Sprintf(`question-%s`, question.Id)}
+        if replacePlaceholderWithOOB {
+            hx-swap-oob="outerHTML:#placeholder-question"
+        }
         class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6">
         <div class="flex w-full items-start justify-between gap-x-2">
             <span class="overflow-auto whitespace-normal text-xl font-semibold">{question.Question}</span>

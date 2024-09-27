@@ -5,7 +5,7 @@ import "fmt"
 import "spaced-ace/views/components"
 import "spaced-ace/models"
 
-templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionForm, errors map[string]string) {
+templ GenerateQuestionForm(hasPlaceholderQuestion bool, questionComponent templ.Component, values request.GenerateQuestionForm, errors map[string]string) {
     <form
         id="generate-question-form"
         hx-post="/generate/start"
@@ -19,7 +19,7 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
             Label: "Context",
             Placeholder: "Provide a context for the question generation",
             Rows: 4,
-            Disabled: fieldsAreValid,
+            Disabled: hasPlaceholderQuestion,
             Value: values.Context,
             Error: errors["context"],
         })
@@ -35,7 +35,7 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
             <button
                 hx-post="/generate/start"
                 hx-vals={fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s" }`, values.QuizId, models.SingleChoiceQuestion)}
-                if fieldsAreValid {
+                if hasPlaceholderQuestion {
                     disabled
                 }
                 class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-gray-600 disabled:bg-gray-400 disabled:opacity-50">
@@ -45,7 +45,7 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
             <button
                 hx-post="/generate/start"
                 hx-vals={fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s" }`, values.QuizId, models.MultipleChoiceQuestion)}
-                if fieldsAreValid {
+                if hasPlaceholderQuestion {
                     disabled
                 }
                 class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-gray-600 disabled:bg-gray-400 disabled:opacity-50">
@@ -55,7 +55,7 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
             <button
                 hx-post="/generate/start"
                 hx-vals={fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s" }`, values.QuizId, models.TrueOrFalseQuestion)}
-                if fieldsAreValid {
+                if hasPlaceholderQuestion {
                     disabled
                 }
                 class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-gray-600 disabled:bg-gray-400 disabled:opacity-50">
@@ -64,13 +64,14 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
         </div>
     </form>
 
-    if fieldsAreValid {
+    if hasPlaceholderQuestion {
         <div hx-swap-oob="beforeend:#questions">
             <div
                 id="placeholder-question"
                 hx-post="/generate"
                 hx-vals={fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s", "context": "%s" }`, values.QuizId, values.QuestionType, values.Context)}
                 hx-trigger="load"
+                hx-target="#generate-question-form"
                 hx-swap="outerHTML"
                 hx-push-url="false"
                 class="flex w-full items-center justify-center h-[250px] rounded-md border border-gray-300">
@@ -82,6 +83,10 @@ templ GenerateQuestionForm(fieldsAreValid bool, values request.GenerateQuestionF
                 </div>
             </div>
         </div>
+    }
+
+    if !hasPlaceholderQuestion && questionComponent != nil {
+        @questionComponent
     }
 
 }

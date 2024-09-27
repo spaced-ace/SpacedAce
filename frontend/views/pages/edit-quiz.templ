@@ -50,6 +50,7 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
             <div class="flex w-full flex-col items-center">
                 @forms.GenerateQuestionForm(
                     false,
+                    nil,
                     request.GenerateQuestionForm{
                         QuizId: viewModel.Quiz.Id,
                     },
@@ -62,11 +63,11 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
                         for _, q := range viewModel.Quiz.Questions {
                             switch question := q.(type) {
                             case *business.SingleChoiceQuestion:
-                                @components.SingleChoiceQuestion(*question, true)
+                                @components.SingleChoiceQuestion(question, true, false)
                             case *business.MultipleChoiceQuestion:
-                                @components.MultipleChoiceQuestion(*question, true)
+                                @components.MultipleChoiceQuestion(question, true, false)
                             case *business.TrueOrFalseQuestion:
-                                @components.TrueOrFalseQuestion(*question, true)
+                                @components.TrueOrFalseQuestion(question, true, false)
                             }
                         }
                 </div>

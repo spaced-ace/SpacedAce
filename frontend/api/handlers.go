@@ -47,7 +47,16 @@ func handleGenerateQuestionStart(c echo.Context) error {
 	var requestForm request.GenerateQuestionForm
 	if err := c.Bind(&requestForm); err != nil {
 		errors["other"] = "Parsing error: " + err.Error()
-		return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+		return render.TemplRender(
+			c,
+			200,
+			forms.GenerateQuestionForm(
+				false,
+				nil,
+				requestForm,
+				errors,
+			),
+		)
 	}
 
 	questionType := requestForm.QuestionType
@@ -57,7 +66,16 @@ func handleGenerateQuestionStart(c echo.Context) error {
 		} else {
 			errors["other"] = fmt.Sprintf("Invalid question type: '%s'.", questionType)
 		}
-		return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+		return render.TemplRender(
+			c,
+			200,
+			forms.GenerateQuestionForm(
+				false,
+				nil,
+				requestForm,
+				errors,
+			),
+		)
 	}
 
 	if requestForm.QuizId == "" {
@@ -67,10 +85,28 @@ func handleGenerateQuestionStart(c echo.Context) error {
 		errors["context"] = "Context is required"
 	}
 	if len(errors) > 0 {
-		return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+		return render.TemplRender(
+			c,
+			200,
+			forms.GenerateQuestionForm(
+				false,
+				nil,
+				requestForm,
+				errors,
+			),
+		)
 	}
 
-	return render.TemplRender(c, 200, forms.GenerateQuestionForm(true, requestForm, errors))
+	return render.TemplRender(
+		c,
+		200,
+		forms.GenerateQuestionForm(
+			true,
+			nil,
+			requestForm,
+			errors,
+		),
+	)
 }
 func handleGenerateQuestion(c echo.Context) error {
 	errors := map[string]string{}
@@ -79,7 +115,16 @@ func handleGenerateQuestion(c echo.Context) error {
 	var requestForm request.GenerateQuestionForm
 	if err := c.Bind(&requestForm); err != nil {
 		errors["other"] = "Parsing error: " + err.Error()
-		return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+		return render.TemplRender(
+			c,
+			200,
+			forms.GenerateQuestionForm(
+				false,
+				nil,
+				requestForm,
+				errors,
+			),
+		)
 	}
 
 	questionType := requestForm.QuestionType
@@ -89,7 +134,16 @@ func handleGenerateQuestion(c echo.Context) error {
 		} else {
 			errors["other"] = fmt.Sprintf("Invalid question type: '%s'.", questionType)
 		}
-		return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+		return render.TemplRender(
+			c,
+			200,
+			forms.GenerateQuestionForm(
+				false,
+				nil,
+				requestForm,
+				errors,
+			),
+		)
 	}
 
 	if requestForm.QuizId == "" {
@@ -99,37 +153,105 @@ func handleGenerateQuestion(c echo.Context) error {
 		errors["context"] = "Context is required"
 	}
 
-	// TODO do not return only the question, but an enabled generate question form with oob and the question
 	switch questionType {
 	case models.SingleChoiceQuestion:
 		{
 			question, err := cc.ApiService.GenerateSingleChoiceQuestion(requestForm.QuizId, requestForm.Context)
 			if err != nil {
 				errors["other"] = "Error generating question: " + err.Error()
-				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+				return render.TemplRender(
+					c,
+					200,
+					forms.GenerateQuestionForm(
+						false,
+						nil,
+						requestForm,
+						errors,
+					),
+				)
 			}
 
-			return render.TemplRender(c, 200, components.SingleChoiceQuestion(*question, true))
+			questionComponent := components.SingleChoiceQuestion(
+				question,
+				true,
+				true,
+			)
+			return render.TemplRender(
+				c,
+				200,
+				forms.GenerateQuestionForm(
+					false,
+					questionComponent,
+					requestForm,
+					errors,
+				),
+			)
 		}
 	case models.MultipleChoiceQuestion:
 		{
 			question, err := cc.ApiService.GenerateMultipleChoiceQuestion(requestForm.QuizId, requestForm.Context)
 			if err != nil {
 				errors["other"] = "Error generating question: " + err.Error()
-				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+				return render.TemplRender(
+					c,
+					200,
+					forms.GenerateQuestionForm(
+						false,
+						nil,
+						requestForm,
+						errors,
+					),
+				)
 			}
 
-			return render.TemplRender(c, 200, components.MultipleChoiceQuestion(*question, true))
+			questionComponent := components.MultipleChoiceQuestion(
+				question,
+				true,
+				true,
+			)
+			return render.TemplRender(
+				c,
+				200,
+				forms.GenerateQuestionForm(
+					false,
+					questionComponent,
+					requestForm,
+					errors,
+				),
+			)
 		}
 	default:
 		{
 			question, err := cc.ApiService.GenerateTrueOrFalseQuestion(requestForm.QuizId, requestForm.Context)
 			if err != nil {
 				errors["other"] = "Error generating question: " + err.Error()
-				return render.TemplRender(c, 200, forms.GenerateQuestionForm(false, requestForm, errors))
+				return render.TemplRender(
+					c,
+					200,
+					forms.GenerateQuestionForm(
+						false,
+						nil,
+						requestForm,
+						errors,
+					),
+				)
 			}
 
-			return render.TemplRender(c, 200, components.TrueOrFalseQuestion(*question, true))
+			questionComponent := components.TrueOrFalseQuestion(
+				question,
+				true,
+				true,
+			)
+			return render.TemplRender(
+				c,
+				200,
+				forms.GenerateQuestionForm(
+					false,
+					questionComponent,
+					requestForm,
+					errors,
+				),
+			)
 		}
 	}
 }
