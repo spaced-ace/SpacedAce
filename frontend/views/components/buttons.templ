@@ -61,6 +61,7 @@ templ Button(props ButtonProps) {
         if props.Color == ButtonColorBlue {
             class="flex-grow h-min rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700"
         }
+        {props.Attributes...}
         >
         {props.Text}
     </button>

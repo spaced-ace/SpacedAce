@@ -40,7 +40,12 @@ templ QuizListItem(props QuizListItemProps) {
                 </div>
             </div>
         </div>
-        <a href={templ.SafeURL(fmt.Sprintf("/quizzes/%s/take", props.QuizInfoWithColors.QuizInfo.Id))} class="flex w-full cursor-pointer rounded-b-md px-2 py-1 h-[100px]">
+        <a
+            href={templ.SafeURL(fmt.Sprintf("/quizzes/%s/preview-popup", props.QuizInfoWithColors.QuizInfo.Id))}
+            hx-target="#popup-container"
+            hx-push-url="false"
+            class="flex w-full cursor-pointer rounded-b-md px-2 py-1 h-[100px]"
+        >
             <span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">{ props.QuizInfoWithColors.QuizInfo.Title }</span>
             <img src="/static/icons/arrow-right.svg" alt="icon" class="h-6 w-6 self-center">
         </a>

@@ -116,23 +116,6 @@ func handleNotFoundPage(c echo.Context) error {
 	)
 	return c.Render(404, "not-found.html", data)
 }
-func handleQuizPreviewPage(c echo.Context) error {
-	cc := c.(*context.AppContext)
-
-	quizId := c.Param("quizId")
-
-	quiz, err := cc.ApiService.GetQuiz(quizId)
-	if err != nil {
-		return err
-	}
-	fmt.Println("quiz ", quiz)
-
-	data := NewPageTemplate(
-		cc.Session,
-		nil,
-	)
-	return c.Render(200, "index", data)
-}
 func handleTakeQuizPage(c echo.Context) error {
 	cc := c.(*context.AppContext)
 

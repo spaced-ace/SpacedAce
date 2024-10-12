@@ -329,3 +329,30 @@ func handleDeleteQuiz(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+func handleQuizPreviewPopup(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizId := c.Param("quizId")
+	quiz, err := cc.ApiService.GetQuiz(quizId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "quizId is required")
+	}
+
+	// TODO
+	//hasQuizSession, err := cc.ApiService.HasQuizSession(cc.Session.User.Id, quizId)
+	_, err = cc.ApiService.HasQuizSession(cc.Session.User.Id, quizId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "error getting checking open sessions: "+err.Error())
+	}
+
+	// TODO get all sessions and then find the open one
+
+	props := components.PreviewQuizPopupProps{
+		Quiz: quiz,
+	}
+	return render.TemplRender(c, 200, components.PreviewQuizPopup(props))
+}
+func handleClosePopup(c echo.Context) error {
+	return c.NoContent(200)
+}
