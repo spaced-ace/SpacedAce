@@ -138,7 +138,7 @@ func GetQuizSessions(c echo.Context) error {
 	}
 
 	quizSessions := make([]models.QuizSession, resultCount)
-	lastIndex := 0
+	nextIndex := 0
 	for _, dbQuizSession := range dbQuizSessions {
 		if !filter(dbQuizSession) {
 			continue
@@ -148,10 +148,15 @@ func GetQuizSessions(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-		quizSessions[lastIndex] = *quizSession
-		lastIndex++
+		quizSessions[nextIndex] = *quizSession
+		nextIndex++
 	}
-	return c.JSON(http.StatusOK, quizSessions)
+
+	response := models.GetQuizSessionsResponseBody{
+		QuizSessions: quizSessions,
+		Length:       resultCount,
+	}
+	return c.JSON(http.StatusOK, response)
 }
 
 func StopQuizSession(c echo.Context) error {

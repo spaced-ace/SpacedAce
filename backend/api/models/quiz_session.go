@@ -13,6 +13,11 @@ type QuizSession struct {
 	ClosesAt   NullableTime `json:"closesAt"`
 }
 
+type GetQuizSessionsResponseBody struct {
+	QuizSessions []QuizSession `json:"quizSessions"`
+	Length       int           `json:"length"`
+}
+
 func MapQuizSession(dbo db.QuizSession) (*QuizSession, error) {
 	return &QuizSession{
 		ID:         dbo.ID,
