@@ -2,13 +2,23 @@
     SELECT * FROM quiz_sessions
     WHERE id = $1 LIMIT 1;
 
--- name: GetQuizSessionByQuizId :one
+-- name: GetQuizSessionsByQuizIdAndUserId :many
     SELECT * FROM quiz_sessions
-    WHERE quiz_id = $1 LIMIT 1;
+    WHERE quiz_id = $1
+        AND user_id = $2;
 
--- name: GetQuizSessionByUserId :one
+-- name: GetQuizSessionsByUserId :many
     SELECT * FROM quiz_sessions
-    WHERE user_id = $1 LIMIT 1;
+    WHERE user_id = $1;
+
+-- name: HasOpenQuizSession :one
+SELECT EXISTS (
+    SELECT 1
+    FROM quiz_sessions
+    WHERE quiz_id = $1
+        AND user_id = $2
+        AND finished_at IS NOT NULL
+) AS exists;
 
 -- name: CreateQuizSession :one
     INSERT INTO quiz_sessions (id, user_id, quiz_id, started_at, finished_at, closes_at)
