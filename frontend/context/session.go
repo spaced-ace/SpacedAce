@@ -31,7 +31,6 @@ func SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		cc.Session = session
-		//c.Set("cc", cc)
 		cc.Set("cc", cc)
 		return next(cc)
 	}
@@ -42,7 +41,7 @@ func RequireSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		cc, ok := c.(*AppContext)
 		if !ok || cc.Session == nil {
 			c.Response().Header().Set("HX-Redirect", "/login")
-			return c.Redirect(http.StatusFound, "/login")
+			return c.NoContent(http.StatusOK)
 		}
 		return next(c)
 	}
