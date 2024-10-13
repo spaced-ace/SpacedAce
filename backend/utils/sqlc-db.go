@@ -52,8 +52,7 @@ func newSQLCQuerier() *SQLCQuerier {
 
 	host := os.Getenv("DB_HOST")
 	if host == "" {
-		//host = "172.20.10.2"
-		host = "192.168.1.72"
+		host = "localhost"
 	}
 
 	connectionString := fmt.Sprintf("user=%s dbname=%s password=%s host=%s port=%s sslmode=disable", user, dbname, password, host, port)
