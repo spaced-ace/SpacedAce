@@ -10,7 +10,7 @@ templ AuthenticatedLayout(props AuthenticatedLayoutProps) {
 	@HtmlLayout() {
 		<div
 			id="page-content-container"
-			class="flex h-full w-full max-w-[1440px]"
+			class="flex h-full w-full max-w-[1440px] border-r"
 		>
 			@components.SideBar(components.SidebarProps{
 				Username:  props.SideBarProps.Username,

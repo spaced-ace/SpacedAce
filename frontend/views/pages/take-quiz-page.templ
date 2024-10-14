@@ -30,7 +30,19 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 					<span class="font-semibold">Started:</span>
 					<span>{ viewModel.QuizSession.StartedAt.Local().Format("2006-01-02 15:04") }</span>
 				</span>
-				<span class="w-full text-base">
+
+                <span class="w-full text-sm">
+                    <span class="font-semibold">Closes:</span>
+                    <span>
+                        if viewModel.QuizSession.Finished {
+                            viewModel.QuizSession.ClosesAt.Local().Format("2006-01-02 15:04")
+                        } else {
+                            -
+                        }
+                    </span>
+                </span>
+
+				<span class="w-full text-sm">
 					<span class="font-semibold">Finished:</span>
 					<span>
 						if viewModel.QuizSession.Finished {

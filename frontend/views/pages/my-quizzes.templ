@@ -7,10 +7,9 @@ templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
 		<div class="flex w-full items-center gap-x-2">
 			<span class="text-nowrap font-bold text-2xl">My Quizzes</span>
 			<div class="w-full bg-pink-500"></div>
-			@components.LinkButton("+ Create new", "/create-new-quiz", components.ButtonColorBlack)
 			@components.Button(components.ButtonProps{
 				Text:  "Manage Learn List",
-				Color: components.ButtonColorWhite,
+				Color: components.ButtonColorBlack,
 				HxGet: "/my-quizzes/manage-learn-list",
 			})
 		</div>
