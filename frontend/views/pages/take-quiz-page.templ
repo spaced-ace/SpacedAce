@@ -1,7 +1,12 @@
 package pages
 
+import (
+	"spaced-ace/models/business"
+	"spaced-ace/views/components"
+)
+
 templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
-	<main class="flex h-full w-full flex-col gap-y-8 p-6">
+	<main class="flex h-full w-full flex-col gap-y-4 p-6">
 		<div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
 			<span
 				hx-get="/my-quizzes"
@@ -21,39 +26,58 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 				{ viewModel.Quiz.Title }
 			</span>
 		</div>
-		<div id="information" class="flex w-full flex-col gap-y-4 border border-gray-300 rounded-md p-6">
-			<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
-			<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
-			<div class="w-full h-4"></div>
-			<div class="flex w-full items-center">
-				<span class="w-full text-sm">
-					<span class="font-semibold">Started:</span>
-					<span>{ viewModel.QuizSession.StartedAt.Local().Format("2006-01-02 15:04") }</span>
-				</span>
-
-                <span class="w-full text-sm">
-                    <span class="font-semibold">Closes:</span>
-                    <span>
-                        if viewModel.QuizSession.Finished {
-                            viewModel.QuizSession.ClosesAt.Local().Format("2006-01-02 15:04")
-                        } else {
-                            -
-                        }
-                    </span>
-                </span>
-
-				<span class="w-full text-sm">
-					<span class="font-semibold">Finished:</span>
-					<span>
-						if viewModel.QuizSession.Finished {
-							viewModel.QuizSession.FinishedAt.Local().Format("2006-01-02 15:04")
-						} else {
-							Not finished yet
-						}
+		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
+			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
+				<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
+				<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
+				<div class="h-4 w-full"></div>
+				<div class="flex w-full items-center">
+					<span class="w-full text-sm">
+						<span class="font-semibold">Started:</span>
+						<span>{ viewModel.QuizSession.StartedAt.Local().Format("2006-01-02 15:04") }</span>
 					</span>
-				</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Closes:</span>
+						<span>
+							if viewModel.QuizSession.Finished {
+								viewModel.QuizSession.ClosesAt.Local().Format("2006-01-02 15:04")
+							} else {
+								-
+							}
+						</span>
+					</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Finished:</span>
+						<span>
+							if viewModel.QuizSession.Finished {
+								viewModel.QuizSession.FinishedAt.Local().Format("2006-01-02 15:04")
+							} else {
+								Not finished yet
+							}
+						</span>
+					</span>
+				</div>
+			</div>
+			<div
+				id="questions"
+				class="flex w-full flex-col gap-y-4"
+			>
+				for _, q := range viewModel.Quiz.Questions {
+					switch question := q.(type) {
+						case *business.SingleChoiceQuestion:
+							@components.SingleChoiceQuestion(question, false, false)
+						case *business.MultipleChoiceQuestion:
+							@components.MultipleChoiceQuestion(question, false, false)
+						case *business.TrueOrFalseQuestion:
+							@components.TrueOrFalseQuestion(question, false, false)
+					}
+				}
 			</div>
 		</div>
-		<div id="questions"></div>
+		<div class="flex w-full justify-end">
+			<div class="flex w-[220px]">
+				@components.LinkButton("Submit quiz", "", components.ButtonColorBlack)
+			</div>
+		</div>
 	</main>
 }

@@ -86,9 +86,9 @@ templ PreviewQuizPopup(props PreviewQuizPopupProps) {
 							Text:  "Continue",
 							HxGet: fmt.Sprintf("quizzes/%s/take/%s", props.Quiz.Id, props.QuizSession.Id),
 							Attributes: templ.Attributes{
-								"hx-target": "main",
-                                "hx-headers":  fmt.Sprint(`{ "SA-popup-action": "close" }`),
-                                "hx-push-url": "true",
+								"hx-target":   "main",
+								"hx-headers":  fmt.Sprint(`{ "SA-popup-action": "close" }`),
+								"hx-push-url": "true",
 							},
 							Color: ButtonColorWhite,
 						})

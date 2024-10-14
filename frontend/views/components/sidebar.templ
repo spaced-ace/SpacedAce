@@ -34,13 +34,9 @@ templ SideBar(props SidebarProps) {
 				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"></path>
 			</svg>
 		</div>
-
 		<hr class="w-full"/>
-
 		@SideBarMenu("", false)
-
 		<hr class="w-full"/>
-
 		<div
 			id="sidebar-quizzes-container"
 			hx-target="#content-container"
@@ -66,10 +62,9 @@ templ SideBar(props SidebarProps) {
 					</div>
 				}
 			</div>
-
-            <div class="flex h-fit w-full pt-4">
-			    @LinkButton("+ Create new", "/create-new-quiz", ButtonColorWhite)
-            </div>
+			<div class="flex h-fit w-full pt-4">
+				@LinkButton("+ Create new", "/create-new-quiz", ButtonColorWhite)
+			</div>
 		</div>
 	</div>
 }
