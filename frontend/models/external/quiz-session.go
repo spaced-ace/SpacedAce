@@ -32,5 +32,6 @@ func (qs QuizSession) MapToBusiness() (*business.QuizSession, error) {
 		StartedAt:  qs.StartedAt.Time,
 		FinishedAt: qs.FinishedAt.Time,
 		ClosesAt:   qs.ClosesAt.Time,
+		Finished:   !qs.FinishedAt.IsZero(),
 	}, nil
 }

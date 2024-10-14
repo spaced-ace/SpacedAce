@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models"
+	"spaced-ace/models/business"
 	"spaced-ace/models/request"
 	"spaced-ace/render"
 	"spaced-ace/utils"
@@ -340,16 +341,29 @@ func handleQuizPreviewPopup(c echo.Context) error {
 	}
 
 	// TODO
-	//hasQuizSession, err := cc.ApiService.HasQuizSession(cc.Session.User.Id, quizId)
 	_, err = cc.ApiService.HasQuizSession(cc.Session.User.Id, quizId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error getting checking open sessions: "+err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "error checking open sessions: "+err.Error())
 	}
 
 	// TODO get all sessions and then find the open one
 
+	quizSessions, err := cc.ApiService.GetQuizSessions(cc.Session.User.Id, quizId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "error getting open sessions: "+err.Error())
+	}
+
+	var quizSession *business.QuizSession
+	for _, session := range quizSessions {
+		if !session.Finished {
+			quizSession = session
+			break
+		}
+	}
+
 	props := components.PreviewQuizPopupProps{
-		Quiz: quiz,
+		Quiz:        quiz,
+		QuizSession: quizSession,
 	}
 	return render.TemplRender(c, 200, components.PreviewQuizPopup(props))
 }

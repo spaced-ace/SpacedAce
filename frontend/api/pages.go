@@ -117,37 +117,45 @@ func handleNotFoundPage(c echo.Context) error {
 	return c.Render(404, "not-found.html", data)
 }
 func handleTakeQuizPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
 	cc := c.(*context.AppContext)
 
 	quizId := c.Param("quizId")
+
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		quizSession, err := cc.ApiService.CreateQuizSession(cc.Session.User.Id, quizId)
+		if err != nil {
+			return err
+		}
+
+		url := fmt.Sprintf("/quizzes/%s/take/%s", quizId, quizSession.Id)
+		c.Response().Header().Set("HX-Replace-Url", url)
+		return c.Redirect(http.StatusFound, url)
+	}
+
+	quizSession, err := cc.ApiService.GetQuizSession(quizSessionId)
+	if err != nil {
+		return err
+	}
+	if quizSession.Finished {
+		// TODO thus the quiz is finished, redirect the user to the results page
+	}
 
 	quiz, err := cc.ApiService.GetQuiz(quizId)
 	if err != nil {
 		return err
 	}
 
-	var questionsWithMetaData []business.QuestionWithMetaData
-	for _, q := range quiz.Questions {
-		questionsWithMetaData = append(
-			questionsWithMetaData,
-			business.QuestionWithMetaData{
-				EditMode: false,
-				Question: q,
-			},
-		)
+	viewModel := pages.TakeQuizPageViewModel{
+		QuizSession: quizSession,
+		Quiz:        quiz,
 	}
-
-	data := NewPageTemplate(
-		cc.Session,
-		TakeQuizPageData{
-			QuizWithMetaData: business.QuizWithMetaData{
-				QuizInfo:              quiz.QuizInfo,
-				QuestionsWithMetaData: questionsWithMetaData,
-			},
-		},
-	)
-	fmt.Println("handleTakeQuizPage: ", data.Data)
-	return c.Render(200, "take-quiz-page", data)
+	return render.TemplRender(c, 200, pages.TakeQuizPage(viewModel))
 }
 func handleSignupPage(c echo.Context) error {
 	cc := c.(*context.AppContext)

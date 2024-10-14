@@ -271,13 +271,8 @@ func (a *ApiService) CreateQuizSession(userId, quizId string) (*business.QuizSes
 	return quizSessionDto.MapToBusiness()
 }
 func (a *ApiService) GetQuizSessions(userId, quizId string) ([]*business.QuizSession, error) {
-	requestBody := &external.CreateQuizSessionRequestBody{
-		UserID: userId,
-		QuizID: quizId,
-	}
-
 	quizSessionsResponse := new(external.GetQuizSessionsResponseBody)
-	if err := a.getResponse("POST", "/quiz-sessions/start", requestBody, quizSessionsResponse); err != nil {
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions?userId=%s&quizId=%s", userId, quizId), nil, quizSessionsResponse); err != nil {
 		return nil, err
 	}
 
@@ -291,6 +286,19 @@ func (a *ApiService) GetQuizSessions(userId, quizId string) ([]*business.QuizSes
 	}
 
 	return quizSessions, nil
+}
+func (a *ApiService) GetQuizSession(quizSessionId string) (*business.QuizSession, error) {
+	quizSessionResponse := new(external.QuizSession)
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s", quizSessionId), nil, quizSessionResponse); err != nil {
+		return nil, err
+	}
+
+	quizSession, err := quizSessionResponse.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return quizSession, nil
 }
 func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/has-session?userId=%s&quizId=%s", userId, quizId), nil, nil); err != nil {

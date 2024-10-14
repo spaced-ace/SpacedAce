@@ -53,7 +53,7 @@ func StartQuizSession(c echo.Context) error {
 		},
 	)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error getting open quiz sessions")
+		return echo.NewHTTPError(http.StatusInternalServerError, "error getting open quiz sessions: "+err.Error())
 	}
 
 	// Close the open quiz sessions
@@ -157,6 +157,26 @@ func GetQuizSessions(c echo.Context) error {
 		Length:       resultCount,
 	}
 	return c.JSON(http.StatusOK, response)
+}
+
+func GetQuizSession(c echo.Context) error {
+	quizSessionId := c.Param("quizSessionId")
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dbQuizSession, err := sqlcQuerier.GetQuizSession(ctx, quizSessionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err)
+	}
+
+	quizSession, err := models.MapQuizSession(dbQuizSession)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, quizSession)
 }
 
 func StopQuizSession(c echo.Context) error {

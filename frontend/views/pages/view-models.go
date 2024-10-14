@@ -25,3 +25,8 @@ type SignupPageViewModel struct {
 type EditQuizPageViewModel struct {
 	Quiz *business.Quiz
 }
+
+type TakeQuizPageViewModel struct {
+	QuizSession *business.QuizSession
+	Quiz        *business.Quiz
+}

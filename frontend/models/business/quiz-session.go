@@ -11,4 +11,5 @@ type QuizSession struct {
 	StartedAt  time.Time
 	FinishedAt time.Time
 	ClosesAt   time.Time
+	Finished   bool
 }

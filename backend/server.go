@@ -71,7 +71,8 @@ func main() {
 	questions.PATCH("/true-or-false/:id", handlers.UpdateTrueOrFalseQuestionEndpoint)
 	questions.DELETE("/true-or-false/:quizId/:id", handlers.DeleteTrueOrFalseQuestionEndpoint)
 
-	quizSessions.GET("/list", handlers.GetQuizSessions)
+	quizSessions.GET("/:quizSessionId", handlers.GetQuizSession)
+	quizSessions.GET("", handlers.GetQuizSessions)
 	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
 	quizSessions.POST("/start", handlers.StartQuizSession)
 	quizSessions.POST("/:quizSessionId/stop", handlers.StopQuizSession)
