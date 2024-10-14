@@ -46,7 +46,9 @@ templ SideBar(props SidebarProps) {
                 class="flex h-full w-full flex-col gap-y-1 overflow-y-auto px-2">
                 for _, q := range props.QuizInfos {
                     <div
-                        hx-get={fmt.Sprintf("/quizzes/%s/take", q.Id)}
+                        hx-get={fmt.Sprintf("/quizzes/%s/preview-popup", q.Id)}
+                        hx-target="#popup-container"
+                        hx-push-url="false"
                         class="flex w-full group flex-shrink-0 items-center gap-x-2 px-2 py-1 cursor-pointer rounded-md hover:bg-gray-200"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 group-hover:fill-black">
