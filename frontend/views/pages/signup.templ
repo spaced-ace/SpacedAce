@@ -1,23 +1,22 @@
 package pages
 
 import (
-    "spaced-ace/views/layout"
+	"spaced-ace/models/request"
 	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
-	"spaced-ace/models/request"
+	"spaced-ace/views/layout"
 )
 
 templ SignupPage(viewModel SignupPageViewModel) {
-    @layout.HtmlLayout() {
-        <main class="h-full w-full">
-            @components.Navbar()
-
-            <div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
-                @forms.SignUpForm(
-                    request.SignupForm{},
-                    map[string]string{},
-                )
-            </div>
-        </main>
-    }
+	@layout.HtmlLayout() {
+		<main class="h-full w-full">
+			@components.Navbar()
+			<div class="flex flex-col w-screen h-[calc(100dvh)] justify-center items-center">
+				@forms.SignUpForm(
+					request.SignupForm{},
+					map[string]string{},
+				)
+			</div>
+		</main>
+	}
 }

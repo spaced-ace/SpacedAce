@@ -1,55 +1,50 @@
 package forms
 
-import "spaced-ace/views/components"
-import "spaced-ace/models/request"
+import (
+	"spaced-ace/models/request"
+	"spaced-ace/views/components"
+)
 
 templ SignUpForm(values request.SignupForm, errors map[string]string) {
-    <form
-        hx-post="/signup"
-        hx-swap="outerHTML"
-        class="flex flex-col gap-y-4 p-6 w-[500px]"
-        >
-        <span class="text-center text-3xl font-bold">Sign up</span>
-
-        @components.TextInput(components.TextInputProps{
-            Name: "name",
-            Label: "Name",
-            Placeholder: "John Doe",
-            Type: "text",
-            Value: values.Name,
-            Error: errors["name"],
-        })
-
-        @components.EMailInput(components.EMailInputProps{
-            Value: values.Email,
-            Error: errors["email"],
-        })
-
-        @components.TextInput(components.TextInputProps{
-            Name: "password",
-            Label: "Password",
-            Placeholder: "Password",
-            Type: "password",
-            Error: errors["password"],
-        })
-
-        @components.TextInput(components.TextInputProps{
-            Name: "password_again",
-            Label: "Password again",
-            Placeholder: "Password",
-            Type: "password",
-            Error: errors["password_again"],
-        })
-
-        @components.Button(components.ButtonProps{
-            Text: "Sign up",
-            Type: "submit",
-        })
-
-        @components.LinkButton("Already have an account?", "/login", components.ButtonColorWhite)
-
-        if errors["other"] != "" {
-            <span class="w-full py-4 text-red-500 text-nowrap">{errors["other"]}</span>
-        }
-    </form>
+	<form
+		hx-post="/signup"
+		hx-swap="outerHTML"
+		class="flex flex-col gap-y-4 p-6 w-[500px]"
+	>
+		<span class="text-center text-3xl font-bold">Sign up</span>
+		@components.TextInput(components.TextInputProps{
+			Name:        "name",
+			Label:       "Name",
+			Placeholder: "John Doe",
+			Type:        "text",
+			Value:       values.Name,
+			Error:       errors["name"],
+		})
+		@components.EMailInput(components.EMailInputProps{
+			Value: values.Email,
+			Error: errors["email"],
+		})
+		@components.TextInput(components.TextInputProps{
+			Name:        "password",
+			Label:       "Password",
+			Placeholder: "Password",
+			Type:        "password",
+			Error:       errors["password"],
+		})
+		@components.TextInput(components.TextInputProps{
+			Name:        "password_again",
+			Label:       "Password again",
+			Placeholder: "Password",
+			Type:        "password",
+			Error:       errors["password_again"],
+		})
+		@components.Button(components.ButtonProps{
+			Text: "Sign up",
+			Type: "submit",
+		})
+		@components.LinkButton("Already have an account?", "/login", components.ButtonColorWhite)
+		if errors["other"] != "" {
+			<span class="w-full py-4 text-red-500 text-nowrap">{ errors["other"] }</span>
+		}
+	</form>
 }

@@ -3,10 +3,10 @@ package pages
 import "spaced-ace/views/forms"
 
 templ CreateNewQuizPage(viewModel CreateNewQuizPageViewModel) {
-    <main class="flex h-full w-full justify-center p-6">
-        @forms.CreateQuizForm(
-            viewModel.Values,
-            viewModel.Errors,
-        )
-    </main>
+	<main class="flex h-full w-full justify-center p-6">
+		@forms.CreateQuizForm(
+			viewModel.Values,
+			viewModel.Errors,
+		)
+	</main>
 }

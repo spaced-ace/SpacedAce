@@ -3,33 +3,28 @@ package pages
 import "spaced-ace/views/components"
 
 templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
-    <main class="flex h-full w-full flex-col p-6 gap-y-8">
-        <div class="flex w-full items-center gap-x-2">
-            <span class="text-nowrap font-bold text-2xl">My Quizzes</span>
-
-            <div class="w-full bg-pink-500"></div>
-
-            @components.LinkButton("+ Create new", "/create-new-quiz", components.ButtonColorBlack)
-
-            @components.Button(components.ButtonProps{
-                Text: "Manage Learn List",
-                Color: components.ButtonColorWhite,
-                HxGet: "/my-quizzes/manage-learn-list",
-            })
-        </div>
-
-        @components.SearchBar(components.SearchBarProps{
-            Name: "query",
-            Placeholder: "Search...",
-            HxPost: "/my-exams",
-        })
-
-        @components.QuizList(components.QuizListProps{
-            QuizInfoWithColors: viewModel.QuizInfosWithColors,
-            AllowEdit: true,
-            AllowDelete: true,
-            AllowManagingLearnList: true,
-        })
-    </main>
-    @components.SideBarMenu("/my-quizzes", true)
+	<main class="flex h-full w-full flex-col p-6 gap-y-8">
+		<div class="flex w-full items-center gap-x-2">
+			<span class="text-nowrap font-bold text-2xl">My Quizzes</span>
+			<div class="w-full bg-pink-500"></div>
+			@components.LinkButton("+ Create new", "/create-new-quiz", components.ButtonColorBlack)
+			@components.Button(components.ButtonProps{
+				Text:  "Manage Learn List",
+				Color: components.ButtonColorWhite,
+				HxGet: "/my-quizzes/manage-learn-list",
+			})
+		</div>
+		@components.SearchBar(components.SearchBarProps{
+			Name:        "query",
+			Placeholder: "Search...",
+			HxPost:      "/my-exams",
+		})
+		@components.QuizList(components.QuizListProps{
+			QuizInfoWithColors:     viewModel.QuizInfosWithColors,
+			AllowEdit:              true,
+			AllowDelete:            true,
+			AllowManagingLearnList: true,
+		})
+	</main>
+	@components.SideBarMenu("/my-quizzes", true)
 }
