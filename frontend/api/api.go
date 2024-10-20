@@ -27,7 +27,6 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.GET("quizzes/:quizId/preview-popup", handleQuizPreviewPopup)
 	protected.GET("/quizzes/:quizId/take", handleTakeQuizPage)
 	protected.GET("/quizzes/:quizId/take/:quizSessionId", handleTakeQuizPage)
-	protected.POST("/quizzes/:quizId/submit", handleSubmitQuiz)
 
 	// Quiz creation page
 	protected.GET("/create-new-quiz", handleCreateNewQuizPage)
@@ -68,6 +67,4 @@ func RegisterRoutes(e *echo.Echo) {
 
 		return c.NoContent(http.StatusOK)
 	})
-
-	public.GET("/not-found", handleNotFoundPage)
 }
