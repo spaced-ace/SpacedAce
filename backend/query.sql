@@ -31,28 +31,64 @@ SELECT EXISTS (
     WHERE id = $1
     RETURNING *;
 
--- -- name: GetAuthor :one
--- SELECT * FROM authors
--- WHERE id = $1 LIMIT 1;
---
--- -- name: ListAuthors :many
--- SELECT * FROM authors
--- ORDER BY name;
---
--- -- name: CreateAuthor :one
--- INSERT INTO authors (
---     name, bio
--- ) VALUES (
---              $1, $2
---          )
--- RETURNING *;
---
--- -- name: UpdateAuthor :exec
--- UPDATE authors
--- set name = $2,
---     bio = $3
--- WHERE id = $1;
---
--- -- name: DeleteAuthor :exec
--- DELETE FROM authors
--- WHERE id = $1;
+-- Multiple Choice answers
+
+-- name: GetMultipleChoiceAnswers :many
+    SELECT *
+    FROM multiple_choice_answers
+    WHERE true
+        AND session_id = $1;
+
+-- name: GetMultipleChoiceAnswerById :one
+    SELECT 1
+    FROM multiple_choice_answers
+    WHERE true
+        AND id = $1
+    LIMIT 1;
+
+-- name: GetMultipleChoiceAnswerBySessionAndQuestionId :one
+    SELECT 1
+    FROM multiple_choice_answers
+    WHERE true
+        AND session_id = $1
+        AND question_id = $2
+    LIMIT 1;
+
+-- name: UpdateMultipleChoiceAnswerBySessionAndQuestionId :one
+    UPDATE multiple_choice_answers
+    SET answers = $3
+    WHERE true
+        AND session_id = $1
+        AND question_id = $2
+    RETURNING *;-- True or False answers
+
+-- True or false answers
+
+-- name: GetTrueOrFalseAnswers :many
+    SELECT *
+    FROM true_or_false_answers
+    WHERE true
+        AND session_id = $1;
+
+-- name: GetTrueOrFalseAnswerById :one
+    SELECT 1
+    FROM true_or_false_answers
+    WHERE true
+        AND id = $1
+    LIMIT 1;
+
+-- name: GetTrueOrFalseAnswerBySessionAndQuestionId :one
+    SELECT 1
+    FROM true_or_false_answers
+    WHERE true
+        AND session_id = $1
+        AND question_id = $2
+    LIMIT 1;
+
+-- name: UpdateTrueOrFalseAnswerBySessionAndQuestionId :one
+    UPDATE true_or_false_answers
+    SET answer = $3
+    WHERE true
+        AND session_id = $1
+        AND question_id = $2
+    RETURNING *;

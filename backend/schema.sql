@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS single_choice_answers(
     answer TEXT[1]
 );
 CREATE INDEX idx_single_choice_answers_session_id ON single_choice_answers(session_id);
+ALTER TABLE single_choice_answers ADD CONSTRAINT constraint_single_choice_answers_unique_session_and_question UNIQUE (session_id, question_id);
 
 CREATE TABLE IF NOT EXISTS multiple_choice_answers(
     id   UUID PRIMARY KEY NOT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS multiple_choice_answers(
     answers TEXT[4] -- list of letters e.g. ABD, maximum 4 answers are possible
 );
 CREATE INDEX idx_multiple_choice_answers_session_id ON multiple_choice_answers(session_id);
+ALTER TABLE multiple_choice_answers ADD CONSTRAINT constraint_multiple_choice_answers_unique_session_and_question UNIQUE (session_id, question_id);
 
 CREATE TABLE IF NOT EXISTS true_or_false_answers(
     id   UUID PRIMARY KEY NOT NULL,
@@ -32,3 +34,5 @@ CREATE TABLE IF NOT EXISTS true_or_false_answers(
     answer BOOLEAN
 );
 CREATE INDEX idx_true_or_false_answers_session_id ON true_or_false_answers(session_id);
+ALTER TABLE true_or_false_answers ADD CONSTRAINT constraint_true_or_false_answers_unique_session_and_question UNIQUE (session_id, question_id);
+
