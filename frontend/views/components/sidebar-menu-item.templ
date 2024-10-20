@@ -1,0 +1,23 @@
+package components
+
+type SidebarMenuItemProps struct {
+	Name   string
+	Url    string
+	Active bool
+}
+
+templ SidebarMenuItem(props SidebarMenuItemProps) {
+	<div
+		hx-get={ props.Url }
+		hx-swap="outerHTML"
+		hx-target="main"
+		if props.Active {
+			class="flex w-full cursor-pointer items-center gap-x-1 rounded-md bg-gray-300 px-2 py-1 hover:bg-gray-200"
+		} else {
+			class="flex w-full cursor-pointer items-center gap-x-1 rounded-md bg-white px-2 py-1 hover:bg-gray-200"
+		}
+	>
+		{ children... }
+		<span class="text-lg font-medium text-nowrap">{ props.Name }</span>
+	</div>
+}

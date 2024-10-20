@@ -1,0 +1,20 @@
+package components
+
+templ IndexPageFeature(name, description string, reversed bool) {
+	<div
+		if reversed {
+			class="flex gap-x-8 w-[1000px] flex-row-reverse"
+		} else {
+			class="flex gap-x-8 w-[1000px]"
+		}
+	>
+		<div class="flex flex-col gap-y-4 justify-center">
+			<div class="flex gap-x-2 items-center">
+				{ children... }
+				<span class="font-bold text-2xl">{ name }</span>
+			</div>
+			<span>{ description }</span>
+		</div>
+		<div class="flex-shrink-0 h-[400px] w-[600px] bg-gray-400"></div>
+	</div>
+}

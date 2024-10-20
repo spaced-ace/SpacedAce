@@ -1,6 +1,6 @@
 {{ block "single-choice-answer" . }}
 <div id="question-{{ .QuestionId }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
-    <div class="flex w-full items-start gap-x-2 justify-between">
+    <div class="flex w-full items-start justify-between gap-x-2">
         <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .QuestionText }}</span>
         <span>{{ .Score }}/{{ .MaxScore }}</span>
     </div>
@@ -31,7 +31,7 @@
 
 {{ block "multiple-choice-answer" . }}
 <div id="question-{{ .QuestionId }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
-    <div class="flex w-full items-start gap-x-2 justify-between">
+    <div class="flex w-full items-start justify-between gap-x-2">
         <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .QuestionText }}</span>
         <span>{{ .Score }}/{{ .MaxScore }}</span>
     </div>
@@ -61,7 +61,7 @@
 
 {{ block "true-or-false-answer" . }}
     <div id="question-{{ .QuestionId }}" class="flex flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6 w-[700px]">
-        <div class="flex w-full items-start gap-x-2 justify-between">
+        <div class="flex w-full items-start justify-between gap-x-2">
             <span class="overflow-auto whitespace-normal text-xl font-semibold">{{ .QuestionText  }}</span>
             <span>{{ .Score }}/{{ .MaxScore }}</span>
         </div>

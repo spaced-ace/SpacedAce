@@ -1,0 +1,46 @@
+package forms
+
+import (
+	"spaced-ace/models/request"
+	"spaced-ace/views/components"
+)
+
+templ CreateQuizForm(values request.CreateQuizRequestForm, errors map[string]string) {
+	<form
+		hx-post="/quizzes/create"
+		hx-swap="outerHTML"
+		class="flex h-full flex-shrink-0 flex-col justify-start py-6 w-[700px]"
+	>
+		<span class="text-2xl font-bold text-nowrap">Create new</span>
+		<div class="h-8 w-full"></div>
+		@components.TextInput(components.TextInputProps{
+			Name:        "title",
+			Label:       "Title",
+			Placeholder: "My quiz",
+			Type:        "text",
+			Value:       values.Title,
+			Error:       errors["title"],
+		})
+		<div class="h-4 w-full"></div>
+		@components.TextArea(components.TextAreaProps{
+			Name:        "description",
+			Label:       "Description",
+			Placeholder: "Description",
+			Rows:        4,
+			Value:       values.Description,
+			Error:       errors["description"],
+		})
+		<div class="h-4 w-full"></div>
+		<div id="generate-buttons" class="flex flex-shrink-0 gap-2">
+			@components.LinkButton("Back", "/my-quizzes", components.ButtonColorRed)
+			@components.Button(components.ButtonProps{
+				Text:  "Create",
+				Type:  "submit",
+				Color: components.ButtonColorBlue,
+			})
+		</div>
+		if errors["other"] != "" {
+			<span class="w-full py-4 text-red-500 text-nowrap">errors["other"]</span>
+		}
+	</form>
+}

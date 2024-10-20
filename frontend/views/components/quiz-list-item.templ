@@ -1,0 +1,59 @@
+package components
+
+import (
+	"fmt"
+	"spaced-ace/models/business"
+)
+
+type QuizListItemProps struct {
+	QuizInfoWithColors     business.QuizInfoWithColors
+	AllowEdit              bool
+	AllowDelete            bool
+	AllowManagingLearnList bool
+}
+
+templ QuizListItem(props QuizListItemProps) {
+	<div
+		id={ fmt.Sprintf("quiz-%s", props.QuizInfoWithColors.QuizInfo.Id) }
+		class="flex flex-col rounded-md border bg-gray-100 w-[350px] group min-w-[350px] h-[265px] hover:bg-gray-200"
+	>
+		<div class={ fmt.Sprintf("h-full w-full rounded-t-md group bg-gradient-to-br from-%s to-%s flex justify-end", props.QuizInfoWithColors.FromColor, props.QuizInfoWithColors.ToColor) }>
+			<div class="hidden h-min items-start justify-start gap-x-2 p-2 group-hover:flex">
+				<span
+					hx-get={ fmt.Sprintf("quizzes/%s/edit", props.QuizInfoWithColors.QuizInfo.Id) }
+					hx-push-url="true"
+					hx-swap="outerHTML"
+					hx-target="main"
+					class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200"
+				>
+					<img
+						src="/static/icons/pencil.svg"
+						alt="icon"
+						class="h-5 w-5"
+					/>
+				</span>
+				<div class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+					<img
+						hx-delete={ fmt.Sprintf("/quizzes/%s", props.QuizInfoWithColors.QuizInfo.Id) }
+						src="/static/icons/x-mark.svg"
+						hx-target={ fmt.Sprintf("#quiz-%s", props.QuizInfoWithColors.QuizInfo.Id) }
+						hx-swap="outerHTML"
+						hx-confirm="Are you sure you want to delete this quiz? This action cannot be undone."
+						hx-push-url="false"
+						alt="icon"
+						class="h-6 w-6"
+					/>
+				</div>
+			</div>
+		</div>
+		<a
+			href={ templ.SafeURL(fmt.Sprintf("/quizzes/%s/preview-popup", props.QuizInfoWithColors.QuizInfo.Id)) }
+			hx-target="#popup-container"
+			hx-push-url="false"
+			class="flex w-full cursor-pointer rounded-b-md px-2 py-1 h-[100px]"
+		>
+			<span class="text-lg w-[calc(100%-1.5rem)] line-clamp-2 text-ellipsis overflow-auto whitespace-normal">{ props.QuizInfoWithColors.QuizInfo.Title }</span>
+			<img src="/static/icons/arrow-right.svg" alt="icon" class="h-6 w-6 self-center"/>
+		</a>
+	</div>
+}

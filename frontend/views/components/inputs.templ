@@ -1,0 +1,126 @@
+package components
+
+import "fmt"
+
+type EMailInputProps struct {
+	Value string
+	Error string
+}
+
+templ EMailInput(props EMailInputProps) {
+	<div class="flex flex-col items-start gap-y-1 group">
+		<label for="email" class="w-full text-sm font-bold leading-6">Email</label>
+		<input
+			id="email"
+			name="email"
+			type="email"
+			placeholder="Email"
+			value={ props.Value }
+			if props.Error == "" {
+				class="h-10 w-full rounded-md border border-gray-300 px-4 py-2 group-hover:bg-gray-100"
+			} else {
+				class="h-10 w-full rounded-md border border-red-500 px-4 py-2 group-hover:bg-red-100"
+			}
+		/>
+		if props.Error != "" {
+			<span class="pl-2 text-sm text-red-500">{ props.Error }</span>
+		}
+	</div>
+}
+
+type TextInputProps struct {
+	Name        string
+	Label       string
+	Placeholder string
+	Value       string
+	Type        string
+	Error       string
+}
+
+templ TextInput(props TextInputProps) {
+	<div class="flex flex-col items-start gap-y-1">
+		<label for={ props.Name } class="w-full text-sm font-bold leading-6">{ props.Label }</label>
+		<input
+			id={ props.Name }
+			name={ props.Name }
+			if props.Type !="" {
+				type={ props.Type }
+			}
+			type="text"
+			value={ props.Value }
+			placeholder={ props.Placeholder }
+			if props.Error == "" {
+				class="h-10 w-full rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-100"
+			} else {
+				class="h-10 w-full rounded-md border border-red-500 px-4 py-2 hover:bg-red-100"
+			}
+		/>
+		if props.Error != "" {
+			<span class="pl-2 text-sm text-red-500">{ props.Error }</span>
+		}
+	</div>
+}
+
+type SearchBarProps struct {
+	Name        string
+	Placeholder string
+	HxPost      string
+	Value       string
+}
+
+templ SearchBar(props SearchBarProps) {
+	<div class="h-12 w-full">
+		<form
+			hx-post={ props.HxPost }
+			class="flex h-full w-full flex-shrink-0 items-center rounded-md border bg-white px-2 focus-within:border-gray-400 hover:bg-gray-100 group"
+		>
+			<img src="/static/icons/search.svg" alt="icon" class="h-5 w-5"/>
+			<label for={ props.Name } class="h-full w-full px-2 group-hover:bg-gray-100">
+				<input
+					id={ props.Name }
+					name={ props.Name }
+					placeholder={ props.Placeholder }
+					type="search"
+					value={ props.Value }
+					class="h-full w-full focus:outline-none focus:ring-0 group-hover:bg-gray-100"
+				/>
+			</label>
+		</form>
+	</div>
+}
+
+type TextAreaProps struct {
+	Name        string
+	Label       string
+	Placeholder string
+	Rows        int
+	Value       string
+	Error       string
+	Disabled    bool
+}
+
+templ TextArea(props TextAreaProps) {
+	<div class="flex flex-col items-start gap-y-1">
+		<label for={ props.Name } class="w-full text-sm font-bold leading-6">{ props.Label }</label>
+		<textarea
+			id={ props.Name }
+			name={ props.Name }
+			type="text"
+			rows={ fmt.Sprintf("%d", props.Rows) }
+			placeholder={ props.Placeholder }
+			if props.Disabled {
+				disabled
+			}
+			if props.Error == "" {
+				class="max-h-64 w-full rounded-md border border-gray-300 px-4 py-2 min-h-32 hover:bg-gray-100 disabled:text-white disabled:cursor-not-allowed disabled:border-gray-600 disabled:bg-gray-400 disabled:opacity-50"
+			} else {
+				class="max-h-64 w-full rounded-md border border-red-500 px-4 py-2 min-h-32 hover:bg-red-100"
+			}
+		>
+			{ props.Value }
+		</textarea>
+		if props.Error != "" {
+			<span class="pl-2 text-sm text-red-500">{ props.Error }</span>
+		}
+	</div>
+}

@@ -1,12 +1,16 @@
 package main
 
 import (
+	"golang.org/x/net/context"
+	"log"
 	"net/http"
 	handlers "spaced-ace-backend/api/handlers"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/constants"
 	"spaced-ace-backend/question"
 	"spaced-ace-backend/quiz"
+	"spaced-ace-backend/utils"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,6 +22,18 @@ func main() {
 	auth.InitDb()
 	quiz.InitDb()
 	question.InitDb()
+
+	// Init and close SQLC connection gracefully
+	sqlcQuerier := utils.GetQuerier()
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	defer func() {
+		closeCtx, closeCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer closeCancel()
+		if err := sqlcQuerier.Close(closeCtx); err != nil {
+			log.Printf("Error closing database connection: %v", err)
+		}
+	}()
 
 	public := e.Group("")
 	protected := e.Group("")
@@ -55,7 +71,11 @@ func main() {
 	questions.PATCH("/true-or-false/:id", handlers.UpdateTrueOrFalseQuestionEndpoint)
 	questions.DELETE("/true-or-false/:quizId/:id", handlers.DeleteTrueOrFalseQuestionEndpoint)
 
+	quizSessions.GET("/:quizSessionId", handlers.GetQuizSession)
+	quizSessions.GET("", handlers.GetQuizSessions)
+	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
 	quizSessions.POST("/start", handlers.StartQuizSession)
+	quizSessions.POST("/:quizSessionId/stop", handlers.StopQuizSession)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

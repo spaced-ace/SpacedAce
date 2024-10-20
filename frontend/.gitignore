@@ -2,3 +2,5 @@
 tmp/
 node_modules/
 /static/tailwindcss.css
+views/*/*.go
+views/*/*.txt

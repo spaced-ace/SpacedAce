@@ -17,15 +17,16 @@ func RegisterRoutes(e *echo.Echo) {
 	public.GET("/", handleIndexPage)
 	public.GET("/login", handleLoginPage)
 	public.GET("/signup", handleSignupPage)
+	public.GET("/close-popup", handleClosePopup)
 
 	// My quizzes page
 	protected.GET("/my-quizzes", handleMyQuizzesPage)
 	protected.DELETE("/quizzes/:quizId", handleDeleteQuiz)
 
 	// Take quiz page
-	//protected.GET("/quizzes/:quizId/preview", handleQuizPreviewPage)
+	protected.GET("quizzes/:quizId/preview-popup", handleQuizPreviewPopup)
 	protected.GET("/quizzes/:quizId/take", handleTakeQuizPage)
-	protected.POST("/quizzes/:quizId/submit", handleSubmitQuiz)
+	protected.GET("/quizzes/:quizId/take/:quizSessionId", handleTakeQuizPage)
 
 	// Quiz creation page
 	protected.GET("/create-new-quiz", handleCreateNewQuizPage)
@@ -33,6 +34,7 @@ func RegisterRoutes(e *echo.Echo) {
 
 	// Question generation
 	protected.GET("/quizzes/:id/edit", handleEditQuizPage)
+	protected.POST("/generate/start", handleGenerateQuestionStart)
 	protected.POST("/generate", handleGenerateQuestion)
 	protected.PATCH("/quizzes/:id", handleUpdateQuiz)
 	protected.DELETE("/questions/:questionId", handleDeleteQuestion)
@@ -65,6 +67,4 @@ func RegisterRoutes(e *echo.Echo) {
 
 		return c.NoContent(http.StatusOK)
 	})
-
-	public.GET("/not-found", handleNotFoundPage)
 }

@@ -5,17 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"spaced-ace/constants"
 	"spaced-ace/models/business"
+	"spaced-ace/models/request"
+	"spaced-ace/render"
+	"spaced-ace/views/forms"
 )
-
-type SignupForm struct {
-	Email         string `form:"email"`
-	Name          string `form:"name"`
-	Password      string `form:"password"`
-	PasswordAgain string `form:"passwordAgain"`
-}
 
 type SignupRequestBody struct {
 	Email         string `json:"email"`
@@ -25,9 +22,39 @@ type SignupRequestBody struct {
 }
 
 func PostRegister(c echo.Context) error {
-	var signupForm = SignupForm{}
+	errors := map[string]string{}
+
+	var signupForm = request.SignupForm{}
 	if err := c.Bind(&signupForm); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		log.Default().Println(err.Error())
+		errors["other"] = "Parsing error"
+		return render.TemplRender(c, 200, forms.SignUpForm(signupForm, errors))
+	}
+
+	// Remove the password and password again fields
+	sanitizedSignupForm := request.SignupForm{
+		Name:  signupForm.Name,
+		Email: signupForm.Email,
+	}
+
+	if signupForm.Name == "" {
+		errors["name"] = "Name is required"
+	}
+	if signupForm.Email == "" {
+		errors["email"] = "Email is required"
+	}
+	if signupForm.Password == "" {
+		errors["password"] = "Password is required"
+	}
+	if signupForm.Password == "" {
+		errors["password_again"] = "Password again is required"
+	}
+	if signupForm.Password != signupForm.PasswordAgain {
+		errors["password"] = "Different passwords"
+		errors["password_again"] = "Different passwords"
+	}
+	if len(errors) > 0 {
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
 	bodyMap := SignupRequestBody{
@@ -38,7 +65,9 @@ func PostRegister(c echo.Context) error {
 	}
 	bodyBytes, err := json.Marshal(bodyMap)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		log.Default().Println(err.Error())
+		errors["other"] = "Internal server error"
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 	bodyBuffer := bytes.NewBuffer(bodyBytes)
 
@@ -46,18 +75,24 @@ func PostRegister(c echo.Context) error {
 	fmt.Println(err)
 	fmt.Println(resp.Status)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		log.Default().Println(err.Error())
+		errors["other"] = "Internal server error"
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return echo.NewHTTPError(resp.StatusCode, resp.Status)
+		log.Default().Printf("Register status code: %d\n", resp.StatusCode)
+		errors["other"] = "Internal server error"
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
 	// parse the response
 	var user business.User
 	err = json.NewDecoder(resp.Body).Decode(&user)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		log.Default().Println(err.Error())
+		errors["other"] = "Internal server error"
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
 	// get the session cookie
@@ -69,7 +104,9 @@ func PostRegister(c echo.Context) error {
 		}
 	}
 	if sessionCookie == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "session cookie not found")
+		log.Default().Println("session cookie not found")
+		errors["other"] = "Error: session cookie not found"
+		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
 	c.SetCookie(sessionCookie)
