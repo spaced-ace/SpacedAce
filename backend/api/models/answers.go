@@ -9,9 +9,9 @@ import (
 type AnswerType int
 
 const (
-	SingleChoice AnswerType = iota
-	MultipleChoice
-	TrueOrFalse
+	SingleChoiceAnswerType AnswerType = iota
+	MultipleChoiceAnswerType
+	TrueOrFalseAnswerType
 )
 
 type SingleChoiceAnswer struct {
@@ -33,7 +33,7 @@ func MapSingleChoiceAnswer(dba db.SingleChoiceAnswer) (*SingleChoiceAnswer, erro
 		ID:         dba.ID,
 		SessionID:  dba.SessionID,
 		QuestionID: dba.QuestionID,
-		AnswerType: SingleChoice,
+		AnswerType: SingleChoiceAnswerType,
 		Answer:     dba.Answer[0],
 	}, nil
 }
@@ -68,7 +68,7 @@ func MapMultipleChoiceAnswer(dba db.MultipleChoiceAnswer) (*MultipleChoiceAnswer
 		ID:         dba.ID,
 		SessionID:  dba.SessionID,
 		QuestionID: dba.QuestionID,
-		AnswerType: MultipleChoice,
+		AnswerType: MultipleChoiceAnswerType,
 		Answers:    answers,
 	}, nil
 }
@@ -86,7 +86,7 @@ func MapTrueOrFalseAnswer(dba db.TrueOrFalseAnswer) (*TrueOrFalseAnswer, error) 
 		ID:         dba.ID,
 		SessionID:  dba.SessionID,
 		QuestionID: dba.QuestionID,
-		AnswerType: TrueOrFalse,
+		AnswerType: TrueOrFalseAnswerType,
 		Answer:     dba.Answer.Bool,
 	}, nil
 }
