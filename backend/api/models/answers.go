@@ -22,6 +22,12 @@ type SingleChoiceAnswer struct {
 	Answer     string     `json:"answer"`
 }
 
+type AnswersResponse struct {
+	SingleChoiceAnswers   []SingleChoiceAnswer   `json:"singleChoiceAnswers"`
+	MultipleChoiceAnswers []MultipleChoiceAnswer `json:"multipleChoiceAnswers"`
+	TrueOrFalseAnswer     []TrueOrFalseAnswer    `json:"trueOrFalseAnswer"`
+}
+
 func MapSingleChoiceAnswer(dba db.SingleChoiceAnswer) (*SingleChoiceAnswer, error) {
 	if len(dba.Answer) > 1 {
 		return nil, fmt.Errorf("invalid number of answers (got: %d, expected: <= 1)", len(dba.Answer))

@@ -238,3 +238,72 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 
 	return echo.NewHTTPError(http.StatusInternalServerError, "unreachable code")
 }
+
+func GetAnswers(c echo.Context) error {
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing path param quizSessionId")
+	}
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dbSingleChoiceAnswers, err := sqlcQuerier.GetSingleChoiceAnswers(
+		ctx,
+		quizSessionId,
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error getting single choice answers: %s", err))
+	}
+
+	singleChoiceAnswers := make([]models.SingleChoiceAnswer, len(dbSingleChoiceAnswers))
+	for i, dbAnswer := range dbSingleChoiceAnswers {
+		answer, err := models.MapSingleChoiceAnswer(dbAnswer)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing a single choice answer: %s", err))
+		}
+		singleChoiceAnswers[i] = *answer
+	}
+
+	dbMultipleChoiceAnswers, err := sqlcQuerier.GetMultipleChoiceAnswers(
+		ctx,
+		quizSessionId,
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error getting multiple choice answers: %s", err))
+	}
+
+	multipleChoiceAnswers := make([]models.MultipleChoiceAnswer, len(dbMultipleChoiceAnswers))
+	for i, dbAnswer := range dbMultipleChoiceAnswers {
+		answer, err := models.MapMultipleChoiceAnswer(dbAnswer)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing a multiple choice answer: %s", err))
+		}
+		multipleChoiceAnswers[i] = *answer
+	}
+
+	dbTrueOrFalseAnswers, err := sqlcQuerier.GetTrueOrFalseAnswers(
+		ctx,
+		quizSessionId,
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error getting true or false answers: %s", err))
+	}
+
+	trueOrFalseAnswers := make([]models.TrueOrFalseAnswer, len(dbTrueOrFalseAnswers))
+	for i, dbAnswer := range dbTrueOrFalseAnswers {
+		answer, err := models.MapTrueOrFalseAnswer(dbAnswer)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing a true or false answer: %s", err))
+		}
+		trueOrFalseAnswers[i] = *answer
+	}
+
+	response := models.AnswersResponse{
+		SingleChoiceAnswers:   singleChoiceAnswers,
+		MultipleChoiceAnswers: multipleChoiceAnswers,
+		TrueOrFalseAnswer:     trueOrFalseAnswers,
+	}
+	return c.JSON(http.StatusOK, response)
+}

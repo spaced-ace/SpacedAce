@@ -76,6 +76,7 @@ func main() {
 	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
 	quizSessions.POST("/start", handlers.StartQuizSession)
 	quizSessions.POST("/:quizSessionId/stop", handlers.StopQuizSession)
+	quizSessions.GET("/:quizSessionId/answers", handlers.GetAnswers)
 	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
