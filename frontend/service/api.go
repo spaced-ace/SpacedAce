@@ -309,7 +309,7 @@ func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 
 func (a *ApiService) GetAnswers(quizSessionId string) (*business.AnswerLists, error) {
 	answersResponse := new(external.AnswersResponse)
-	if err := a.getResponse("GET", fmt.Sprintf("/%s/answers", quizSessionId), nil, &answersResponse); err != nil {
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), nil, &answersResponse); err != nil {
 		return nil, err
 	}
 
@@ -320,10 +320,10 @@ func (a *ApiService) GetAnswers(quizSessionId string) (*business.AnswerLists, er
 	return answerLists, nil
 }
 func (a *ApiService) CreateOrUpdateSingleChoiceAnswer(quizSessionId, questionId string, answer string) (*business.SingleChoiceAnswer, error) {
-	requestBody := external.NewSingleChoiceAnswerRequestBody(quizSessionId, questionId, answer)
+	requestBody := external.NewSingleChoiceAnswerRequestBody(questionId, answer)
 
 	responseBody := new(external.SingleChoiceAnswer)
-	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
 		return nil, err
 	}
 
@@ -334,10 +334,10 @@ func (a *ApiService) CreateOrUpdateSingleChoiceAnswer(quizSessionId, questionId 
 	return singleChoiceAnswer, nil
 }
 func (a *ApiService) CreateOrUpdateMultipleChoiceAnswer(quizSessionId, questionId string, answers []string) (*business.MultipleChoiceAnswer, error) {
-	requestBody := external.NewMultipleChoiceAnswerRequestBody(quizSessionId, questionId, answers)
+	requestBody := external.NewMultipleChoiceAnswerRequestBody(questionId, answers)
 
 	responseBody := new(external.MultipleChoiceAnswer)
-	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
 		return nil, err
 	}
 
@@ -348,10 +348,10 @@ func (a *ApiService) CreateOrUpdateMultipleChoiceAnswer(quizSessionId, questionI
 	return multipleChoiceAnswer, nil
 }
 func (a *ApiService) CreateOrUpdateTrueOrFalseAnswer(quizSessionId, questionId string, answer bool) (*business.TrueOrFalseAnswer, error) {
-	requestBody := external.NewTrueOrFalseAnswerRequestBody(quizSessionId, questionId, answer)
+	requestBody := external.NewTrueOrFalseAnswerRequestBody(questionId, answer)
 
 	responseBody := new(external.TrueOrFalseAnswer)
-	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
 		return nil, err
 	}
 

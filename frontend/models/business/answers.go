@@ -8,17 +8,14 @@ type CommonAnswerData struct {
 	QuestionId string
 	AnswerType models.AnswerType
 }
-
 type SingleChoiceAnswer struct {
 	CommonAnswerData
 	Answer string
 }
-
 type MultipleChoiceAnswer struct {
 	CommonAnswerData
 	Answers []string
 }
-
 type TrueOrFalseAnswer struct {
 	CommonAnswerData
 	Answer bool
@@ -27,5 +24,30 @@ type TrueOrFalseAnswer struct {
 type AnswerLists struct {
 	SingleChoiceAnswers   []SingleChoiceAnswer
 	MultipleChoiceAnswers []MultipleChoiceAnswer
-	TrueOrFalseAnswer     []TrueOrFalseAnswer
+	TrueOrFalseAnswers    []TrueOrFalseAnswer
+}
+
+func (lists *AnswerLists) GetSingleChoiceAnswerOrNil(questionId string) *SingleChoiceAnswer {
+	for _, a := range lists.SingleChoiceAnswers {
+		if a.QuestionId == questionId {
+			return &a
+		}
+	}
+	return nil
+}
+func (lists *AnswerLists) GetMultipleChoiceAnswerOrNil(questionId string) *MultipleChoiceAnswer {
+	for _, a := range lists.MultipleChoiceAnswers {
+		if a.QuestionId == questionId {
+			return &a
+		}
+	}
+	return nil
+}
+func (lists *AnswerLists) GetTrueOrFalseAnswerOrNil(questionId string) *TrueOrFalseAnswer {
+	for _, a := range lists.TrueOrFalseAnswers {
+		if a.QuestionId == questionId {
+			return &a
+		}
+	}
+	return nil
 }

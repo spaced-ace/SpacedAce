@@ -29,4 +29,5 @@ type EditQuizPageViewModel struct {
 type TakeQuizPageViewModel struct {
 	QuizSession *business.QuizSession
 	Quiz        *business.Quiz
+	AnswerLists *business.AnswerLists
 }

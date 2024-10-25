@@ -64,11 +64,29 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
 					for _, q := range viewModel.Quiz.Questions {
 						switch question := q.(type) {
 							case *business.SingleChoiceQuestion:
-								@components.SingleChoiceQuestion(question, true, false)
+								@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+									QuizSession:               nil,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             true,
+									ReplacePlaceholderWithOOB: false,
+								})
 							case *business.MultipleChoiceQuestion:
-								@components.MultipleChoiceQuestion(question, true, false)
+								@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+									QuizSession:               nil,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             true,
+									ReplacePlaceholderWithOOB: false,
+								})
 							case *business.TrueOrFalseQuestion:
-								@components.TrueOrFalseQuestion(question, true, false)
+								@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+									QuizSession:               nil,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             true,
+									ReplacePlaceholderWithOOB: false,
+								})
 						}
 					}
 				</div>

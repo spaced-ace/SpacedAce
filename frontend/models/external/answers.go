@@ -3,6 +3,7 @@ package external
 import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
+	"strings"
 )
 
 type SingleChoiceAnswer struct {
@@ -17,7 +18,7 @@ type MultipleChoiceAnswer struct {
 	SessionID  string            `json:"sessionId"`
 	QuestionID string            `json:"questionId"`
 	AnswerType models.AnswerType `json:"answerType"`
-	Answers    []string          `json:"answers"`
+	Answers    string            `json:"answers"`
 }
 type TrueOrFalseAnswer struct {
 	ID         string            `json:"id"`
@@ -46,7 +47,7 @@ func (a MultipleChoiceAnswer) MapToBusiness() (*business.MultipleChoiceAnswer, e
 			QuestionId: a.QuestionID,
 			AnswerType: a.AnswerType,
 		},
-		Answers: a.Answers,
+		Answers: strings.Split(a.Answers, ""),
 	}, nil
 }
 func (a TrueOrFalseAnswer) MapToBusiness() (*business.TrueOrFalseAnswer, error) {
@@ -98,7 +99,7 @@ func (r AnswersResponse) MapToBusiness() (*business.AnswerLists, error) {
 	return &business.AnswerLists{
 		SingleChoiceAnswers:   singleChoiceAnswers,
 		MultipleChoiceAnswers: multipleChoiceAnswers,
-		TrueOrFalseAnswer:     trueOrFalseAnswers,
+		TrueOrFalseAnswers:    trueOrFalseAnswers,
 	}, nil
 }
 
@@ -119,7 +120,7 @@ type TrueOrFalseAnswerRequestBody struct {
 	Answer bool `json:"answer"`
 }
 
-func NewSingleChoiceAnswerRequestBody(quizSessionId, questionId string, answer string) *SingleChoiceAnswerRequestBody {
+func NewSingleChoiceAnswerRequestBody(questionId string, answer string) *SingleChoiceAnswerRequestBody {
 	return &SingleChoiceAnswerRequestBody{
 		AnswerRequestBody: AnswerRequestBody{
 			QuestionId: questionId,
@@ -128,7 +129,7 @@ func NewSingleChoiceAnswerRequestBody(quizSessionId, questionId string, answer s
 		Answer: answer,
 	}
 }
-func NewMultipleChoiceAnswerRequestBody(quizSessionId, questionId string, answers []string) *MultipleChoiceAnswerRequestBody {
+func NewMultipleChoiceAnswerRequestBody(questionId string, answers []string) *MultipleChoiceAnswerRequestBody {
 	return &MultipleChoiceAnswerRequestBody{
 		AnswerRequestBody: AnswerRequestBody{
 			QuestionId: questionId,
@@ -137,7 +138,7 @@ func NewMultipleChoiceAnswerRequestBody(quizSessionId, questionId string, answer
 		Answers: answers,
 	}
 }
-func NewTrueOrFalseAnswerRequestBody(quizSessionId, questionId string, answer bool) *TrueOrFalseAnswerRequestBody {
+func NewTrueOrFalseAnswerRequestBody(questionId string, answer bool) *TrueOrFalseAnswerRequestBody {
 	return &TrueOrFalseAnswerRequestBody{
 		AnswerRequestBody: AnswerRequestBody{
 			QuestionId: questionId,

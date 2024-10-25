@@ -32,6 +32,9 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.GET("/create-new-quiz", handleCreateNewQuizPage)
 	protected.POST("/quizzes/create", handleCreateQuiz)
 
+	// Answer questions
+	protected.PUT("/quiz-sessions/:quizSessionId/answers", handleAnswerQuestion)
+
 	// Question generation
 	protected.GET("/quizzes/:id/edit", handleEditQuizPage)
 	protected.POST("/generate/start", handleGenerateQuestionStart)

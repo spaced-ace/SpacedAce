@@ -63,13 +63,60 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 				class="flex w-full flex-col gap-y-4"
 			>
 				for _, q := range viewModel.Quiz.Questions {
-					switch question := q.(type) {
-						case *business.SingleChoiceQuestion:
-							@components.SingleChoiceQuestion(question, false, false)
-						case *business.MultipleChoiceQuestion:
-							@components.MultipleChoiceQuestion(question, false, false)
-						case *business.TrueOrFalseQuestion:
-							@components.TrueOrFalseQuestion(question, false, false)
+					if viewModel.AnswerLists == nil {
+						switch question := q.(type) {
+							case *business.SingleChoiceQuestion:
+								@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.MultipleChoiceQuestion:
+								@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.TrueOrFalseQuestion:
+								@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+						}
+					} else {
+						switch question := q.(type) {
+							case *business.SingleChoiceQuestion:
+								@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetSingleChoiceAnswerOrNil(q.(*business.SingleChoiceQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.MultipleChoiceQuestion:
+								@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetMultipleChoiceAnswerOrNil(q.(*business.MultipleChoiceQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.TrueOrFalseQuestion:
+								@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetTrueOrFalseAnswerOrNil(q.(*business.TrueOrFalseQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+						}
 					}
 				}
 			</div>

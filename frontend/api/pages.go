@@ -115,9 +115,16 @@ func handleTakeQuizPage(c echo.Context) error {
 		return err
 	}
 
+	var answerLists *business.AnswerLists
+	answers, err := cc.ApiService.GetAnswers(quizSession.Id)
+	if err == nil {
+		answerLists = answers
+	}
+
 	viewModel := pages.TakeQuizPageViewModel{
 		QuizSession: quizSession,
 		Quiz:        quiz,
+		AnswerLists: answerLists,
 	}
 	return render.TemplRender(c, 200, pages.TakeQuizPage(viewModel))
 }
