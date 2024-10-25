@@ -63,7 +63,7 @@ func MapMultipleChoiceAnswer(dba db.MultipleChoiceAnswer) (*MultipleChoiceAnswer
 			return nil, fmt.Errorf("invalid answer option: got: `%s`, expected: A or B or C or D", a)
 		}
 
-		if strings.Contains(a, answers) {
+		if len(answers) > 0 && strings.Contains(answers, a) {
 			return nil, fmt.Errorf("the option `%s` appears more than once in %s", a, answers)
 		}
 
