@@ -12,32 +12,6 @@ import (
 	"spaced-ace/views/pages"
 )
 
-type quiz struct {
-	business.QuizInfo
-	FromColor string
-	ToColor   string
-}
-
-type IndexPageData struct{}
-type CreateNewQuizPageData struct{}
-type EditQuizPageData struct {
-	QuizWithMetaData business.QuizWithMetaData
-}
-type LoginPageData struct{}
-type MyQuizzesPageData struct {
-	Quizzes []quiz
-}
-type QuizPreviewPageData struct {
-	Quiz *business.Quiz
-}
-type SignupPageData struct{}
-type TakeQuizPageData struct {
-	QuizWithMetaData business.QuizWithMetaData
-}
-type SubmitQuizPageData struct {
-	Answers []business.Answer
-}
-
 func handleIndexPage(c echo.Context) error {
 	return render.TemplRender(c, 200, pages.IndexPage())
 }

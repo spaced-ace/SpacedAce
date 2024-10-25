@@ -306,3 +306,58 @@ func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (a *ApiService) GetAnswers(quizSessionId string) (*business.AnswerLists, error) {
+	answersResponse := new(external.AnswersResponse)
+	if err := a.getResponse("GET", fmt.Sprintf("/%s/answers", quizSessionId), nil, &answersResponse); err != nil {
+		return nil, err
+	}
+
+	answerLists, err := answersResponse.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return answerLists, nil
+}
+func (a *ApiService) CreateOrUpdateSingleChoiceAnswer(quizSessionId, questionId string, answer string) (*business.SingleChoiceAnswer, error) {
+	requestBody := external.NewSingleChoiceAnswerRequestBody(quizSessionId, questionId, answer)
+
+	responseBody := new(external.SingleChoiceAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	singleChoiceAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return singleChoiceAnswer, nil
+}
+func (a *ApiService) CreateOrUpdateMultipleChoiceAnswer(quizSessionId, questionId string, answers []string) (*business.MultipleChoiceAnswer, error) {
+	requestBody := external.NewMultipleChoiceAnswerRequestBody(quizSessionId, questionId, answers)
+
+	responseBody := new(external.MultipleChoiceAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	multipleChoiceAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return multipleChoiceAnswer, nil
+}
+func (a *ApiService) CreateOrUpdateTrueOrFalseAnswer(quizSessionId, questionId string, answer bool) (*business.TrueOrFalseAnswer, error) {
+	requestBody := external.NewTrueOrFalseAnswerRequestBody(quizSessionId, questionId, answer)
+
+	responseBody := new(external.TrueOrFalseAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	trueOrFalseAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return trueOrFalseAnswer, nil
+}
