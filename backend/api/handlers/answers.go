@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
+	"io"
 	"log"
 	"net/http"
 	"slices"
@@ -39,8 +41,15 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing path param quizSessionId")
 	}
 
+	bodyBytes, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		log.Default().Println(err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("bad request: %s", err.Error()))
+	}
+	c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	var answerRequestBody AnswerRequestBody
-	err := json.NewDecoder(c.Request().Body).Decode(&answerRequestBody)
+	err = json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&answerRequestBody)
 	if err != nil {
 		log.Default().Println(err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("bad request: %s", err.Error()))
@@ -70,7 +79,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 	switch answerRequestBody.AnswerType {
 	case "single-choice":
 		var requestBody SingleChoiceAnswerRequestBody
-		if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&requestBody); err != nil {
 			log.Default().Println(err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing single-choice answer: %s", err.Error()))
 		}
@@ -122,7 +131,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 		return c.JSON(http.StatusOK, result)
 	case "multiple-choice":
 		var requestBody MultipleChoiceAnswerRequestBody
-		if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&requestBody); err != nil {
 			log.Default().Println(err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing multiple-choice answer: %s", err.Error()))
 		}
@@ -182,7 +191,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 
 	case "true-or-false":
 		var requestBody TrueOrFalseAnswerRequestBody
-		if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&requestBody); err != nil {
 			log.Default().Println(err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("error parsing true-or-false answer: %s", err.Error()))
 		}
