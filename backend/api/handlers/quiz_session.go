@@ -261,6 +261,39 @@ func PostSubmitQuiz(c echo.Context) error {
 	return c.JSON(http.StatusOK, quizResult)
 }
 
+func GetQuizResult(c echo.Context) error {
+	quizSessionId := c.Param("quizSessionId")
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	dbQuizResult, err := sqlcQuerier.GetQuizResultByQuizSessionId(ctx, quizSessionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("quiz result is not found for ID `%s`, error: %s", quizSessionId, err.Error()))
+	}
+	quizResult, err := models.MapQuizResult(dbQuizResult)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error mapping quiz result: %s", err.Error()))
+	}
+
+	dbAnswerScores, err := sqlcQuerier.GetAnswerScores(ctx, quizResult.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error finding answer scores for quiz result with ID `%s`, error: %s", quizResult.ID, err))
+	}
+	answerScores := make([]models.AnswerScore, 0, len(dbAnswerScores))
+	for _, dbAnswerScore := range dbAnswerScores {
+		answerScore, err := models.MapAnswerScore(dbAnswerScore)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error mapping answer score with ID `%s`", dbAnswerScore.ID))
+		}
+		answerScores = append(answerScores, *answerScore)
+	}
+	quizResult.AnswerScores = answerScores
+
+	return c.JSON(http.StatusOK, quizResult)
+}
+
 func calculateAndStoreQuizResult(ctx context.Context, sessionID, quizID string) (*models.QuizResult, error) {
 	sqlcQuerier := utils.GetQuerier()
 

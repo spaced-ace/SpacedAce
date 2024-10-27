@@ -76,6 +76,7 @@ func main() {
 	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
 	quizSessions.POST("/start", handlers.StartQuizSession)
 	quizSessions.POST("/:quizSessionId/submit", handlers.PostSubmitQuiz)
+	quizSessions.GET("/:quizSessionId/result", handlers.GetQuizResult)
 	quizSessions.GET("/:quizSessionId/answers", handlers.GetAnswers)
 	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
 
