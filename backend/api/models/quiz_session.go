@@ -18,7 +18,7 @@ type GetQuizSessionsResponseBody struct {
 	Length       int           `json:"length"`
 }
 
-func MapQuizSession(dbo db.QuizSession) (*QuizSession, error) {
+func MapQuizSession(dbo *db.QuizSession) (*QuizSession, error) {
 	return &QuizSession{
 		ID:         dbo.ID,
 		UserID:     dbo.UserID,

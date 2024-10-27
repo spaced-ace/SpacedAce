@@ -8,7 +8,7 @@ sql:
         package: "db"
         out: "db"
         sql_package: "pgx/v5"
-        emit_result_struct_pointers: false
+        emit_result_struct_pointers: true
         overrides:
           - go_type: "string"
             db_type: "uuid"

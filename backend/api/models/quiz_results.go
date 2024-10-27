@@ -21,7 +21,7 @@ type QuizResult struct {
 	AnswerScores []AnswerScore `json:"answerScores"`
 }
 
-func MapAnswerScore(score db.AnswerScore) (*AnswerScore, error) {
+func MapAnswerScore(score *db.AnswerScore) (*AnswerScore, error) {
 	return &AnswerScore{
 		ID:                     score.ID,
 		QuizResultId:           score.QuizResultID,
@@ -32,7 +32,7 @@ func MapAnswerScore(score db.AnswerScore) (*AnswerScore, error) {
 		Score:                  score.Score,
 	}, nil
 }
-func MapQuizResult(result db.QuizResult) (*QuizResult, error) {
+func MapQuizResult(result *db.QuizResult) (*QuizResult, error) {
 	return &QuizResult{
 		ID:           result.ID,
 		SessionID:    result.SessionID,

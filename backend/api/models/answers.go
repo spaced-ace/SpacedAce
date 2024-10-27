@@ -28,7 +28,7 @@ type AnswersResponse struct {
 	TrueOrFalseAnswer     []TrueOrFalseAnswer    `json:"trueOrFalseAnswer"`
 }
 
-func MapSingleChoiceAnswer(dba db.SingleChoiceAnswer) (*SingleChoiceAnswer, error) {
+func MapSingleChoiceAnswer(dba *db.SingleChoiceAnswer) (*SingleChoiceAnswer, error) {
 	if len(dba.Answer) > 1 {
 		return nil, fmt.Errorf("invalid number of answers (got: %d, expected: <= 1)", len(dba.Answer))
 	} else if len(dba.Answer) == 1 && dba.Answer[0] != "A" && dba.Answer[0] != "B" && dba.Answer[0] != "C" && dba.Answer[0] != "D" {
@@ -52,7 +52,7 @@ type MultipleChoiceAnswer struct {
 	Answers    string     `json:"answers"`
 }
 
-func MapMultipleChoiceAnswer(dba db.MultipleChoiceAnswer) (*MultipleChoiceAnswer, error) {
+func MapMultipleChoiceAnswer(dba *db.MultipleChoiceAnswer) (*MultipleChoiceAnswer, error) {
 	if len(dba.Answers) > 4 {
 		return nil, fmt.Errorf("invalid number of answers (got: %d, expected: >= 0 and <= 4)", len(dba.Answers))
 	}
@@ -87,7 +87,7 @@ type TrueOrFalseAnswer struct {
 	Answer     bool       `json:"answer"`
 }
 
-func MapTrueOrFalseAnswer(dba db.TrueOrFalseAnswer) (*TrueOrFalseAnswer, error) {
+func MapTrueOrFalseAnswer(dba *db.TrueOrFalseAnswer) (*TrueOrFalseAnswer, error) {
 	return &TrueOrFalseAnswer{
 		ID:         dba.ID,
 		SessionID:  dba.SessionID,

@@ -123,7 +123,7 @@ func GetQuizSessions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	filter := func(s db.QuizSession) bool {
+	filter := func(s *db.QuizSession) bool {
 		if open == "true" {
 			return !s.FinishedAt.Valid
 		} else if open == "false" {
@@ -375,7 +375,7 @@ func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sess
 		return []models.AnswerScore{}, err
 	}
 
-	dbAnswerScores := make([]db.AnswerScore, len(questions))
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
 	for _, q := range questions {
 		singleChoiceQuestion := models.SingleChoiceQuestion{
@@ -440,7 +440,7 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 		return []models.AnswerScore{}, err
 	}
 
-	dbAnswerScores := make([]db.AnswerScore, len(questions))
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
 	for _, q := range questions {
 		multipleChoiceQuestion := models.MultipleChoiceQuestion{
@@ -512,7 +512,7 @@ func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessi
 		return []models.AnswerScore{}, err
 	}
 
-	dbAnswerScores := make([]db.AnswerScore, len(questions))
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
 	for _, q := range questions {
 		trueOrFalseQuestion := models.TrueOrFalseQuestion{
@@ -561,7 +561,7 @@ func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessi
 	return answerScores, nil
 }
 
-func findSingleChoiceAnswer(answers []db.SingleChoiceAnswer, questionID string) (*models.SingleChoiceAnswer, error) {
+func findSingleChoiceAnswer(answers []*db.SingleChoiceAnswer, questionID string) (*models.SingleChoiceAnswer, error) {
 	for _, dbAnswer := range answers {
 		if dbAnswer.QuestionID == questionID {
 			answer, err := models.MapSingleChoiceAnswer(dbAnswer)
@@ -573,7 +573,7 @@ func findSingleChoiceAnswer(answers []db.SingleChoiceAnswer, questionID string) 
 	}
 	return nil, fmt.Errorf("answer not found for question with ID `%s`", questionID)
 }
-func findMultipleChoiceAnswer(answers []db.MultipleChoiceAnswer, questionID string) (*models.MultipleChoiceAnswer, error) {
+func findMultipleChoiceAnswer(answers []*db.MultipleChoiceAnswer, questionID string) (*models.MultipleChoiceAnswer, error) {
 	for _, dbAnswer := range answers {
 		if dbAnswer.QuestionID == questionID {
 			answer, err := models.MapMultipleChoiceAnswer(dbAnswer)
@@ -585,7 +585,7 @@ func findMultipleChoiceAnswer(answers []db.MultipleChoiceAnswer, questionID stri
 	}
 	return nil, fmt.Errorf("answer not found for question with ID `%s`", questionID)
 }
-func findTrueOrFalseAnswer(answers []db.TrueOrFalseAnswer, questionID string) (*models.TrueOrFalseAnswer, error) {
+func findTrueOrFalseAnswer(answers []*db.TrueOrFalseAnswer, questionID string) (*models.TrueOrFalseAnswer, error) {
 	for _, dbAnswer := range answers {
 		if dbAnswer.QuestionID == questionID {
 			answer, err := models.MapTrueOrFalseAnswer(dbAnswer)

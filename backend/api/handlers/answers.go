@@ -96,7 +96,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 			},
 		)
 
-		var answer db.SingleChoiceAnswer
+		var answer *db.SingleChoiceAnswer
 		var dbError error
 
 		if err == nil {
@@ -155,7 +155,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 			},
 		)
 
-		var answer db.MultipleChoiceAnswer
+		var answer *db.MultipleChoiceAnswer
 		var dbError error
 
 		if err == nil {
@@ -204,7 +204,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 			},
 		)
 
-		var answer db.TrueOrFalseAnswer
+		var answer *db.TrueOrFalseAnswer
 		var dbError error
 
 		if err == nil {
