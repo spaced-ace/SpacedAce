@@ -8,6 +8,17 @@ sql:
         package: "db"
         out: "db"
         sql_package: "pgx/v5"
+        emit_result_struct_pointers: false
         overrides:
           - go_type: "string"
             db_type: "uuid"
+            nullable: false
+          - go_type: "string"
+            db_type: "uuid"
+            nullable: true
+          - go_type: "float64"
+            db_type: "pg_catalog.float8"
+            nullable: false
+          - go_type: "float64"
+            db_type: "pg_catalog.float8"
+            nullable: true

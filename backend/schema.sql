@@ -36,3 +36,26 @@ CREATE TABLE IF NOT EXISTS true_or_false_answers(
 CREATE INDEX idx_true_or_false_answers_session_id ON true_or_false_answers(session_id);
 ALTER TABLE true_or_false_answers ADD CONSTRAINT constraint_true_or_false_answers_unique_session_and_question UNIQUE (session_id, question_id);
 
+CREATE TABLE IF NOT EXISTS quiz_results(
+    id UUID PRIMARY KEY NOT NULL,
+    session_id UUID REFERENCES quiz_sessions(id) ON DELETE CASCADE NOT NULL,
+    max_score FLOAT,
+    score FLOAT
+);
+CREATE INDEX idx_quiz_result_session_id ON quiz_results(session_id);
+
+CREATE TABLE IF NOT EXISTS answer_scores(
+    id UUID PRIMARY KEY NOT NULL,
+    quiz_result_id UUID REFERENCES quiz_results(id) ON DELETE CASCADE NOT NULL,
+    single_choice_answer_id UUID REFERENCES single_choice_answers(id),
+    multiple_choice_answer_id UUID REFERENCES multiple_choice_answers(id),
+    true_or_false_answer_id UUID REFERENCES true_or_false_answers(id),
+    CHECK (
+        (single_choice_answer_id IS NOT NULL)::int +
+        (multiple_choice_answer_id IS NOT NULL)::int +
+        (true_or_false_answer_id IS NOT NULL)::int = 1
+    ),
+    max_score FLOAT,
+    score FLOAT
+);
+CREATE INDEX idx_answer_score_quiz_results_id ON answer_scores(quiz_result_id);

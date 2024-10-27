@@ -138,3 +138,43 @@
         AND session_id = $1
         AND question_id = $2
     RETURNING *;
+
+-- name: GetQuizResultByQuizSessionId :one
+    SELECT *
+    FROM quiz_results
+    WHERE true
+        AND session_id = $1
+    LIMIT 1;
+
+-- name: CreateQuizResult :one
+    INSERT INTO quiz_results(id, session_id, max_score, score)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *;
+
+-- name: UpdateQuizResultScores :one
+    UPDATE quiz_results
+    SET max_score = $2, score = $3
+    WHERE true
+        AND id == $1
+        RETURNING *;
+
+-- name: GetAnswerScores :many
+    SELECT *
+    FROM answer_scores
+    WHERE true
+        AND quiz_result_id = $1;
+
+-- name: CreateSingleChoiceAnswerScore :one
+    INSERT INTO answer_scores(id, quiz_result_id, single_choice_answer_id, max_score, score)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+
+-- name: CreateMultipleChoiceAnswerScore :one
+    INSERT INTO answer_scores(id, quiz_result_id, multiple_choice_answer_id, max_score, score)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+
+-- name: CreateTrueOrFalseAnswerScore :one
+    INSERT INTO answer_scores(id, quiz_result_id, true_or_false_answer_id, max_score, score)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
