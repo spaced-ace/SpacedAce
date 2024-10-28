@@ -307,6 +307,33 @@ func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 	return true, nil
 }
 
+func (a *ApiService) SubmitQuiz(quizSessionId string) (*business.QuizResult, error) {
+	quizResultDto := new(external.QuizResult)
+	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/submit"), nil, &quizResultDto); err != nil {
+		return nil, fmt.Errorf("error submitting quiz session with ID `%s`: %w", quizSessionId, err)
+	}
+
+	quizResult, err := quizResultDto.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("error mapping quiz result with ID `%s`: %w", quizResultDto.ID, err)
+	}
+
+	return quizResult, err
+}
+func (a *ApiService) GetQuizResult(quizSessionId string) (*business.QuizResult, error) {
+	quizResultDto := new(external.QuizResult)
+	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/result"), nil, &quizResultDto); err != nil {
+		return nil, fmt.Errorf("error getting quiz result for session with ID `%s`: %w", quizSessionId, err)
+	}
+
+	quizResult, err := quizResultDto.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("error mapping quiz result with ID `%s`: %w", quizResultDto.ID, err)
+	}
+
+	return quizResult, err
+}
+
 func (a *ApiService) GetAnswers(quizSessionId string) (*business.AnswerLists, error) {
 	answersResponse := new(external.AnswersResponse)
 	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), nil, &answersResponse); err != nil {
