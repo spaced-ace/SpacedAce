@@ -1,6 +1,8 @@
 package business
 
-import "spaced-ace/models"
+import (
+	"spaced-ace/models"
+)
 
 type Option struct {
 	Value   string `json:"value"`

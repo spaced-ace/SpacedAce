@@ -1,6 +1,8 @@
 package business
 
-import "spaced-ace/models"
+import (
+	"spaced-ace/models"
+)
 
 type CommonAnswerData struct {
 	Id         string

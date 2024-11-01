@@ -3,7 +3,33 @@ package components
 import (
 	"fmt"
 	"slices"
+	"spaced-ace/models/business"
 )
+
+type SingleChoiceQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.SingleChoiceQuestion
+	Answer                    *business.SingleChoiceAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
+type MultipleChoiceQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.MultipleChoiceQuestion
+	Answer                    *business.MultipleChoiceAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
+type TrueOrFalseQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.TrueOrFalseQuestion
+	Answer                    *business.TrueOrFalseAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
 
 templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 	<div
@@ -27,23 +53,43 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 					</svg>
 				</div>
 			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
 		<form
 			class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5"
 		>
 			for index, option := range props.Question.Options {
-				<label class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+				<label
+					if props.Answer != nil {
+						if option.Correct && isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+						}
+						if option.Correct && !isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+						}
+						if !option.Correct && isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+						}
+						if !option.Correct && !isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+						}
+					} else {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+					}
+				>
 					<input
 						type="radio"
 						name="answer"
-						if props.AllowDeleting {
-							disabled
-							if option.Correct {
-								checked
-							}
+						if props.AllowDeleting && option.Correct {
+							checked
 						}
-						if props.QuizSession != nil {
+						if props.AllowDeleting || props.AnswerScore != nil {
+							disabled
+						}
+						if props.QuizSession != nil && props.AnswerScore == nil {
 							hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 							hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "single-choice" }`, props.Question.Id) }
 						}
@@ -101,10 +147,13 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 					</svg>
 				</div>
 			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
 		<form
-			if props.QuizSession != nil {
+			if props.QuizSession != nil && props.AnswerScore == nil {
 				hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 				hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "multiple-choice" }`, props.Question.Id) }
 				hx-trigger="change from:input[type='checkbox']"
@@ -113,15 +162,32 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 			class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5"
 		>
 			for index, option := range props.Question.Options {
-				<label class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+				<label
+					if props.Answer != nil {
+						if option.Correct && isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+						}
+						if option.Correct && !isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+						}
+						if !option.Correct && isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+						}
+						if !option.Correct && !isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+						}
+					} else {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+					}
+				>
 					<input
 						type="checkbox"
 						name="answer"
-						if props.AllowDeleting {
+						if props.AllowDeleting && option.Correct {
+							checked
+						}
+						if props.AllowDeleting || props.AnswerScore != nil {
 							disabled
-							if option.Correct {
-								checked
-							}
 						}
 						if index == 0 {
 							value="A"
@@ -177,20 +243,40 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 					</svg>
 				</div>
 			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
 		<form class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
-			<label class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+			<label
+				if props.Answer != nil {
+					if props.Question.Answer == props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+					}
+					if props.Question.Answer != props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+					}
+					if props.Question.Answer != props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+					}
+					if props.Question.Answer == props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+					}
+				} else {
+					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+				}
+			>
 				<input
 					type="radio"
 					name="answer"
-					if props.AllowDeleting {
-						disabled
-						if props.Question.Answer {
-							checked
-						}
+					if !props.Question.Answer {
+						checked
 					}
-					if props.QuizSession != nil {
+					if props.AllowDeleting || props.AnswerScore != nil {
+						disabled
+					}
+					if props.QuizSession != nil && props.AnswerScore == nil {
 						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
 					}
@@ -201,15 +287,32 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				/>
 				true
 			</label>
-			<label class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+			<label
+				if props.Answer != nil {
+					if props.Question.Answer == props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+					}
+					if props.Question.Answer != props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+					}
+					if props.Question.Answer != props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+					}
+					if props.Question.Answer == props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+					}
+				} else {
+					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+				}
+			>
 				<input
 					type="radio"
 					name="answer"
-					if props.AllowDeleting {
+					if !props.Question.Answer {
+						checked
+					}
+					if props.AllowDeleting || props.AnswerScore != nil {
 						disabled
-						if !props.Question.Answer {
-							checked
-						}
 					}
 					if props.QuizSession != nil {
 						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
@@ -224,4 +327,11 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 			</label>
 		</form>
 	</div>
+}
+
+func isSingleChoiceAnswerSelected(index int, answerLetter string) bool {
+	return (index == 0 && answerLetter == "A") || (index == 1 && answerLetter == "B") || (index == 2 && answerLetter == "C") || (index == 3 && answerLetter == "D")
+}
+func isMultipleChoiceAnswerSelected(index int, answerLetters []string) bool {
+	return (index == 0 && slices.Contains(answerLetters, "A")) || (index == 1 && slices.Contains(answerLetters, "B")) || (index == 2 && slices.Contains(answerLetters, "C")) || (index == 3 && slices.Contains(answerLetters, "D"))
 }
