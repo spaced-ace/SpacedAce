@@ -22,12 +22,27 @@ type QuizResult struct {
 }
 
 func MapAnswerScore(score *db.AnswerScore) (*AnswerScore, error) {
+	singleChoiceAnswerId := ""
+	if score.SingleChoiceAnswerID != nil {
+		singleChoiceAnswerId = *score.SingleChoiceAnswerID
+	}
+
+	multipleChoiceAnswerId := ""
+	if score.MultipleChoiceAnswerID != nil {
+		multipleChoiceAnswerId = *score.MultipleChoiceAnswerID
+	}
+
+	trueOrFalseAnswerId := ""
+	if score.TrueOrFalseAnswerID != nil {
+		trueOrFalseAnswerId = *score.TrueOrFalseAnswerID
+	}
+
 	return &AnswerScore{
 		ID:                     score.ID,
 		QuizResultId:           score.QuizResultID,
-		SingleChoiceAnswerId:   score.SingleChoiceAnswerID,
-		MultipleChoiceAnswerId: score.MultipleChoiceAnswerID,
-		TrueOrFalseAnswerId:    score.TrueOrFalseAnswerID,
+		SingleChoiceAnswerId:   singleChoiceAnswerId,
+		MultipleChoiceAnswerId: multipleChoiceAnswerId,
+		TrueOrFalseAnswerId:    trueOrFalseAnswerId,
 		MaxScore:               score.MaxScore,
 		Score:                  score.Score,
 	}, nil

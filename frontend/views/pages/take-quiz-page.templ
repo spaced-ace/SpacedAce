@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"fmt"
 	"spaced-ace/models/business"
 	"spaced-ace/views/components"
 )
@@ -123,7 +124,16 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 		</div>
 		<div class="flex w-full justify-end">
 			<div class="flex w-[220px]">
-				@components.LinkButton("Submit quiz", "", components.ButtonColorBlack)
+				@components.Button(components.ButtonProps{
+					Text:   "Submit quiz",
+					Color:  components.ButtonColorBlack,
+					HxPost: fmt.Sprintf("/quiz-sessions/%s/submit", viewModel.QuizSession.Id),
+					Attributes: templ.Attributes{
+						"hx-target":   "main",
+						"hx-swap":     "outerHTMl",
+						"hx-push-url": "true",
+					},
+				})
 			</div>
 		</div>
 	</main>

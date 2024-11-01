@@ -93,6 +93,6 @@ func MapTrueOrFalseAnswer(dba *db.TrueOrFalseAnswer) (*TrueOrFalseAnswer, error)
 		SessionID:  dba.SessionID,
 		QuestionID: dba.QuestionID,
 		AnswerType: TrueOrFalseAnswerType,
-		Answer:     dba.Answer.Bool,
+		Answer:     dba.Answer,
 	}, nil
 }

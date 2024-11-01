@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models"
@@ -12,6 +13,7 @@ import (
 	"spaced-ace/utils"
 	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
+	"spaced-ace/views/pages"
 )
 
 func handleCreateQuiz(c echo.Context) error {
@@ -399,6 +401,52 @@ func handleDeleteQuiz(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func handleSubmitQuiz(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		log.Default().Print("missing quizSessionId in url params\n")
+		return echo.NewHTTPError(http.StatusBadRequest, "missing quizSessionId in url param")
+	}
+
+	quizSession, err := cc.ApiService.GetQuizSession(quizSessionId)
+	if err != nil {
+		log.Default().Printf("invalid quiz session ID `%s`\n", quizSessionId)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid quizSessionId: %s", quizSessionId))
+	}
+
+	var quizResult *business.QuizResult
+	if quizSession.Finished {
+		quizResult, err = cc.ApiService.GetQuizResult(quizSessionId)
+	} else {
+		quizResult, err = cc.ApiService.SubmitQuiz(quizSessionId)
+	}
+	if err != nil {
+		return err
+	}
+
+	quiz, err := cc.ApiService.GetQuiz(quizSession.QuizId)
+	if err != nil {
+		return err
+	}
+
+	var answerLists *business.AnswerLists
+	answers, err := cc.ApiService.GetAnswers(quizSession.Id)
+	if err == nil {
+		answerLists = answers
+	}
+
+	viewModel := pages.QuizResulPageViewModel{
+		QuizSession: quizSession,
+		Quiz:        quiz,
+		AnswerLists: answerLists,
+		QuizResult:  quizResult,
+	}
+	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/quiz-results/%s", quizSessionId))
+	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 
 func handleQuizPreviewPopup(c echo.Context) error {

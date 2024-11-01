@@ -184,19 +184,19 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				<input
 					type="radio"
 					name="answer"
-                    if props.AllowDeleting {
-                        disabled
-                        if props.Question.Answer {
-                            checked
-                        }
-                    }
-                    if props.QuizSession != nil {
-                        hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
-                        hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
-                    }
-                    if props.Answer != nil && props.Answer.Answer {
-                        checked
-                    }
+					if props.AllowDeleting {
+						disabled
+						if props.Question.Answer {
+							checked
+						}
+					}
+					if props.QuizSession != nil {
+						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
+					}
+					if props.Answer != nil && props.Answer.Answer {
+						checked
+					}
 					value="true"
 				/>
 				true
@@ -206,18 +206,18 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 					type="radio"
 					name="answer"
 					if props.AllowDeleting {
-                        disabled
-                        if !props.Question.Answer {
-                            checked
-                        }
+						disabled
+						if !props.Question.Answer {
+							checked
+						}
 					}
-                    if props.QuizSession != nil {
-                        hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
-                        hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
-                    }
-                    if props.Answer != nil && !props.Answer.Answer {
-                        checked
-                    }
+					if props.QuizSession != nil {
+						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
+					}
+					if props.Answer != nil && !props.Answer.Answer {
+						checked
+					}
 					value="false"
 				/>
 				false

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
 	"io"
@@ -213,10 +212,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 				db.UpdateTrueOrFalseAnswerBySessionAndQuestionIdParams{
 					SessionID:  oldAnswer.SessionID,
 					QuestionID: oldAnswer.QuestionID,
-					Answer: pgtype.Bool{
-						Bool:  requestBody.Answer,
-						Valid: true,
-					},
+					Answer:     requestBody.Answer,
 				},
 			)
 		} else {
@@ -226,10 +222,7 @@ func PutCreateOrUpdateAnswer(c echo.Context) error {
 					ID:         uuid.NewString(),
 					SessionID:  quizSessionId,
 					QuestionID: requestBody.QuestionId,
-					Answer: pgtype.Bool{
-						Bool:  requestBody.Answer,
-						Valid: true,
-					},
+					Answer:     requestBody.Answer,
 				},
 			)
 		}

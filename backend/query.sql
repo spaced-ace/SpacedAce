@@ -1,6 +1,9 @@
 -- name: GetQuizSession :one
-    SELECT * FROM quiz_sessions
-    WHERE id = $1 LIMIT 1;
+    SELECT *
+    FROM quiz_sessions
+    WHERE true
+        AND id = $1
+    LIMIT 1;
 
 -- name: GetQuizSessionsByQuizIdAndUserId :many
     SELECT * FROM quiz_sessions
@@ -15,9 +18,10 @@
     SELECT EXISTS (
         SELECT 1
         FROM quiz_sessions
-        WHERE quiz_id = $1
+        WHERE true
+            AND quiz_id = $1
             AND user_id = $2
-            AND finished_at IS NOT NULL
+            AND finished_at IS NULL
     ) AS exists;
 
 -- name: CreateQuizSession :one

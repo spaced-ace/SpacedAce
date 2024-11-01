@@ -309,7 +309,7 @@ func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 
 func (a *ApiService) SubmitQuiz(quizSessionId string) (*business.QuizResult, error) {
 	quizResultDto := new(external.QuizResult)
-	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/submit"), nil, &quizResultDto); err != nil {
+	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/submit", quizSessionId), nil, &quizResultDto); err != nil {
 		return nil, fmt.Errorf("error submitting quiz session with ID `%s`: %w", quizSessionId, err)
 	}
 
@@ -322,7 +322,7 @@ func (a *ApiService) SubmitQuiz(quizSessionId string) (*business.QuizResult, err
 }
 func (a *ApiService) GetQuizResult(quizSessionId string) (*business.QuizResult, error) {
 	quizResultDto := new(external.QuizResult)
-	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/result"), nil, &quizResultDto); err != nil {
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s/result", quizSessionId), nil, &quizResultDto); err != nil {
 		return nil, fmt.Errorf("error getting quiz result for session with ID `%s`: %w", quizSessionId, err)
 	}
 

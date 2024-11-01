@@ -194,7 +194,7 @@ func PostSubmitQuiz(c echo.Context) error {
 	}
 
 	sqlcQuerier := utils.GetQuerier()
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Hour)
 	defer cancel()
 
 	quizSession, err := sqlcQuerier.GetQuizSession(
@@ -377,27 +377,15 @@ func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sess
 
 	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
-	for _, q := range questions {
-		singleChoiceQuestion := models.SingleChoiceQuestion{
-			ID:            q.UUID,
-			QuizID:        q.QuizID,
-			QuestionType:  models.SingleChoice,
-			Question:      q.Question,
-			Answers:       q.Answers,
-			CorrectAnswer: q.CorrectAnswer,
-		}
-
+	for i, q := range questions {
 		userAnswer, err := findSingleChoiceAnswer(answers, q.UUID)
 		if err != nil {
 			return []models.AnswerScore{}, err
 		}
 
 		score := 0.0
-		for _, a := range singleChoiceQuestion.Answers {
-			if a == userAnswer.Answer {
-				score += 1
-				break
-			}
+		if userAnswer.Answer == q.CorrectAnswer {
+			score = 1.0
 		}
 
 		dbAnswerScore, err := sqlcQuerier.CreateSingleChoiceAnswerScore(
@@ -405,7 +393,7 @@ func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sess
 			db.CreateSingleChoiceAnswerScoreParams{
 				ID:                   uuid.NewString(),
 				QuizResultID:         quizResultID,
-				SingleChoiceAnswerID: userAnswer.ID,
+				SingleChoiceAnswerID: &userAnswer.ID,
 				MaxScore:             1,
 				Score:                score,
 			},
@@ -413,7 +401,7 @@ func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sess
 		if err != nil {
 			return nil, err
 		}
-		dbAnswerScores = append(dbAnswerScores, dbAnswerScore)
+		dbAnswerScores[i] = dbAnswerScore
 	}
 
 	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
@@ -442,7 +430,7 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 
 	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
-	for _, q := range questions {
+	for i, q := range questions {
 		multipleChoiceQuestion := models.MultipleChoiceQuestion{
 			ID:             q.UUID,
 			QuizID:         q.QuizID,
@@ -461,7 +449,7 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 		negativeScore := 1.0 / float64(4-len(multipleChoiceQuestion.Answers))
 
 		score := 0.0
-		for _, correctAnswer := range multipleChoiceQuestion.Answers {
+		for _, correctAnswer := range multipleChoiceQuestion.CorrectAnswers {
 			if strings.Contains(userAnswer.Answers, correctAnswer) {
 				score += positiveScore
 			} else {
@@ -472,20 +460,20 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 			score = 0
 		}
 
-		dbAnswerScore, err := sqlcQuerier.CreateSingleChoiceAnswerScore(
+		dbAnswerScore, err := sqlcQuerier.CreateMultipleChoiceAnswerScore(
 			ctx,
-			db.CreateSingleChoiceAnswerScoreParams{
-				ID:                   uuid.NewString(),
-				QuizResultID:         quizResultID,
-				SingleChoiceAnswerID: userAnswer.ID,
-				MaxScore:             1,
-				Score:                score,
+			db.CreateMultipleChoiceAnswerScoreParams{
+				ID:                     uuid.NewString(),
+				QuizResultID:           quizResultID,
+				MultipleChoiceAnswerID: &userAnswer.ID,
+				MaxScore:               1,
+				Score:                  score,
 			},
 		)
 		if err != nil {
 			return nil, err
 		}
-		dbAnswerScores = append(dbAnswerScores, dbAnswerScore)
+		dbAnswerScores[i] = dbAnswerScore
 	}
 
 	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
@@ -514,7 +502,7 @@ func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessi
 
 	dbAnswerScores := make([]*db.AnswerScore, len(questions))
 
-	for _, q := range questions {
+	for i, q := range questions {
 		trueOrFalseQuestion := models.TrueOrFalseQuestion{
 			ID:            q.UUID,
 			QuizID:        q.QuizID,
@@ -533,20 +521,20 @@ func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessi
 			score = 1.0
 		}
 
-		dbAnswerScore, err := sqlcQuerier.CreateSingleChoiceAnswerScore(
+		dbAnswerScore, err := sqlcQuerier.CreateTrueOrFalseAnswerScore(
 			ctx,
-			db.CreateSingleChoiceAnswerScoreParams{
-				ID:                   uuid.NewString(),
-				QuizResultID:         quizResultID,
-				SingleChoiceAnswerID: userAnswer.ID,
-				MaxScore:             1,
-				Score:                score,
+			db.CreateTrueOrFalseAnswerScoreParams{
+				ID:                  uuid.NewString(),
+				QuizResultID:        quizResultID,
+				TrueOrFalseAnswerID: &userAnswer.ID,
+				MaxScore:            1,
+				Score:               score,
 			},
 		)
 		if err != nil {
 			return nil, err
 		}
-		dbAnswerScores = append(dbAnswerScores, dbAnswerScore)
+		dbAnswerScores[i] = dbAnswerScore
 	}
 
 	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
@@ -614,8 +602,10 @@ func HasOpenQuizSession(c echo.Context) error {
 		},
 	)
 	if err != nil {
+		log.Default().Printf("error during HasOpenQuizSession call: %f\n", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	log.Default().Printf("hasOpenQuizSession: %t\n", hasOpenSession)
 
 	if hasOpenSession {
 		return c.NoContent(http.StatusOK)

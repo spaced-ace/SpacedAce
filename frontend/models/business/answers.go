@@ -28,6 +28,10 @@ type AnswerLists struct {
 }
 
 func (lists *AnswerLists) GetSingleChoiceAnswerOrNil(questionId string) *SingleChoiceAnswer {
+	if lists == nil {
+		return nil
+	}
+
 	for _, a := range lists.SingleChoiceAnswers {
 		if a.QuestionId == questionId {
 			return &a
@@ -36,6 +40,10 @@ func (lists *AnswerLists) GetSingleChoiceAnswerOrNil(questionId string) *SingleC
 	return nil
 }
 func (lists *AnswerLists) GetMultipleChoiceAnswerOrNil(questionId string) *MultipleChoiceAnswer {
+	if lists == nil {
+		return nil
+	}
+
 	for _, a := range lists.MultipleChoiceAnswers {
 		if a.QuestionId == questionId {
 			return &a
@@ -44,6 +52,10 @@ func (lists *AnswerLists) GetMultipleChoiceAnswerOrNil(questionId string) *Multi
 	return nil
 }
 func (lists *AnswerLists) GetTrueOrFalseAnswerOrNil(questionId string) *TrueOrFalseAnswer {
+	if lists == nil {
+		return nil
+	}
+
 	for _, a := range lists.TrueOrFalseAnswers {
 		if a.QuestionId == questionId {
 			return &a

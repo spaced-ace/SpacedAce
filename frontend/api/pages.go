@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models/business"
@@ -107,7 +108,9 @@ func handleTakeQuizPage(c echo.Context) error {
 		return err
 	}
 	if quizSession.Finished {
-		// TODO thus the quiz is finished, redirect the user to the results page
+		url := fmt.Sprintf("/quiz-results/%s", quizSessionId)
+		c.Response().Header().Set("HX-Replace-Url", url)
+		return c.Redirect(http.StatusFound, url)
 	}
 
 	quiz, err := cc.ApiService.GetQuiz(quizId)
@@ -138,6 +141,61 @@ func handleSignupPage(c echo.Context) error {
 		Errors: map[string]string{},
 	}
 	return render.TemplRender(c, 200, pages.SignupPage(viewModel))
+}
+
+func handleQuizResultPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	cc := c.(*context.AppContext)
+
+	redirectToMyQuizzes := func() error {
+		url := "my-quizzes"
+		c.Response().Header().Set("HX-Replace-Url", url)
+		return c.Redirect(http.StatusFound, url)
+	}
+
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		log.Default().Print("missing quizSessionId in url params\n")
+		return redirectToMyQuizzes()
+	}
+
+	quizSession, err := cc.ApiService.GetQuizSession(quizSessionId)
+	if err != nil {
+		log.Default().Printf("invalid quiz session ID `%s`\n", quizSessionId)
+		return redirectToMyQuizzes()
+	}
+
+	quizResult, err := cc.ApiService.GetQuizResult(quizSession.Id)
+	if err != nil {
+		log.Default().Printf("quiz session is not finised. quiz session ID `%s`\n", quizSessionId)
+		url := fmt.Sprintf("/quizzes/%s/take/%s", quizSession.QuizId, quizSession.Id)
+		c.Response().Header().Set("HX-Replace-Url", url)
+		return c.Redirect(http.StatusFound, url)
+	}
+
+	quiz, err := cc.ApiService.GetQuiz(quizSession.QuizId)
+	if err != nil {
+		log.Default().Printf("quiz not find with ID `%s`", quizSession.QuizId)
+		return redirectToMyQuizzes()
+	}
+
+	var answerLists *business.AnswerLists
+	answers, err := cc.ApiService.GetAnswers(quizSession.Id)
+	if err == nil {
+		answerLists = answers
+	}
+
+	viewModel := pages.QuizResulPageViewModel{
+		QuizSession: quizSession,
+		Quiz:        quiz,
+		AnswerLists: answerLists,
+		QuizResult:  quizResult,
+	}
+	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 
 func handleNonHXRequest(c echo.Context) error {

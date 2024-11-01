@@ -31,3 +31,10 @@ type TakeQuizPageViewModel struct {
 	Quiz        *business.Quiz
 	AnswerLists *business.AnswerLists
 }
+
+type QuizResulPageViewModel struct {
+	QuizSession *business.QuizSession
+	Quiz        *business.Quiz
+	AnswerLists *business.AnswerLists
+	QuizResult  *business.QuizResult
+}

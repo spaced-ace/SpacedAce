@@ -9,16 +9,24 @@ sql:
         out: "db"
         sql_package: "pgx/v5"
         emit_result_struct_pointers: true
+        emit_pointers_for_null_types: true
         overrides:
-          - go_type: "string"
-            db_type: "uuid"
+          - db_type: "uuid"
             nullable: false
-          - go_type: "string"
-            db_type: "uuid"
+            go_type:
+              type: "string"
+              pointer: false
+
+          - db_type: "uuid"
             nullable: true
-          - go_type: "float64"
-            db_type: "pg_catalog.float8"
+            go_type:
+              type: "string"
+              pointer: true
+
+          - db_type: "pg_catalog.float8"
             nullable: false
-          - go_type: "float64"
-            db_type: "pg_catalog.float8"
+            go_type: "float64"
+
+          - db_type: "pg_catalog.float8"
             nullable: true
+            go_type: "float64"
