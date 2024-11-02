@@ -23,6 +23,9 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.GET("/my-quizzes", handleMyQuizzesPage)
 	protected.DELETE("/quizzes/:quizId", handleDeleteQuiz)
 
+	// Quiz history page
+	protected.GET("/quiz-history", handleQuizHistoryPage)
+
 	// Take quiz page
 	protected.GET("quizzes/:quizId/preview-popup", handleQuizPreviewPopup)
 	protected.GET("/quizzes/:quizId/take", handleTakeQuizPage)

@@ -11,6 +11,7 @@ templ SidebarMenuItem(props SidebarMenuItemProps) {
 		hx-get={ props.Url }
 		hx-swap="outerHTML"
 		hx-target="main"
+		hx-push-url="true"
 		if props.Active {
 			class="flex w-full cursor-pointer items-center gap-x-1 rounded-md bg-gray-300 px-2 py-1 hover:bg-gray-200"
 		} else {

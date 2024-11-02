@@ -388,3 +388,21 @@ func (a *ApiService) CreateOrUpdateTrueOrFalseAnswer(quizSessionId, questionId s
 	}
 	return trueOrFalseAnswer, nil
 }
+
+func (a *ApiService) GetQuizHistory(userID string) ([]business.QuizHistoryEntry, error) {
+	responseBody := new(external.QuizHistoryEntriesResponseBody)
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-history?userID=%s", userID), nil, responseBody); err != nil {
+		return []business.QuizHistoryEntry{}, err
+	}
+
+	entries := make([]business.QuizHistoryEntry, 0, responseBody.Length)
+	for _, e := range responseBody.QuizHistoryEntries {
+		entry, err := e.MapToBusiness()
+		if err != nil {
+			return []business.QuizHistoryEntry{}, err
+		}
+		entries = append(entries, *entry)
+	}
+
+	return entries, nil
+}
