@@ -445,7 +445,6 @@ func handleSubmitQuiz(c echo.Context) error {
 		AnswerLists: answerLists,
 		QuizResult:  quizResult,
 	}
-	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/quiz-results/%s", quizSessionId))
 	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 

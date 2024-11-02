@@ -2,5 +2,5 @@ package pipeline
 
 templ ClosedPopup(content templ.Component) {
 	@content
-	<div id="popup-container" hx-swap-oob="outerHTML"></div>
+	<div id="popup-container" hx-history="false" hx-swap-oob="outerHTML"></div>
 }

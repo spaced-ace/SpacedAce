@@ -31,7 +31,7 @@ type MultipleChoiceAnswerRequestBody struct {
 }
 type TrueOrFalseAnswerRequestBody struct {
 	AnswerRequestBody
-	Answer bool `json:"answer"`
+	Answer *bool `json:"answer"`
 }
 
 func PutCreateOrUpdateAnswer(c echo.Context) error {

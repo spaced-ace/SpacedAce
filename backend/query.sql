@@ -159,7 +159,7 @@
     UPDATE quiz_results
     SET max_score = $2, score = $3
     WHERE true
-        AND id == $1
+        AND id = $1
         RETURNING *;
 
 -- name: GetAnswerScores :many

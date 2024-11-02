@@ -35,12 +35,17 @@ func MapSingleChoiceAnswer(dba *db.SingleChoiceAnswer) (*SingleChoiceAnswer, err
 		return nil, fmt.Errorf("invalid answer option: got: `%s`, expected: A or B or C or D", dba.Answer)
 	}
 
+	answer := ""
+	if len(dba.Answer) > 0 {
+		answer = dba.Answer[0]
+	}
+
 	return &SingleChoiceAnswer{
 		ID:         dba.ID,
 		SessionID:  dba.SessionID,
 		QuestionID: dba.QuestionID,
 		AnswerType: SingleChoiceAnswerType,
-		Answer:     dba.Answer[0],
+		Answer:     answer,
 	}, nil
 }
 
@@ -84,7 +89,7 @@ type TrueOrFalseAnswer struct {
 	SessionID  string     `json:"sessionId"`
 	QuestionID string     `json:"questionId"`
 	AnswerType AnswerType `json:"answerType"`
-	Answer     bool       `json:"answer"`
+	Answer     *bool      `json:"answer"`
 }
 
 func MapTrueOrFalseAnswer(dba *db.TrueOrFalseAnswer) (*TrueOrFalseAnswer, error) {

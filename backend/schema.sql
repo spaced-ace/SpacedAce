@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS single_choice_answers(
     id   UUID PRIMARY KEY NOT NULL,
     session_id UUID REFERENCES quiz_sessions(id) NOT NULL,
     question_id UUID REFERENCES single_choice_questions(uuid) ON DELETE CASCADE NOT NULL,
-    answer TEXT[1] NOT NULL
+    answer TEXT[1] NULL
 );
 CREATE INDEX idx_single_choice_answers_session_id ON single_choice_answers(session_id);
 ALTER TABLE single_choice_answers ADD CONSTRAINT constraint_single_choice_answers_unique_session_and_question UNIQUE (session_id, question_id);
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS multiple_choice_answers(
     id   UUID PRIMARY KEY NOT NULL,
     session_id UUID REFERENCES quiz_sessions(id) NOT NULL,
     question_id UUID REFERENCES multiple_choice_questions(uuid) ON DELETE CASCADE NOT NULL,
-    answers TEXT[4] NOT NULL -- list of letters e.g. ABD, maximum 4 answers are possible
+    answers TEXT[4] NULL -- list of letters e.g. ABD, maximum 4 answers are possible
 );
 CREATE INDEX idx_multiple_choice_answers_session_id ON multiple_choice_answers(session_id);
 ALTER TABLE multiple_choice_answers ADD CONSTRAINT constraint_multiple_choice_answers_unique_session_and_question UNIQUE (session_id, question_id);
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS true_or_false_answers(
     id   UUID PRIMARY KEY NOT NULL,
     session_id UUID REFERENCES quiz_sessions(id) NOT NULL,
     question_id UUID REFERENCES true_or_false_questions(uuid) ON DELETE CASCADE NOT NULL,
-    answer BOOLEAN NOT NULL
+    answer BOOLEAN NULL
 );
 CREATE INDEX idx_true_or_false_answers_session_id ON true_or_false_answers(session_id);
 ALTER TABLE true_or_false_answers ADD CONSTRAINT constraint_true_or_false_answers_unique_session_and_question UNIQUE (session_id, question_id);

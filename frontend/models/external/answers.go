@@ -25,7 +25,7 @@ type TrueOrFalseAnswer struct {
 	SessionID  string            `json:"sessionId"`
 	QuestionID string            `json:"questionId"`
 	AnswerType models.AnswerType `json:"answerType"`
-	Answer     bool              `json:"answer"`
+	Answer     *bool             `json:"answer"`
 }
 
 func (a SingleChoiceAnswer) MapToBusiness() (*business.SingleChoiceAnswer, error) {

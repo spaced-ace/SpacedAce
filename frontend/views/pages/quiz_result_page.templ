@@ -1,9 +1,9 @@
 package pages
 
 import (
+	"fmt"
 	"spaced-ace/models/business"
 	"spaced-ace/views/components"
-	"fmt"
 )
 
 templ QuizResultPage(viewModel QuizResulPageViewModel) {
@@ -29,12 +29,12 @@ templ QuizResultPage(viewModel QuizResulPageViewModel) {
 		</div>
 		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
 			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
-			    <div class="w-full flex justify-between align-top gap-x-2">
-			        <span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
-                    if viewModel.QuizResult != nil {
-                        <span class="text-xl font-semibold">{ fmt.Sprintf("%g / %g (%.2f%%)", viewModel.QuizResult.Score, viewModel.QuizResult.MaxScore, viewModel.QuizResult.Score / viewModel.QuizResult.MaxScore * 100) }</span>
-                    }
-			    </div>
+				<div class="w-full flex justify-between align-top gap-x-2">
+					<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
+					if viewModel.QuizResult != nil {
+						<span class="text-xl font-semibold">{ fmt.Sprintf("%g / %g (%.2f%%)", viewModel.QuizResult.Score, viewModel.QuizResult.MaxScore, viewModel.QuizResult.Score / viewModel.QuizResult.MaxScore * 100) }</span>
+					}
+				</div>
 				<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
 				<div class="h-4 w-full"></div>
 				<div class="flex w-full items-center">

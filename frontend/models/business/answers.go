@@ -20,7 +20,7 @@ type MultipleChoiceAnswer struct {
 }
 type TrueOrFalseAnswer struct {
 	CommonAnswerData
-	Answer bool
+	Answer *bool
 }
 
 type AnswerLists struct {

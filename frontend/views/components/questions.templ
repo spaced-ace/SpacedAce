@@ -74,7 +74,7 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
 						}
 						if !option.Correct && !isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
-							class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+							class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
 						}
 					} else {
 						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
@@ -174,7 +174,7 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
 						}
 						if !option.Correct && !isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
-							class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+							class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
 						}
 					} else {
 						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
@@ -251,17 +251,17 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 		<form class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
 			<label
 				if props.Answer != nil {
-					if props.Question.Answer == props.Answer.Answer && props.Question.Answer {
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
 					}
-					if props.Question.Answer != props.Answer.Answer && props.Question.Answer {
+					if (props.Answer.Answer == nil || props.Question.Answer != *props.Answer.Answer) && props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
 					}
-					if props.Question.Answer != props.Answer.Answer && !props.Question.Answer {
+					if props.Answer.Answer != nil && props.Question.Answer != *props.Answer.Answer && !props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
 					}
-					if props.Question.Answer == props.Answer.Answer && !props.Question.Answer {
-						class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
 					}
 				} else {
 					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
@@ -280,7 +280,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
 					}
-					if props.Answer != nil && props.Answer.Answer {
+					if props.Answer != nil && props.Answer.Answer != nil && *props.Answer.Answer {
 						checked
 					}
 					value="true"
@@ -289,17 +289,17 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 			</label>
 			<label
 				if props.Answer != nil {
-					if props.Question.Answer == props.Answer.Answer && !props.Question.Answer {
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && !props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
 					}
-					if props.Question.Answer != props.Answer.Answer && !props.Question.Answer {
+					if (props.Answer.Answer == nil || props.Question.Answer != *props.Answer.Answer) && !props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
 					}
-					if props.Question.Answer != props.Answer.Answer && props.Question.Answer {
+					if props.Answer.Answer != nil && props.Question.Answer != *props.Answer.Answer && props.Question.Answer {
 						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
 					}
-					if props.Question.Answer == props.Answer.Answer && props.Question.Answer {
-						class="overflow-auto whitespace-normal rounded-md border border-gray-300 px-2"
+					if (props.Answer.Answer == nil || props.Question.Answer == *props.Answer.Answer) && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
 					}
 				} else {
 					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
@@ -318,7 +318,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
 					}
-					if props.Answer != nil && !props.Answer.Answer {
+					if props.Answer != nil && props.Answer.Answer != nil && !*props.Answer.Answer {
 						checked
 					}
 					value="false"

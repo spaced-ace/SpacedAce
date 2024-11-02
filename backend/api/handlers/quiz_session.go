@@ -351,6 +351,9 @@ func calculateAndStoreQuizResult(ctx context.Context, sessionID, quizID string) 
 			Score:    score,
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("error updating scores for quiz result `%s`: %w", dbQuizResult.ID, err)
+	}
 
 	// Map the results
 	quizResult, err := models.MapQuizResult(updatedDbQuizResult)
@@ -380,7 +383,24 @@ func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sess
 	for i, q := range questions {
 		userAnswer, err := findSingleChoiceAnswer(answers, q.UUID)
 		if err != nil {
-			return []models.AnswerScore{}, err
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateSingleChoiceAnswer(
+				ctx,
+				db.CreateSingleChoiceAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answer:     []string{},
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapSingleChoiceAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping single choice answer from db to business: %w", err)
+			}
 		}
 
 		score := 0.0
@@ -442,7 +462,24 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 
 		userAnswer, err := findMultipleChoiceAnswer(answers, q.UUID)
 		if err != nil {
-			return []models.AnswerScore{}, err
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateMultipleChoiceAnswer(
+				ctx,
+				db.CreateMultipleChoiceAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answers:    []string{},
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapMultipleChoiceAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping multiple choice answer from db to business: %w", err)
+			}
 		}
 
 		positiveScore := 1.0 / float64(len(multipleChoiceQuestion.Answers))
@@ -513,11 +550,28 @@ func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessi
 
 		userAnswer, err := findTrueOrFalseAnswer(answers, q.UUID)
 		if err != nil {
-			return []models.AnswerScore{}, err
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateTrueOrFalseAnswer(
+				ctx,
+				db.CreateTrueOrFalseAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answer:     nil,
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapTrueOrFalseAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping true or false answer from db to business: %w", err)
+			}
 		}
 
 		score := 0.0
-		if trueOrFalseQuestion.CorrectAnswer == userAnswer.Answer {
+		if userAnswer.Answer != nil && trueOrFalseQuestion.CorrectAnswer == *userAnswer.Answer {
 			score = 1.0
 		}
 

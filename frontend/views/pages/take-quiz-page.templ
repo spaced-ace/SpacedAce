@@ -130,8 +130,8 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 					HxPost: fmt.Sprintf("/quiz-sessions/%s/submit", viewModel.QuizSession.Id),
 					Attributes: templ.Attributes{
 						"hx-target":   "main",
-						"hx-swap":     "outerHTMl",
-						"hx-push-url": "true",
+						"hx-swap":     "outerHTML",
+						"hx-push-url": "false",
 					},
 				})
 			</div>
