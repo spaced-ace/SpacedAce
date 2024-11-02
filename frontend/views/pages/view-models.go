@@ -29,4 +29,12 @@ type EditQuizPageViewModel struct {
 type TakeQuizPageViewModel struct {
 	QuizSession *business.QuizSession
 	Quiz        *business.Quiz
+	AnswerLists *business.AnswerLists
+}
+
+type QuizResulPageViewModel struct {
+	QuizSession *business.QuizSession
+	Quiz        *business.Quiz
+	AnswerLists *business.AnswerLists
+	QuizResult  *business.QuizResult
 }

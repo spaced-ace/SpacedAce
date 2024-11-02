@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"spaced-ace/context"
 	"spaced-ace/models"
@@ -12,6 +13,7 @@ import (
 	"spaced-ace/utils"
 	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
+	"spaced-ace/views/pages"
 )
 
 func handleCreateQuiz(c echo.Context) error {
@@ -172,11 +174,13 @@ func handleGenerateQuestion(c echo.Context) error {
 				)
 			}
 
-			questionComponent := components.SingleChoiceQuestion(
-				question,
-				true,
-				true,
-			)
+			questionComponent := components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+				QuizSession:               nil,
+				Question:                  question,
+				Answer:                    nil,
+				AllowDeleting:             true,
+				ReplacePlaceholderWithOOB: true,
+			})
 			return render.TemplRender(
 				c,
 				200,
@@ -205,11 +209,13 @@ func handleGenerateQuestion(c echo.Context) error {
 				)
 			}
 
-			questionComponent := components.MultipleChoiceQuestion(
-				question,
-				true,
-				true,
-			)
+			questionComponent := components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+				QuizSession:               nil,
+				Question:                  question,
+				Answer:                    nil,
+				AllowDeleting:             true,
+				ReplacePlaceholderWithOOB: true,
+			})
 			return render.TemplRender(
 				c,
 				200,
@@ -238,11 +244,13 @@ func handleGenerateQuestion(c echo.Context) error {
 				)
 			}
 
-			questionComponent := components.TrueOrFalseQuestion(
-				question,
-				true,
-				true,
-			)
+			questionComponent := components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+				QuizSession:               nil,
+				Question:                  question,
+				Answer:                    nil,
+				AllowDeleting:             true,
+				ReplacePlaceholderWithOOB: true,
+			})
 			return render.TemplRender(
 				c,
 				200,
@@ -255,6 +263,70 @@ func handleGenerateQuestion(c echo.Context) error {
 			)
 		}
 	}
+}
+
+func handleAnswerQuestion(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing quizSessionId")
+	}
+
+	var commonRequestForm request.CreateOrUpdateAnswerForm
+	if err := c.Bind(&commonRequestForm); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid CreateOrUpdateRequestForm: ", err.Error())
+	}
+
+	switch commonRequestForm.AnswerType {
+	case "single-choice":
+		var requestForm request.CreateOrUpdateSingleChoiceAnswerForm
+		if err := c.Bind(&requestForm); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid CreateOrUpdateSingleChoiceAnswerForm: ", err.Error())
+		}
+
+		_, err := cc.ApiService.CreateOrUpdateSingleChoiceAnswer(
+			quizSessionId,
+			requestForm.CreateOrUpdateAnswerForm.QuestionId,
+			requestForm.Answer,
+		)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		return c.NoContent(http.StatusOK)
+	case "multiple-choice":
+		var requestForm request.CreateOrUpdateMultipleChoiceAnswerForm
+		if err := c.Bind(&requestForm); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid CreateOrUpdateMultipleChoiceAnswerForm: ", err.Error())
+		}
+
+		_, err := cc.ApiService.CreateOrUpdateMultipleChoiceAnswer(
+			quizSessionId,
+			requestForm.CreateOrUpdateAnswerForm.QuestionId,
+			requestForm.Answers,
+		)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		return c.NoContent(http.StatusOK)
+	case "true-or-false":
+		var requestForm request.CreateOrUpdateTrueOrFalseAnswerForm
+		if err := c.Bind(&requestForm); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid CreateOrUpdateTrueOrFalseAnswerForm: ", err.Error())
+		}
+
+		_, err := cc.ApiService.CreateOrUpdateTrueOrFalseAnswer(
+			quizSessionId,
+			requestForm.CreateOrUpdateAnswerForm.QuestionId,
+			requestForm.Answer,
+		)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		return c.NoContent(http.StatusOK)
+	}
+
+	return echo.NewHTTPError(http.StatusBadRequest, "invalid answerType: ", commonRequestForm.AnswerType)
 }
 
 func handleUpdateQuiz(c echo.Context) error {
@@ -329,6 +401,51 @@ func handleDeleteQuiz(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func handleSubmitQuiz(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizSessionId := c.Param("quizSessionId")
+	if quizSessionId == "" {
+		log.Default().Print("missing quizSessionId in url params\n")
+		return echo.NewHTTPError(http.StatusBadRequest, "missing quizSessionId in url param")
+	}
+
+	quizSession, err := cc.ApiService.GetQuizSession(quizSessionId)
+	if err != nil {
+		log.Default().Printf("invalid quiz session ID `%s`\n", quizSessionId)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid quizSessionId: %s", quizSessionId))
+	}
+
+	var quizResult *business.QuizResult
+	if quizSession.Finished {
+		quizResult, err = cc.ApiService.GetQuizResult(quizSessionId)
+	} else {
+		quizResult, err = cc.ApiService.SubmitQuiz(quizSessionId)
+	}
+	if err != nil {
+		return err
+	}
+
+	quiz, err := cc.ApiService.GetQuiz(quizSession.QuizId)
+	if err != nil {
+		return err
+	}
+
+	var answerLists *business.AnswerLists
+	answers, err := cc.ApiService.GetAnswers(quizSession.Id)
+	if err == nil {
+		answerLists = answers
+	}
+
+	viewModel := pages.QuizResulPageViewModel{
+		QuizSession: quizSession,
+		Quiz:        quiz,
+		AnswerLists: answerLists,
+		QuizResult:  quizResult,
+	}
+	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 
 func handleQuizPreviewPopup(c echo.Context) error {

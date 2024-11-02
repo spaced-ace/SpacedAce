@@ -12,7 +12,9 @@ import (
 	"spaced-ace-backend/api/models"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/db"
+	"spaced-ace-backend/question"
 	"spaced-ace-backend/utils"
+	"strings"
 	"time"
 )
 
@@ -121,7 +123,7 @@ func GetQuizSessions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	filter := func(s db.QuizSession) bool {
+	filter := func(s *db.QuizSession) bool {
 		if open == "true" {
 			return !s.FinishedAt.Valid
 		} else if open == "false" {
@@ -179,7 +181,7 @@ func GetQuizSession(c echo.Context) error {
 	return c.JSON(http.StatusOK, quizSession)
 }
 
-func StopQuizSession(c echo.Context) error {
+func PostSubmitQuiz(c echo.Context) error {
 	quizSessionId := c.Param("quizSessionId")
 
 	session, err := c.Cookie("session")
@@ -192,7 +194,7 @@ func StopQuizSession(c echo.Context) error {
 	}
 
 	sqlcQuerier := utils.GetQuerier()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Hour)
 	defer cancel()
 
 	quizSession, err := sqlcQuerier.GetQuizSession(
@@ -204,12 +206,11 @@ func StopQuizSession(c echo.Context) error {
 	}
 
 	if quizSession.FinishedAt.Valid {
-		return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("quiz session '%s' is already closed", quizSessionId))
+		return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("quiz session '%s' is already submitted", quizSessionId))
 	}
 
-	// TODO when roles (like admin and normal user) will be available, we should enable this action for admins
 	if quizSession.UserID != userId {
-		return echo.NewHTTPError(http.StatusForbidden, "cannot stop other user's quiz session")
+		return echo.NewHTTPError(http.StatusForbidden, "cannot submit other user's quiz session")
 	}
 
 	_, err = sqlcQuerier.UpdateQuizSessionFinishedAt(
@@ -224,11 +225,419 @@ func StopQuizSession(c echo.Context) error {
 		},
 	)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error closing quiz session: %s", quizSessionId))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error submitting quiz session: %s", quizSessionId))
 	}
-	log.Default().Printf("quiz session closed: %s", quizSessionId)
+	log.Default().Printf("quiz session submitted: %s", quizSessionId)
 
-	return c.NoContent(http.StatusOK)
+	dbQuizResult, err := sqlcQuerier.GetQuizResultByQuizSessionId(ctx, quizSessionId)
+	if err != nil {
+		quizResult, err := calculateAndStoreQuizResult(ctx, quizSessionId, quizSession.QuizID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "error calculating the quiz result: "+err.Error())
+		}
+		return c.JSON(http.StatusOK, quizResult)
+	}
+
+	quizResult, err := models.MapQuizResult(dbQuizResult)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing quiz result: %s", dbQuizResult.ID))
+	}
+
+	dbAnswerScores, err := sqlcQuerier.GetAnswerScores(ctx, dbQuizResult.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error getting answer scores for the quiz result: %s", dbQuizResult.ID))
+	}
+
+	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
+	for i, dbScore := range dbAnswerScores {
+		score, err := models.MapAnswerScore(dbScore)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error parsing answer score: %s", dbScore.ID))
+		}
+		answerScores[i] = *score
+	}
+
+	quizResult.AnswerScores = answerScores
+	return c.JSON(http.StatusOK, quizResult)
+}
+
+func GetQuizResult(c echo.Context) error {
+	quizSessionId := c.Param("quizSessionId")
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	dbQuizResult, err := sqlcQuerier.GetQuizResultByQuizSessionId(ctx, quizSessionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("quiz result is not found for ID `%s`, error: %s", quizSessionId, err.Error()))
+	}
+	quizResult, err := models.MapQuizResult(dbQuizResult)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error mapping quiz result: %s", err.Error()))
+	}
+
+	dbAnswerScores, err := sqlcQuerier.GetAnswerScores(ctx, quizResult.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("error finding answer scores for quiz result with ID `%s`, error: %s", quizResult.ID, err))
+	}
+	answerScores := make([]models.AnswerScore, 0, len(dbAnswerScores))
+	for _, dbAnswerScore := range dbAnswerScores {
+		answerScore, err := models.MapAnswerScore(dbAnswerScore)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error mapping answer score with ID `%s`", dbAnswerScore.ID))
+		}
+		answerScores = append(answerScores, *answerScore)
+	}
+	quizResult.AnswerScores = answerScores
+
+	return c.JSON(http.StatusOK, quizResult)
+}
+
+func calculateAndStoreQuizResult(ctx context.Context, sessionID, quizID string) (*models.QuizResult, error) {
+	sqlcQuerier := utils.GetQuerier()
+
+	// Create a quiz result record with initial scores
+	dbQuizResult, err := sqlcQuerier.CreateQuizResult(
+		ctx,
+		db.CreateQuizResultParams{
+			ID:        uuid.NewString(),
+			SessionID: sessionID,
+			MaxScore:  0.0,
+			Score:     0.0,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error creating quiz result: %w", err)
+	}
+
+	// Calculate the scores for the single choice questions
+	singleChoiceAnswerScores, err := calculateSingleChoiceQuestionScores(ctx, dbQuizResult.ID, sessionID, quizID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate single choice scores: %w", err)
+	}
+
+	// Calculate the scores for the multiple choice questions
+	multipleChoiceAnswerScores, err := calculateMultipleChoiceQuestionScores(ctx, dbQuizResult.ID, sessionID, quizID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate multiple choice scores: %w", err)
+	}
+
+	// Calculate the scores for the true or false questions
+	trueOrFalseAnswerScores, err := calculateTrueOrFalseQuestionScores(ctx, dbQuizResult.ID, sessionID, quizID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate true or false scores: %w", err)
+	}
+
+	// Collect all the answer scores
+	answerScores := make([]models.AnswerScore, 0, len(singleChoiceAnswerScores)+len(multipleChoiceAnswerScores)+len(trueOrFalseAnswerScores))
+	answerScores = append(answerScores, singleChoiceAnswerScores...)
+	answerScores = append(answerScores, multipleChoiceAnswerScores...)
+	answerScores = append(answerScores, trueOrFalseAnswerScores...)
+
+	// Calculate the score and the max score
+	var maxScore, score float64
+	for _, answerScore := range answerScores {
+		maxScore += answerScore.MaxScore
+		score += answerScore.Score
+	}
+
+	// Update quiz result with the calculated scores
+	updatedDbQuizResult, err := sqlcQuerier.UpdateQuizResultScores(
+		ctx,
+		db.UpdateQuizResultScoresParams{
+			ID:       dbQuizResult.ID,
+			MaxScore: maxScore,
+			Score:    score,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error updating scores for quiz result `%s`: %w", dbQuizResult.ID, err)
+	}
+
+	// Map the results
+	quizResult, err := models.MapQuizResult(updatedDbQuizResult)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update quiz result scores: %w", err)
+	}
+	quizResult.AnswerScores = answerScores
+
+	return quizResult, nil
+}
+
+func calculateSingleChoiceQuestionScores(ctx context.Context, quizResultID, sessionID, quizID string) ([]models.AnswerScore, error) {
+	sqlcQuerier := utils.GetQuerier()
+
+	questions, err := question.GetSingleChoiceQuestions(quizID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	answers, err := sqlcQuerier.GetSingleChoiceAnswers(ctx, sessionID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
+
+	for i, q := range questions {
+		userAnswer, err := findSingleChoiceAnswer(answers, q.UUID)
+		if err != nil {
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateSingleChoiceAnswer(
+				ctx,
+				db.CreateSingleChoiceAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answer:     []string{},
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapSingleChoiceAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping single choice answer from db to business: %w", err)
+			}
+		}
+
+		score := 0.0
+		if userAnswer.Answer == q.CorrectAnswer {
+			score = 1.0
+		}
+
+		dbAnswerScore, err := sqlcQuerier.CreateSingleChoiceAnswerScore(
+			ctx,
+			db.CreateSingleChoiceAnswerScoreParams{
+				ID:                   uuid.NewString(),
+				QuizResultID:         quizResultID,
+				SingleChoiceAnswerID: &userAnswer.ID,
+				MaxScore:             1,
+				Score:                score,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		dbAnswerScores[i] = dbAnswerScore
+	}
+
+	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
+	for i, dbs := range dbAnswerScores {
+		answerScore, err := models.MapAnswerScore(dbs)
+		if err != nil {
+			return []models.AnswerScore{}, err
+		}
+		answerScores[i] = *answerScore
+	}
+
+	return answerScores, nil
+}
+func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, sessionID, quizID string) ([]models.AnswerScore, error) {
+	sqlcQuerier := utils.GetQuerier()
+
+	questions, err := question.GetMultipleChoiceQuestions(quizID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	answers, err := sqlcQuerier.GetMultipleChoiceAnswers(ctx, sessionID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
+
+	for i, q := range questions {
+		multipleChoiceQuestion := models.MultipleChoiceQuestion{
+			ID:             q.UUID,
+			QuizID:         q.QuizID,
+			QuestionType:   models.MultipleChoice,
+			Question:       q.Question,
+			Answers:        q.Answers,
+			CorrectAnswers: q.CorrectAnswers,
+		}
+
+		userAnswer, err := findMultipleChoiceAnswer(answers, q.UUID)
+		if err != nil {
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateMultipleChoiceAnswer(
+				ctx,
+				db.CreateMultipleChoiceAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answers:    []string{},
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapMultipleChoiceAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping multiple choice answer from db to business: %w", err)
+			}
+		}
+
+		positiveScore := 1.0 / float64(len(multipleChoiceQuestion.Answers))
+		negativeScore := 1.0 / float64(4-len(multipleChoiceQuestion.Answers))
+
+		score := 0.0
+		for _, correctAnswer := range multipleChoiceQuestion.CorrectAnswers {
+			if strings.Contains(userAnswer.Answers, correctAnswer) {
+				score += positiveScore
+			} else {
+				score -= negativeScore
+			}
+		}
+		if score <= 0.0 {
+			score = 0
+		}
+
+		dbAnswerScore, err := sqlcQuerier.CreateMultipleChoiceAnswerScore(
+			ctx,
+			db.CreateMultipleChoiceAnswerScoreParams{
+				ID:                     uuid.NewString(),
+				QuizResultID:           quizResultID,
+				MultipleChoiceAnswerID: &userAnswer.ID,
+				MaxScore:               1,
+				Score:                  score,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		dbAnswerScores[i] = dbAnswerScore
+	}
+
+	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
+	for i, dbs := range dbAnswerScores {
+		answerScore, err := models.MapAnswerScore(dbs)
+		if err != nil {
+			return []models.AnswerScore{}, err
+		}
+		answerScores[i] = *answerScore
+	}
+
+	return answerScores, nil
+}
+func calculateTrueOrFalseQuestionScores(ctx context.Context, quizResultID, sessionID, quizID string) ([]models.AnswerScore, error) {
+	sqlcQuerier := utils.GetQuerier()
+
+	questions, err := question.GetTrueOrFalseQuestions(quizID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	answers, err := sqlcQuerier.GetTrueOrFalseAnswers(ctx, sessionID)
+	if err != nil {
+		return []models.AnswerScore{}, err
+	}
+
+	dbAnswerScores := make([]*db.AnswerScore, len(questions))
+
+	for i, q := range questions {
+		trueOrFalseQuestion := models.TrueOrFalseQuestion{
+			ID:            q.UUID,
+			QuizID:        q.QuizID,
+			QuestionType:  models.TrueOrFalse,
+			Question:      q.Question,
+			CorrectAnswer: q.CorrectAnswer,
+		}
+
+		userAnswer, err := findTrueOrFalseAnswer(answers, q.UUID)
+		if err != nil {
+			log.Default().Printf("user answer not found for question with ID `%s`, trying to create a new one", q.UUID)
+			emptyAnswer, err := sqlcQuerier.CreateTrueOrFalseAnswer(
+				ctx,
+				db.CreateTrueOrFalseAnswerParams{
+					ID:         uuid.NewString(),
+					SessionID:  sessionID,
+					QuestionID: q.UUID,
+					Answer:     nil,
+				},
+			)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error creating empty answer for question with ID `%s`: %w", q.UUID, err)
+			}
+
+			userAnswer, err = models.MapTrueOrFalseAnswer(emptyAnswer)
+			if err != nil {
+				return []models.AnswerScore{}, fmt.Errorf("error mapping true or false answer from db to business: %w", err)
+			}
+		}
+
+		score := 0.0
+		if userAnswer.Answer != nil && trueOrFalseQuestion.CorrectAnswer == *userAnswer.Answer {
+			score = 1.0
+		}
+
+		dbAnswerScore, err := sqlcQuerier.CreateTrueOrFalseAnswerScore(
+			ctx,
+			db.CreateTrueOrFalseAnswerScoreParams{
+				ID:                  uuid.NewString(),
+				QuizResultID:        quizResultID,
+				TrueOrFalseAnswerID: &userAnswer.ID,
+				MaxScore:            1,
+				Score:               score,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		dbAnswerScores[i] = dbAnswerScore
+	}
+
+	answerScores := make([]models.AnswerScore, len(dbAnswerScores))
+	for i, dbs := range dbAnswerScores {
+		answerScore, err := models.MapAnswerScore(dbs)
+		if err != nil {
+			return []models.AnswerScore{}, err
+		}
+		answerScores[i] = *answerScore
+	}
+
+	return answerScores, nil
+}
+
+func findSingleChoiceAnswer(answers []*db.SingleChoiceAnswer, questionID string) (*models.SingleChoiceAnswer, error) {
+	for _, dbAnswer := range answers {
+		if dbAnswer.QuestionID == questionID {
+			answer, err := models.MapSingleChoiceAnswer(dbAnswer)
+			if err != nil {
+				return nil, fmt.Errorf("error mapping answer with ID `%s`", dbAnswer.ID)
+			}
+			return answer, err
+		}
+	}
+	return nil, fmt.Errorf("answer not found for question with ID `%s`", questionID)
+}
+func findMultipleChoiceAnswer(answers []*db.MultipleChoiceAnswer, questionID string) (*models.MultipleChoiceAnswer, error) {
+	for _, dbAnswer := range answers {
+		if dbAnswer.QuestionID == questionID {
+			answer, err := models.MapMultipleChoiceAnswer(dbAnswer)
+			if err != nil {
+				return nil, fmt.Errorf("error mapping answer with ID `%s`", dbAnswer.ID)
+			}
+			return answer, err
+		}
+	}
+	return nil, fmt.Errorf("answer not found for question with ID `%s`", questionID)
+}
+func findTrueOrFalseAnswer(answers []*db.TrueOrFalseAnswer, questionID string) (*models.TrueOrFalseAnswer, error) {
+	for _, dbAnswer := range answers {
+		if dbAnswer.QuestionID == questionID {
+			answer, err := models.MapTrueOrFalseAnswer(dbAnswer)
+			if err != nil {
+				return nil, fmt.Errorf("error mapping answer with ID `%s`", dbAnswer.ID)
+			}
+			return answer, err
+		}
+	}
+	return nil, fmt.Errorf("answer not found for question with ID `%s`", questionID)
 }
 
 func HasOpenQuizSession(c echo.Context) error {
@@ -247,8 +656,10 @@ func HasOpenQuizSession(c echo.Context) error {
 		},
 	)
 	if err != nil {
+		log.Default().Printf("error during HasOpenQuizSession call: %f\n", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	log.Default().Printf("hasOpenQuizSession: %t\n", hasOpenSession)
 
 	if hasOpenSession {
 		return c.NoContent(http.StatusOK)

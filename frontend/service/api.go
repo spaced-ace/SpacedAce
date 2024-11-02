@@ -306,3 +306,85 @@ func (a *ApiService) HasQuizSession(userId, quizId string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (a *ApiService) SubmitQuiz(quizSessionId string) (*business.QuizResult, error) {
+	quizResultDto := new(external.QuizResult)
+	if err := a.getResponse("POST", fmt.Sprintf("/quiz-sessions/%s/submit", quizSessionId), nil, &quizResultDto); err != nil {
+		return nil, fmt.Errorf("error submitting quiz session with ID `%s`: %w", quizSessionId, err)
+	}
+
+	quizResult, err := quizResultDto.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("error mapping quiz result with ID `%s`: %w", quizResultDto.ID, err)
+	}
+
+	return quizResult, err
+}
+func (a *ApiService) GetQuizResult(quizSessionId string) (*business.QuizResult, error) {
+	quizResultDto := new(external.QuizResult)
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s/result", quizSessionId), nil, &quizResultDto); err != nil {
+		return nil, fmt.Errorf("error getting quiz result for session with ID `%s`: %w", quizSessionId, err)
+	}
+
+	quizResult, err := quizResultDto.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("error mapping quiz result with ID `%s`: %w", quizResultDto.ID, err)
+	}
+
+	return quizResult, err
+}
+
+func (a *ApiService) GetAnswers(quizSessionId string) (*business.AnswerLists, error) {
+	answersResponse := new(external.AnswersResponse)
+	if err := a.getResponse("GET", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), nil, &answersResponse); err != nil {
+		return nil, err
+	}
+
+	answerLists, err := answersResponse.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return answerLists, nil
+}
+func (a *ApiService) CreateOrUpdateSingleChoiceAnswer(quizSessionId, questionId string, answer string) (*business.SingleChoiceAnswer, error) {
+	requestBody := external.NewSingleChoiceAnswerRequestBody(questionId, answer)
+
+	responseBody := new(external.SingleChoiceAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	singleChoiceAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return singleChoiceAnswer, nil
+}
+func (a *ApiService) CreateOrUpdateMultipleChoiceAnswer(quizSessionId, questionId string, answers []string) (*business.MultipleChoiceAnswer, error) {
+	requestBody := external.NewMultipleChoiceAnswerRequestBody(questionId, answers)
+
+	responseBody := new(external.MultipleChoiceAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	multipleChoiceAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return multipleChoiceAnswer, nil
+}
+func (a *ApiService) CreateOrUpdateTrueOrFalseAnswer(quizSessionId, questionId string, answer bool) (*business.TrueOrFalseAnswer, error) {
+	requestBody := external.NewTrueOrFalseAnswerRequestBody(questionId, answer)
+
+	responseBody := new(external.TrueOrFalseAnswer)
+	if err := a.getResponse("PUT", fmt.Sprintf("/quiz-sessions/%s/answers", quizSessionId), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	trueOrFalseAnswer, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+	return trueOrFalseAnswer, nil
+}

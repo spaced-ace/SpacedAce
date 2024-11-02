@@ -25,3 +25,11 @@ func ParseFloatToQuestionType(floatValue float64) QuestionType {
 		return Unknown
 	}
 }
+
+type AnswerType int
+
+const (
+	SingleChoiceAnswerType AnswerType = iota
+	MultipleChoiceAnswerType
+	TrueOrFalseAnswerType
+)
