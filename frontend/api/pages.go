@@ -108,7 +108,7 @@ func handleTakeQuizPage(c echo.Context) error {
 		return err
 	}
 	if quizSession.Finished {
-		url := fmt.Sprintf("/quiz-results/%s", quizSessionId)
+		url := fmt.Sprintf("/quiz-history/%s", quizSessionId)
 		c.Response().Header().Set("HX-Replace-Url", url)
 		return c.Redirect(http.StatusFound, url)
 	}

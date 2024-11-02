@@ -61,7 +61,7 @@ templ QuizHistoryPage(viewModel QuizHistoryPageViewModel) {
 									<td class="px-2 py-2 text-left text-orange-600">In progress</td>
 								}
 								<td
-									hx-get={ fmt.Sprintf("/quiz-results/%s", e.SessionID) }
+									hx-get={ fmt.Sprintf("/quiz-history/%s", e.SessionID) }
 									hx-target="main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
