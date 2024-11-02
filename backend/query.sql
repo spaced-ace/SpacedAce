@@ -155,8 +155,7 @@
     FROM quiz_results
     INNER JOIN quiz_sessions qs on qs.id = quiz_results.session_id
     WHERE true
-      AND qs.user_id = $1
-    LIMIT 1;
+      AND qs.user_id = $1;
 
 -- name: CreateQuizResult :one
     INSERT INTO quiz_results(id, session_id, max_score, score)

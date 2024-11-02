@@ -3,6 +3,7 @@ package models
 import "time"
 
 type QuizHistoryEntry struct {
+	QuizID          string        `json:"quizID"`
 	QuizName        string        `json:"quizName"`
 	SessionID       string        `json:"sessionID"`
 	Finished        bool          `json:"finished"`
