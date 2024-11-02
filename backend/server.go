@@ -40,6 +40,7 @@ func main() {
 	quiz := e.Group("/quizzes")
 	questions := e.Group("/questions")
 	quizSessions := e.Group("/quiz-sessions")
+	quizHistory := e.Group("/quiz-history")
 	public.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
@@ -79,6 +80,8 @@ func main() {
 	quizSessions.GET("/:quizSessionId/result", handlers.GetQuizResult)
 	quizSessions.GET("/:quizSessionId/answers", handlers.GetAnswers)
 	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
+
+	quizHistory.GET("", handlers.GetQuizHistoryEntries)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
