@@ -26,7 +26,7 @@
 
 -- name: CreateQuizSession :one
     INSERT INTO quiz_sessions (id, user_id, quiz_id, started_at, finished_at, closes_at)
-    VALUES ($1, $2, $3, NOW(), NULL, $4)
+    VALUES ($1, $2, $3, $4, NULL, $5)
     RETURNING *;
 
 -- name: UpdateQuizSessionFinishedAt :one

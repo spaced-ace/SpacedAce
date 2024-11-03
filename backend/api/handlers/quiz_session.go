@@ -89,6 +89,11 @@ func StartQuizSession(c echo.Context) error {
 			ID:     uuid.NewString(),
 			UserID: userId,
 			QuizID: request.QuizId,
+			StartedAt: pgtype.Timestamp{
+				Time:             time.Now(),
+				InfinityModifier: pgtype.Finite,
+				Valid:            true,
+			},
 		},
 	)
 	if err != nil {
