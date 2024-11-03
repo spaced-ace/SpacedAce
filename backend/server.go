@@ -41,6 +41,7 @@ func main() {
 	questions := e.Group("/questions")
 	quizSessions := e.Group("/quiz-sessions")
 	quizHistory := e.Group("/quiz-history")
+	learnList := e.Group("/learn-list")
 	public.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
@@ -82,6 +83,10 @@ func main() {
 	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
 
 	quizHistory.GET("", handlers.GetQuizHistoryEntries)
+
+	learnList.GET("", handlers.GetLearnList)
+	learnList.POST("/:quizID/add", handlers.PostAddQuizToLearnList)
+	learnList.POST("/:quizID/remove", handlers.PostRemoveQuizFromLearnList)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
