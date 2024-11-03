@@ -445,6 +445,7 @@ func handleSubmitQuiz(c echo.Context) error {
 		AnswerLists: answerLists,
 		QuizResult:  quizResult,
 	}
+	c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/quiz-history/%s", quizSessionId))
 	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 

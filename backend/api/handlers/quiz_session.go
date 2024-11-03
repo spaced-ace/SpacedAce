@@ -89,6 +89,11 @@ func StartQuizSession(c echo.Context) error {
 			ID:     uuid.NewString(),
 			UserID: userId,
 			QuizID: request.QuizId,
+			StartedAt: pgtype.Timestamp{
+				Time:             time.Now(),
+				InfinityModifier: pgtype.Finite,
+				Valid:            true,
+			},
 		},
 	)
 	if err != nil {
@@ -482,8 +487,8 @@ func calculateMultipleChoiceQuestionScores(ctx context.Context, quizResultID, se
 			}
 		}
 
-		positiveScore := 1.0 / float64(len(multipleChoiceQuestion.Answers))
-		negativeScore := 1.0 / float64(4-len(multipleChoiceQuestion.Answers))
+		positiveScore := 1.0 / float64(len(multipleChoiceQuestion.CorrectAnswers))
+		negativeScore := 1.0 / float64(4-len(multipleChoiceQuestion.CorrectAnswers))
 
 		score := 0.0
 		for _, correctAnswer := range multipleChoiceQuestion.CorrectAnswers {

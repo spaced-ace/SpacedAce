@@ -26,7 +26,7 @@
 
 -- name: CreateQuizSession :one
     INSERT INTO quiz_sessions (id, user_id, quiz_id, started_at, finished_at, closes_at)
-    VALUES ($1, $2, $3, NOW(), NULL, $4)
+    VALUES ($1, $2, $3, $4, NULL, $5)
     RETURNING *;
 
 -- name: UpdateQuizSessionFinishedAt :one
@@ -149,6 +149,13 @@
     WHERE true
         AND session_id = $1
     LIMIT 1;
+
+-- name: GetQuizResultsByUserID :many
+    SELECT *
+    FROM quiz_results
+    INNER JOIN quiz_sessions qs on qs.id = quiz_results.session_id
+    WHERE true
+      AND qs.user_id = $1;
 
 -- name: CreateQuizResult :one
     INSERT INTO quiz_results(id, session_id, max_score, score)

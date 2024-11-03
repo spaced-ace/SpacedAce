@@ -38,3 +38,7 @@ type QuizResulPageViewModel struct {
 	AnswerLists *business.AnswerLists
 	QuizResult  *business.QuizResult
 }
+
+type QuizHistoryPageViewModel struct {
+	QuizHistoryEntries []business.QuizHistoryEntry
+}

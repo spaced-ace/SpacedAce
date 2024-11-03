@@ -108,7 +108,7 @@ func handleTakeQuizPage(c echo.Context) error {
 		return err
 	}
 	if quizSession.Finished {
-		url := fmt.Sprintf("/quiz-results/%s", quizSessionId)
+		url := fmt.Sprintf("/quiz-history/%s", quizSessionId)
 		c.Response().Header().Set("HX-Replace-Url", url)
 		return c.Redirect(http.StatusFound, url)
 	}
@@ -196,6 +196,30 @@ func handleQuizResultPage(c echo.Context) error {
 		QuizResult:  quizResult,
 	}
 	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
+}
+
+func handleQuizHistoryPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	cc := c.(*context.AppContext)
+	redirectToMyQuizzes := func() error {
+		url := "my-quizzes"
+		c.Response().Header().Set("HX-Replace-Url", url)
+		return c.Redirect(http.StatusFound, url)
+	}
+
+	quizHistoryEntries, err := cc.ApiService.GetQuizHistory(cc.Session.User.Id)
+	if err != nil {
+		return redirectToMyQuizzes()
+	}
+
+	viewModel := pages.QuizHistoryPageViewModel{
+		QuizHistoryEntries: quizHistoryEntries,
+	}
+	return render.TemplRender(c, 200, pages.QuizHistoryPage(viewModel))
 }
 
 func handleNonHXRequest(c echo.Context) error {
