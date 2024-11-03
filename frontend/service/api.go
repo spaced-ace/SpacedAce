@@ -406,3 +406,43 @@ func (a *ApiService) GetQuizHistory(userID string) ([]business.QuizHistoryEntry,
 
 	return entries, nil
 }
+
+func (a *ApiService) GetLearnList() (*business.LearnList, error) {
+	responseBody := new(external.LearnListResponseBody)
+	if err := a.getResponse("GET", "/learn-list", nil, responseBody); err != nil {
+		return nil, err
+	}
+
+	learnList, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return learnList, nil
+}
+func (a *ApiService) AddQuizToLearnList(quizID string) (*business.LearnList, error) {
+	responseBody := new(external.LearnListResponseBody)
+	if err := a.getResponse("POST", fmt.Sprintf("/learn-list/%s/add", quizID), nil, responseBody); err != nil {
+		return nil, err
+	}
+
+	learnList, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return learnList, nil
+}
+func (a *ApiService) RemoveQuizFromLearnList(quizID string) (*business.LearnList, error) {
+	responseBody := new(external.LearnListResponseBody)
+	if err := a.getResponse("POST", fmt.Sprintf("/learn-list/%s/remove", quizID), nil, responseBody); err != nil {
+		return nil, err
+	}
+
+	learnList, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return learnList, nil
+}

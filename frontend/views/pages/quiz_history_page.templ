@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"spaced-ace/views/components"
 	"time"
 )
 
@@ -90,6 +91,7 @@ templ QuizHistoryPage(viewModel QuizHistoryPageViewModel) {
 			</div>
 		}
 	</main>
+	@components.SideBarMenu("/quiz-history", true)
 }
 
 func formatDuration(d time.Duration) string {

@@ -449,6 +449,56 @@ func handleSubmitQuiz(c echo.Context) error {
 	return render.TemplRender(c, 200, pages.QuizResultPage(viewModel))
 }
 
+func handleShowLearnListPopup(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	learnList, err := cc.ApiService.GetLearnList()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	props := components.LearnListPopupProps{
+		LearnList: *learnList,
+	}
+	return render.TemplRender(c, 200, components.LearnListPopup(props))
+}
+func handleAddQuizToLearnList(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizID := c.Param("quizID")
+	if quizID == "" {
+		return echo.NewHTTPError(http.StatusInternalServerError, "missing path param quizID")
+	}
+
+	learnList, err := cc.ApiService.AddQuizToLearnList(quizID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	props := components.LearnListPopupProps{
+		LearnList: *learnList,
+	}
+	return render.TemplRender(c, 200, components.LearnListPopup(props))
+}
+func handleRemoveQuizFromLearnList(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quizID := c.Param("quizID")
+	if quizID == "" {
+		return echo.NewHTTPError(http.StatusInternalServerError, "missing path param quizID")
+	}
+
+	learnList, err := cc.ApiService.RemoveQuizFromLearnList(quizID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	props := components.LearnListPopupProps{
+		LearnList: *learnList,
+	}
+	return render.TemplRender(c, 200, components.LearnListPopup(props))
+}
+
 func handleQuizPreviewPopup(c echo.Context) error {
 	cc := c.(*context.AppContext)
 

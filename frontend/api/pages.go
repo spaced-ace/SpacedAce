@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+	"slices"
 	"spaced-ace/context"
 	"spaced-ace/models/business"
 	"spaced-ace/render"
@@ -215,6 +216,11 @@ func handleQuizHistoryPage(c echo.Context) error {
 	if err != nil {
 		return redirectToMyQuizzes()
 	}
+
+	// Sort the entries to show the most recent ones first
+	slices.SortFunc(quizHistoryEntries, func(a, b business.QuizHistoryEntry) int {
+		return b.DateTaken.Compare(a.DateTaken)
+	})
 
 	viewModel := pages.QuizHistoryPageViewModel{
 		QuizHistoryEntries: quizHistoryEntries,
