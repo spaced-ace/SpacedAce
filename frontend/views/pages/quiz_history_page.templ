@@ -99,22 +99,16 @@ func formatDuration(d time.Duration) string {
 
 	var parts []string
 	if hours > 0 {
-		parts = append(parts, fmt.Sprintf("%dh%s", hours, plural(hours)))
+		parts = append(parts, fmt.Sprintf("%dh", hours))
 	}
 	if minutes > 0 {
-		parts = append(parts, fmt.Sprintf("%dm%s", minutes, plural(minutes)))
+		parts = append(parts, fmt.Sprintf("%dm", minutes))
 	}
 	if seconds > 0 {
-		parts = append(parts, fmt.Sprintf("%ds%s", seconds, plural(seconds)))
+		parts = append(parts, fmt.Sprintf("%ds", seconds))
 	}
 
 	return fmt.Sprintf("%s", joinParts(parts))
-}
-func plural(n int) string {
-	if n != 1 {
-		return "s"
-	}
-	return ""
 }
 func joinParts(parts []string) string {
 	if len(parts) == 1 {
