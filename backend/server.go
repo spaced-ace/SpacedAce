@@ -3,8 +3,7 @@ package main
 import (
 	"golang.org/x/net/context"
 	"log"
-	"net/http"
-	handlers "spaced-ace-backend/api/handlers"
+	"spaced-ace-backend/api/handlers"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/constants"
 	"spaced-ace-backend/question"
@@ -36,28 +35,22 @@ func main() {
 	}()
 
 	public := e.Group("")
-	protected := e.Group("")
-	quiz := e.Group("/quizzes")
-	questions := e.Group("/questions")
-	quizSessions := e.Group("/quiz-sessions")
-	quizHistory := e.Group("/quiz-history")
-	learnList := e.Group("/learn-list")
-	public.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
 	public.POST("/authenticate-user", auth.AuthenticateUser)
 	public.GET("/authenticated", auth.Authenticated)
 	public.POST("/create-user", auth.Register)
 	public.DELETE("/delete-user/:id", auth.DeleteUserEndpoint)
+
+	protected := e.Group("")
 	protected.POST("/logout", auth.Logout)
 
-	quiz.GET("/:id", handlers.GetQuizEndpoint)
-	quiz.PATCH("/:id", handlers.UpdateQuizEndpoint)
-	quiz.DELETE("/:id", handlers.DeleteQuizEndpoint)
-	quiz.GET("/user/:id", handlers.GetQuizzesOfUserEndpoint)
-	quiz.POST("/create", handlers.CreateQuizEndpoint)
+	quizGroup := protected.Group("/quizzes")
+	quizGroup.GET("/:id", handlers.GetQuizEndpoint)
+	quizGroup.PATCH("/:id", handlers.UpdateQuizEndpoint)
+	quizGroup.DELETE("/:id", handlers.DeleteQuizEndpoint)
+	quizGroup.GET("/user/:id", handlers.GetQuizzesOfUserEndpoint)
+	quizGroup.POST("/create", handlers.CreateQuizEndpoint)
 
+	questions := protected.Group("/questions")
 	questions.POST("/multiple-choice", handlers.CreateMultipleChoiceQuestionEndpoint)
 	questions.GET("/multiple-choice/:id", handlers.GetMultipleChoiceEndpoint)
 	questions.PATCH("/multiple-choice/:id", handlers.UpdateMultipleChoiceQuestionEndpoint)
@@ -73,6 +66,7 @@ func main() {
 	questions.PATCH("/true-or-false/:id", handlers.UpdateTrueOrFalseQuestionEndpoint)
 	questions.DELETE("/true-or-false/:quizId/:id", handlers.DeleteTrueOrFalseQuestionEndpoint)
 
+	quizSessions := protected.Group("/quiz-sessions")
 	quizSessions.GET("/:quizSessionId", handlers.GetQuizSession)
 	quizSessions.GET("", handlers.GetQuizSessions)
 	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
@@ -82,8 +76,10 @@ func main() {
 	quizSessions.GET("/:quizSessionId/answers", handlers.GetAnswers)
 	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
 
+	quizHistory := protected.Group("/quiz-history")
 	quizHistory.GET("", handlers.GetQuizHistoryEntries)
 
+	learnList := protected.Group("/learn-list")
 	learnList.GET("", handlers.GetLearnList)
 	learnList.POST("/:quizID/add", handlers.PostAddQuizToLearnList)
 	learnList.POST("/:quizID/remove", handlers.PostRemoveQuizFromLearnList)
