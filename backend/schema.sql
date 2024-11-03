@@ -59,3 +59,10 @@ CREATE TABLE IF NOT EXISTS answer_scores(
     score FLOAT NOT NULL
 );
 CREATE INDEX idx_answer_score_quiz_results_id ON answer_scores(quiz_result_id);
+
+CREATE TABLE IF NOT EXISTS learn_list_added_items(
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE NOT NULL,
+    UNIQUE (user_id, quiz_id)
+);
+CREATE INDEX idx_learn_list_added_items_user_id ON learn_list_added_items(user_id);

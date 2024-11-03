@@ -189,3 +189,20 @@
     INSERT INTO answer_scores(id, quiz_result_id, true_or_false_answer_id, max_score, score)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *;
+
+-- name: GetAddedLearnListItems :many
+    SELECT *
+    FROM learn_list_added_items
+    WHERE true
+        AND user_id = $1;
+
+-- name: AddQuizToLearnList :exec
+    INSERT INTO learn_list_added_items(user_id, quiz_id)
+    VALUES ($1, $2)
+    ON CONFLICT (user_id, quiz_id) DO NOTHING;
+
+-- name: RemoveQuizFromLearnList :exec
+    DELETE FROM learn_list_added_items
+    WHERE true
+        AND user_id = $1
+        AND quiz_id = $2;
