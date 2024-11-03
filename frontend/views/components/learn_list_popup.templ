@@ -1,0 +1,77 @@
+package components
+
+import (
+	"fmt"
+	"spaced-ace/models/business"
+)
+
+type LearnListPopupProps struct {
+	LearnList business.LearnList
+}
+
+templ LearnListPopup(props LearnListPopupProps) {
+	<div
+		id="learn-list-popup"
+		class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 pl-[130px]"
+	>
+		<div class="flex flex-col gap-y-4 rounded-md border border-gray-300 bg-gray-100 p-4 drop-shadow w-[600px] max-h-[400px]">
+			<div class="flex w-full items-center justify-between">
+				<span class="text-ellipsis text-2xl font-semibold">Manage Learn List</span>
+				<div
+					hx-get="/close-popup"
+					hx-target="#popup-container"
+					hx-push-url="false"
+					class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 group-hover:text-gray-600">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+					</svg>
+				</div>
+			</div>
+			<div class="flex w-full gap-x-4">
+				<div id="available-quizzes" class="flex h-full flex-col w-full">
+					<span class="font-semibold">Available Quizzes</span>
+					<div class="h-[256px] w-full overflow-y-auto gap-y-2">
+						for _, item := range props.LearnList.AvailableItems {
+							<div class="w-full flex justify-between items-center py-2">
+								<span>{ item.QuizName }</span>
+								<div
+									hx-post={ fmt.Sprintf("/my-quizzes/learn-list/%s/add", item.QuizID) }
+									hx-target="#learn-list-popup"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									class="flex h-8 w-8 items-center justify-center border rounded border-gray-300 bg-gray-100 rounder-md hover:bg-gray-200"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+									</svg>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+				<div id="selected-quizzes" class="flex h-full flex-col w-full">
+					<span class="font-semibold">Learn List</span>
+					<div class="h-[256px] w-full overflow-y-auto gap-y-2">
+						for _, item := range props.LearnList.SelectedItems {
+							<div class="w-full flex justify-between items-center py-2">
+								<span>{ item.QuizName }</span>
+								<div
+									hx-post={ fmt.Sprintf("/my-quizzes/learn-list/%s/remove", item.QuizID) }
+									hx-target="#learn-list-popup"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									class="flex h-8 w-8 items-center justify-center border rounded border-gray-300 bg-gray-100 rounder-md hover:bg-gray-200"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
+									</svg>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

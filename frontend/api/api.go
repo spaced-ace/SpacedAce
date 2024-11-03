@@ -22,6 +22,9 @@ func RegisterRoutes(e *echo.Echo) {
 	// My quizzes page
 	protected.GET("/my-quizzes", handleMyQuizzesPage)
 	protected.DELETE("/quizzes/:quizId", handleDeleteQuiz)
+	protected.GET("/my-quizzes/learn-list/show", handleShowLearnListPopup)
+	protected.POST("/my-quizzes/learn-list/:quizID/add", handleAddQuizToLearnList)
+	protected.POST("/my-quizzes/learn-list/:quizID/remove", handleRemoveQuizFromLearnList)
 
 	// Quiz history page
 	protected.GET("/quiz-history", handleQuizHistoryPage)

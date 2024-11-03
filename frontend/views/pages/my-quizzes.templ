@@ -10,7 +10,11 @@ templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
 			@components.Button(components.ButtonProps{
 				Text:  "Manage Learn List",
 				Color: components.ButtonColorBlack,
-				HxGet: "/my-quizzes/manage-learn-list",
+				HxGet: "/my-quizzes/learn-list/show",
+				Attributes: templ.Attributes{
+					"hx-target":   "#popup-container",
+					"hx-push-url": "false",
+				},
 			})
 		</div>
 		@components.SearchBar(components.SearchBarProps{
