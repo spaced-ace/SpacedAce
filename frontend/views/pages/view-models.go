@@ -42,3 +42,8 @@ type QuizResulPageViewModel struct {
 type QuizHistoryPageViewModel struct {
 	QuizHistoryEntries []business.QuizHistoryEntry
 }
+
+type LearnPageViewModel struct {
+	TotalQuestions    int
+	QuestionsToReview int
+}

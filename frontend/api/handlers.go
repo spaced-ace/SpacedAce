@@ -499,6 +499,35 @@ func handleRemoveQuizFromLearnList(c echo.Context) error {
 	return render.TemplRender(c, 200, components.LearnListPopup(props))
 }
 
+func handleGetReviewItemList(c echo.Context) error {
+	props := components.ReviewItemListProps{
+		SelectedQuizOption: nil,
+		QuizOptions: []components.Option{
+			{Name: "Quiz1", Value: "quiz-1-id"},
+			{Name: "Quiz 2", Value: "quiz-2-id"},
+			{Name: "Quiz 3 asdas as d", Value: "quiz-3-id"},
+		},
+		SelectedDifficulty: &components.Option{Name: "Easy", Value: "easy"},
+		DifficultyOptions: []components.Option{
+			{Name: "Easy", Value: "easy"},
+			{Name: "Medium", Value: "medium"},
+			{Name: "Hard", Value: "hard"},
+		},
+		SelectedStatus: nil,
+		StatusOptions: []components.Option{
+			{Name: "Due", Value: "due"},
+			{Name: "Not Due", Value: "not-due"},
+		},
+		Query:        "",
+		ReviewItems:  []business.ReviewItem{},
+		PageOptions:  []int{1, 2, 3, 4, 5},
+		CurrentPage:  1,
+		PreviousPage: -1,
+		NextPage:     2,
+	}
+	return render.TemplRender(c, 200, components.ReviewItemList(props))
+}
+
 func handleQuizPreviewPopup(c echo.Context) error {
 	cc := c.(*context.AppContext)
 

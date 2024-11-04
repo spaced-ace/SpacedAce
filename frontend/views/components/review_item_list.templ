@@ -1,0 +1,92 @@
+package components
+
+import "spaced-ace/models/business"
+
+type Option struct {
+	Name  string
+	Value string
+}
+
+type ReviewItemListProps struct {
+	SelectedQuizOption *Option
+	QuizOptions        []Option
+	SelectedDifficulty *Option
+	DifficultyOptions  []Option
+	SelectedStatus     *Option
+	StatusOptions      []Option
+	Query              string
+
+	ReviewItems  []business.ReviewItem
+	PageOptions  []int
+	CurrentPage  int
+	PreviousPage int
+	NextPage     int
+}
+
+templ ReviewItemList(props ReviewItemListProps) {
+	<form id="review-item-list" class="flex w-full flex-shrink-0 flex-col gap-y-4">
+		<div class="w-full flex gap-x-4">
+			<label for="quiz" class="flex flex-col w-[160px]">
+				<span class="text-sm font-semibold">Select quiz</span>
+				<select
+					id="quiz"
+					name="quiz"
+					class="h-8 rounded-md border border-gray-300 px-2"
+				>
+					<option>All</option>
+					for _, option := range props.QuizOptions {
+						<option
+							if props.SelectedQuizOption != nil && props.SelectedQuizOption.Value == option.Value {
+								selected
+							}
+							value={ option.Value }
+						>
+							{ option.Name }
+						</option>
+					}
+				</select>
+			</label>
+			<label for="difficulty" class="flex flex-col w-[120px]">
+				<span class="text-sm font-semibold">Difficulty</span>
+				<select
+					id="difficulty"
+					name="difficulty"
+					class="h-8 rounded-md border border-gray-300 px-2"
+				>
+					<option>All</option>
+					for _, option := range props.DifficultyOptions {
+						<option
+							if props.SelectedDifficulty != nil && props.SelectedDifficulty.Value == option.Value {
+								selected
+							}
+							value={ option.Value }
+						>
+							{ option.Name }
+						</option>
+					}
+				</select>
+			</label>
+			<label for="status" class="flex flex-col w-[120px]">
+				<span class="text-sm font-semibold">Status</span>
+				<select
+					id="status"
+					name="status"
+					class="h-8 rounded-md border border-gray-300 px-2"
+				>
+					<option>All</option>
+					for _, option := range props.StatusOptions {
+						<option
+							if props.SelectedStatus != nil && props.SelectedStatus.Value == option.Value {
+								selected
+							}
+							value={ option.Value }
+						>
+							{ option.Name }
+						</option>
+					}
+				</select>
+			</label>
+		</div>
+		<div></div>
+	</form>
+}

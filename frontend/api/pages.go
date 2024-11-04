@@ -228,6 +228,19 @@ func handleQuizHistoryPage(c echo.Context) error {
 	return render.TemplRender(c, 200, pages.QuizHistoryPage(viewModel))
 }
 
+func handleLearnPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	viewModel := pages.LearnPageViewModel{
+		TotalQuestions:    150,
+		QuestionsToReview: 40,
+	}
+	return render.TemplRender(c, 200, pages.LearnPage(viewModel))
+}
+
 func handleNonHXRequest(c echo.Context) error {
 	activeUrl := c.Request().URL.Path
 	sideBarProps, err := createSideBarProps(c, activeUrl)
