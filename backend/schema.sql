@@ -66,3 +66,25 @@ CREATE TABLE IF NOT EXISTS learn_list_added_items(
     UNIQUE (user_id, quiz_id)
 );
 CREATE INDEX idx_learn_list_added_items_user_id ON learn_list_added_items(user_id);
+
+CREATE TABLE IF NOT EXISTS review_items(
+    id UUID PRIMARY KEY NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    single_choice_question_id UUID REFERENCES single_choice_questions(uuid) ON DELETE CASCADE NULL,
+    multiple_choice_question_id UUID REFERENCES multiple_choice_questions(uuid) ON DELETE CASCADE NULL,
+    true_or_false_question_id UUID REFERENCES true_or_false_questions(uuid) ON DELETE CASCADE NULL,
+    CHECK (
+        (single_choice_question_id IS NOT NULL)::int +
+        (multiple_choice_question_id IS NOT NULL)::int +
+        (true_or_false_question_id IS NOT NULL)::int = 1
+    ),
+    ease_factor FLOAT NOT NULL,
+    difficulty FLOAT NOT NULL,
+    score INT NOT NULL,
+    streak INT NOT NULL,
+    next_review_date TIMESTAMP NOT NULL
+);
+CREATE INDEX idx_review_items_user_id ON review_items(user_id);
+CREATE INDEX idx_review_items_single_choice_question_id ON review_items(single_choice_question_id);
+CREATE INDEX idx_review_items_multiple_choice_question_id ON review_items(multiple_choice_question_id);
+CREATE INDEX idx_review_items_true_or_false_question_id ON review_items(true_or_false_question_id);
