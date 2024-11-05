@@ -20,8 +20,8 @@ def init_model() -> str:
 def init_base_url() -> str:
     return os.environ.get('OLLAMA_URL', 'http://ollama:11434')
 
-def init_mock_response() -> str:
-    return os.environ.get('MOCK_RESPONSE', 'false')
+def init_mock_response() -> bool:
+    return os.environ.get('MOCK_RESPONSE', 'false') == 'true'
 
 def get_db_config() -> dict:
     return {
