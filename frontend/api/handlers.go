@@ -501,19 +501,19 @@ func handleRemoveQuizFromLearnList(c echo.Context) error {
 
 func handleGetReviewItemList(c echo.Context) error {
 	props := components.ReviewItemListProps{
-		SelectedQuizOption: nil,
+		SelectedQuizOption: components.Option{},
 		QuizOptions: []components.Option{
 			{Name: "Quiz1", Value: "quiz-1-id"},
 			{Name: "Quiz 2", Value: "quiz-2-id"},
 			{Name: "Quiz 3 asdas as d", Value: "quiz-3-id"},
 		},
-		SelectedDifficulty: &components.Option{Name: "Easy", Value: "easy"},
+		SelectedDifficulty: components.Option{Name: "Easy", Value: "easy"},
 		DifficultyOptions: []components.Option{
 			{Name: "Easy", Value: "easy"},
 			{Name: "Medium", Value: "medium"},
 			{Name: "Hard", Value: "hard"},
 		},
-		SelectedStatus: nil,
+		SelectedStatus: components.Option{},
 		StatusOptions: []components.Option{
 			{Name: "Due", Value: "due"},
 			{Name: "Not Due", Value: "not-due"},

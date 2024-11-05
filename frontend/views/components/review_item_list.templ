@@ -1,6 +1,9 @@
 package components
 
-import "spaced-ace/models/business"
+import (
+	"fmt"
+	"spaced-ace/models/business"
+)
 
 type Option struct {
 	Name  string
@@ -8,11 +11,11 @@ type Option struct {
 }
 
 type ReviewItemListProps struct {
-	SelectedQuizOption *Option
+	SelectedQuizOption Option
 	QuizOptions        []Option
-	SelectedDifficulty *Option
+	SelectedDifficulty Option
 	DifficultyOptions  []Option
-	SelectedStatus     *Option
+	SelectedStatus     Option
 	StatusOptions      []Option
 	Query              string
 
@@ -24,19 +27,34 @@ type ReviewItemListProps struct {
 }
 
 templ ReviewItemList(props ReviewItemListProps) {
-	<form id="review-item-list" class="flex w-full flex-shrink-0 flex-col gap-y-4">
-		<div class="w-full flex gap-x-4">
-			<label for="quiz" class="flex flex-col w-[160px]">
+	<form
+		id="review-item-list"
+		hx-get="/learn/review-item-list"
+		class="flex w-full flex-shrink-0 flex-col gap-y-4"
+	>
+		<div class="flex w-full flex-col gap-x-4 gap-y-2 md:flex-row">
+			<label for="quiz" class="flex w-full flex-col md:w-[160px]">
 				<span class="text-sm font-semibold">Select quiz</span>
 				<select
 					id="quiz"
 					name="quiz"
+					hx-trigger="change"
+					hx-get="/learn/review-item-list"
+					hx-target="#review-item-list"
+					hx-vals={
+						fmt.Sprintf(
+							`{ "difficulty": "%s", "status": "%s", "query": "%s" }`,
+							props.SelectedDifficulty.Value,
+							props.SelectedStatus.Value,
+							props.Query,
+						),
+					}
 					class="h-8 rounded-md border border-gray-300 px-2"
 				>
-					<option>All</option>
+					<option value="">All</option>
 					for _, option := range props.QuizOptions {
 						<option
-							if props.SelectedQuizOption != nil && props.SelectedQuizOption.Value == option.Value {
+							if props.SelectedQuizOption.Value == option.Value {
 								selected
 							}
 							value={ option.Value }
@@ -46,17 +64,27 @@ templ ReviewItemList(props ReviewItemListProps) {
 					}
 				</select>
 			</label>
-			<label for="difficulty" class="flex flex-col w-[120px]">
+			<label for="difficulty" class="flex w-full flex-col md:w-[120px]">
 				<span class="text-sm font-semibold">Difficulty</span>
 				<select
 					id="difficulty"
 					name="difficulty"
+					hx-get="/learn/review-item-list"
+					hx-target="#review-item-list"
+					hx-vals={
+						fmt.Sprintf(
+							`{ "quiz": "%s", "status": "%s", "query": "%s" }`,
+							props.SelectedQuizOption.Value,
+							props.SelectedStatus.Value,
+							props.Query,
+						),
+					}
 					class="h-8 rounded-md border border-gray-300 px-2"
 				>
-					<option>All</option>
+					<option value="">All</option>
 					for _, option := range props.DifficultyOptions {
 						<option
-							if props.SelectedDifficulty != nil && props.SelectedDifficulty.Value == option.Value {
+							if props.SelectedDifficulty.Value == option.Value {
 								selected
 							}
 							value={ option.Value }
@@ -66,17 +94,27 @@ templ ReviewItemList(props ReviewItemListProps) {
 					}
 				</select>
 			</label>
-			<label for="status" class="flex flex-col w-[120px]">
+			<label for="status" class="flex w-full flex-col md:w-[120px]">
 				<span class="text-sm font-semibold">Status</span>
 				<select
 					id="status"
 					name="status"
+					hx-get="/learn/review-item-list"
+					hx-target="#review-item-list"
+					hx-vals={
+						fmt.Sprintf(
+							`{ "quiz": "%s", "difficulty": "%s", "query": "%s" }`,
+							props.SelectedQuizOption.Value,
+							props.SelectedDifficulty.Value,
+							props.Query,
+						),
+					}
 					class="h-8 rounded-md border border-gray-300 px-2"
 				>
-					<option>All</option>
+					<option value="">All</option>
 					for _, option := range props.StatusOptions {
 						<option
-							if props.SelectedStatus != nil && props.SelectedStatus.Value == option.Value {
+							if props.SelectedStatus.Value == option.Value {
 								selected
 							}
 							value={ option.Value }
@@ -86,7 +124,71 @@ templ ReviewItemList(props ReviewItemListProps) {
 					}
 				</select>
 			</label>
+			<label for="query" class="flex w-full flex-col h-[52px] md:w-[200px]">
+				<span class="text-sm font-semibold">Search</span>
+				<input
+					id="query"
+					name="query"
+					type="search"
+					value={ props.Query }
+					placeholder="Search questions..."
+					hx-get="/learn/review-item-list"
+					hx-target="#review-item-list"
+					hx-trigger="keyup changed delay:500ms"
+					hx-vals={
+						fmt.Sprintf(
+							`{ "quiz": "%s", "difficulty": "%s", "status": "%s" }`,
+							props.SelectedQuizOption.Value,
+							props.SelectedDifficulty.Value,
+							props.SelectedStatus.Value,
+						),
+					}
+					class="h-full w-full rounded-md border border-gray-300 px-2"
+				/>
+			</label>
 		</div>
-		<div></div>
+		<div class="flex w-full flex-col gap-y-8 rounded-md border border-gray-300 p-4 shadow-sm">
+			<span class="text-xl font-semibold">Quiz Questions</span>
+			<table></table>
+			<div class="w-full justify-center items-center gap-x-2 flex">
+				<button
+					name="page"
+					value={ fmt.Sprintf("%d", props.PreviousPage) }
+					if props.PreviousPage == -1 {
+						disabled
+					}
+					class="flex gap-x-2 justify-center items-center hover:bg-gray-100 rounded-md p-2 disabled:bg-white disabled:cursor-not-allowed disabled:text-gray-400"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+					</svg>
+					<span>Previous</span>
+				</button>
+				for _, page := range props.PageOptions {
+					<button
+						name="page"
+						value={ fmt.Sprintf("%d", page) }
+						if props.CurrentPage == page {
+							class="size-10 rounded hover:bg-gray-100 border border-gray-300"
+						} else {
+							class="size-10 rounded hover:bg-gray-100"
+						}
+					>{ fmt.Sprintf("%d", page) }</button>
+				}
+				<button
+					name="page"
+					value={ fmt.Sprintf("%d", props.NextPage) }
+					if props.NextPage == -1 {
+						disabled
+					}
+					class="flex gap-x-2 justify-center items-center hover:bg-gray-100 rounded-md p-2 disabled:bg-white disabled:cursor-not-allowed disabled:text-gray-400"
+				>
+					<span>Next</span>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+						<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
 	</form>
 }
