@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   ollama:
-    image: ollama/ollama:0.1.27
+    image: ollama/ollama:0.4.0
     container_name: ollama
     ports:
       - "11435:11434"
@@ -14,8 +14,10 @@ services:
     build:
       context: ./llm-api/
     environment:
-      OLLAMA_URL: http://ollama:11434
-      MODEL: mistral-quizgen
+      MODEL: ${MODEL}
+      BASE_URL: ${BASE_URL}
+      API_KEY: ${API_KEY}
+      PROVIDER: ${PROVIDER}
       DB_USER: ${PG_USER}
       DB_PASS: ${PG_PW}
       DB_HOST: database
@@ -50,6 +52,7 @@ services:
       DB_NAME: postgres
     depends_on:
       - database
+      - llm-api
     ports:
       - "9000:80"
     networks:

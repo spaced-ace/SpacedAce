@@ -1,5 +1,9 @@
 from pydantic import BaseModel, field_validator
 
+MULTIPLE_CHOICE = 'mcma'
+SINGLE_CHOICE = 'mcsa'
+TRUE_OR_FALSE = 'boolean'
+
 
 class MulipleChoice(BaseModel):
     question: str

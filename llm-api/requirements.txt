@@ -6,3 +6,4 @@ langchain
 asyncpg
 pgvector
 returns
+langdetect
