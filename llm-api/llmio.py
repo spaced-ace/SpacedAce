@@ -156,8 +156,8 @@ def format_question(context: str, q_type: str, lang: str) -> list[dict]:
 
 
 def strip_response(response: str) -> str:
-    s = response.removeprefix('<output>')
-    s = s.removesuffix('</output>')
+    s = response.split('<output>')[-1]
+    s = s.split('</output>')[0]
     s = s.strip()
     return s
 

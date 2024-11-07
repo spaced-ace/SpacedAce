@@ -60,10 +60,11 @@ client = AsyncClient(
 
 def request_data(messages) -> dict:
     return {
-        'temperature': 0.2,
+        'temperature': 0.4,
         'model': MODEL,
         'stream': False,
         'messages': messages,
+        'max_new_tokens': 500,
     }
 
 
