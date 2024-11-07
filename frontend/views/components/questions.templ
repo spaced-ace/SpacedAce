@@ -1,0 +1,337 @@
+package components
+
+import (
+	"fmt"
+	"slices"
+	"spaced-ace/models/business"
+)
+
+type SingleChoiceQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.SingleChoiceQuestion
+	Answer                    *business.SingleChoiceAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
+type MultipleChoiceQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.MultipleChoiceQuestion
+	Answer                    *business.MultipleChoiceAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
+type TrueOrFalseQuestionProps struct {
+	QuizSession               *business.QuizSession
+	Question                  *business.TrueOrFalseQuestion
+	Answer                    *business.TrueOrFalseAnswer
+	AnswerScore               *business.AnswerScore
+	AllowDeleting             bool
+	ReplacePlaceholderWithOOB bool
+}
+
+templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
+	<div
+		id={ fmt.Sprintf(`question-%s`, props.Question.Id) }
+		if props.ReplacePlaceholderWithOOB {
+			hx-swap-oob="outerHTML:#placeholder-question"
+		}
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+	>
+		<div class="flex w-full items-start justify-between gap-x-2">
+			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
+			if props.AllowDeleting {
+				<div
+					hx-delete={ fmt.Sprintf(`/questions/%s?type=single-choice&quizId=%s`, props.Question.Id, props.Question.QuizId) }
+					hx-target={ fmt.Sprintf(`#question-%s`, props.Question.Id) }
+					hx-push-url="false"
+					hx-swap="outerHTML"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+					</svg>
+				</div>
+			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
+		</div>
+		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+		<form
+			class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5"
+		>
+			for index, option := range props.Question.Options {
+				<label
+					if props.Answer != nil {
+						if option.Correct && isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+						}
+						if option.Correct && !isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+						}
+						if !option.Correct && isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+						}
+						if !option.Correct && !isSingleChoiceAnswerSelected(index, props.Answer.Answer) {
+							class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
+						}
+					} else {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+					}
+				>
+					<input
+						type="radio"
+						name="answer"
+						if props.AllowDeleting && option.Correct {
+							checked
+						}
+						if props.AllowDeleting || props.AnswerScore != nil {
+							disabled
+						}
+						if props.QuizSession != nil && props.AnswerScore == nil {
+							hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+							hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "single-choice" }`, props.Question.Id) }
+						}
+						if index == 0 {
+							value="A"
+							if !props.AllowDeleting && props.Answer != nil && props.Answer.Answer == "A" {
+								checked
+							}
+						}
+						if index == 1 {
+							value="B"
+							if !props.AllowDeleting && props.Answer != nil && props.Answer.Answer == "B" {
+								checked
+							}
+						}
+						if index == 2 {
+							value="C"
+							if !props.AllowDeleting && props.Answer != nil && props.Answer.Answer == "C" {
+								checked
+							}
+						}
+						if index == 3 {
+							value="D"
+							if !props.AllowDeleting && props.Answer != nil && props.Answer.Answer == "D" {
+								checked
+							}
+						}
+					/>
+					{ option.Value }
+				</label>
+			}
+		</form>
+	</div>
+}
+
+templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
+	<div
+		id={ fmt.Sprintf(`question-%s`, props.Question.Id) }
+		if props.ReplacePlaceholderWithOOB {
+			hx-swap-oob="outerHTML:#placeholder-question"
+		}
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+	>
+		<div class="flex w-full items-start justify-between gap-x-2">
+			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
+			if props.AllowDeleting {
+				<div
+					hx-delete={ fmt.Sprintf(`/questions/%s?type=multiple-choice&quizId=%s`, props.Question.Id, props.Question.QuizId) }
+					hx-target={ fmt.Sprintf(`#question-%s`, props.Question.Id) }
+					hx-push-url="false"
+					hx-swap="outerHTML"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+					</svg>
+				</div>
+			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
+		</div>
+		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+		<form
+			if props.QuizSession != nil && props.AnswerScore == nil {
+				hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+				hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "multiple-choice" }`, props.Question.Id) }
+				hx-trigger="change from:input[type='checkbox']"
+				hx-swap="none"
+			}
+			class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5"
+		>
+			for index, option := range props.Question.Options {
+				<label
+					if props.Answer != nil {
+						if option.Correct && isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+						}
+						if option.Correct && !isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+						}
+						if !option.Correct && isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+						}
+						if !option.Correct && !isMultipleChoiceAnswerSelected(index, props.Answer.Answers) {
+							class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
+						}
+					} else {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+					}
+				>
+					<input
+						type="checkbox"
+						name="answer"
+						if props.AllowDeleting && option.Correct {
+							checked
+						}
+						if props.AllowDeleting || props.AnswerScore != nil {
+							disabled
+						}
+						if index == 0 {
+							value="A"
+							if !props.AllowDeleting && props.Answer != nil && slices.Contains(props.Answer.Answers, "A") {
+								checked
+							}
+						}
+						if index == 1 {
+							value="B"
+							if !props.AllowDeleting && props.Answer != nil && slices.Contains(props.Answer.Answers, "B") {
+								checked
+							}
+						}
+						if index == 2 {
+							value="C"
+							if !props.AllowDeleting && props.Answer != nil && slices.Contains(props.Answer.Answers, "C") {
+								checked
+							}
+						}
+						if index == 3 {
+							value="D"
+							if !props.AllowDeleting && props.Answer != nil && slices.Contains(props.Answer.Answers, "D") {
+								checked
+							}
+						}
+					/>
+					{ option.Value }
+				</label>
+			}
+		</form>
+	</div>
+}
+
+templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
+	<div
+		id={ fmt.Sprintf(`question-%s`, props.Question.Id) }
+		if props.ReplacePlaceholderWithOOB {
+			hx-swap-oob="outerHTML:#placeholder-question"
+		}
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+	>
+		<div class="flex w-full items-start justify-between gap-x-2">
+			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
+			if props.AllowDeleting {
+				<div
+					hx-delete={ fmt.Sprintf(`/questions/%s?type=true-or-false&quizId=%s`, props.Question.Id, props.Question.QuizId) }
+					hx-target={ fmt.Sprintf(`#question-%s`, props.Question.Id) }
+					hx-push-url="false"
+					hx-swap="outerHTML"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+					</svg>
+				</div>
+			}
+			if props.AnswerScore != nil {
+				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+			}
+		</div>
+		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+		<form class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
+			<label
+				if props.Answer != nil {
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+					}
+					if (props.Answer.Answer == nil || props.Question.Answer != *props.Answer.Answer) && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+					}
+					if props.Answer.Answer != nil && props.Question.Answer != *props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+					}
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
+					}
+				} else {
+					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+				}
+			>
+				<input
+					type="radio"
+					name="answer"
+					if !props.Question.Answer {
+						checked
+					}
+					if props.AllowDeleting || props.AnswerScore != nil {
+						disabled
+					}
+					if props.QuizSession != nil && props.AnswerScore == nil {
+						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
+					}
+					if props.Answer != nil && props.Answer.Answer != nil && *props.Answer.Answer {
+						checked
+					}
+					value="true"
+				/>
+				true
+			</label>
+			<label
+				if props.Answer != nil {
+					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-green-400 bg-green-200 px-2"
+					}
+					if (props.Answer.Answer == nil || props.Question.Answer != *props.Answer.Answer) && !props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-orange-400 bg-orange-200 px-2"
+					}
+					if props.Answer.Answer != nil && props.Question.Answer != *props.Answer.Answer && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-red-400 bg-red-200 px-2"
+					}
+					if (props.Answer.Answer == nil || props.Question.Answer == *props.Answer.Answer) && props.Question.Answer {
+						class="overflow-auto whitespace-normal rounded-md border border-transparent px-2"
+					}
+				} else {
+					class="overflow-auto whitespace-normal rounded-md border border-transparent bg-transparent px-2"
+				}
+			>
+				<input
+					type="radio"
+					name="answer"
+					if !props.Question.Answer {
+						checked
+					}
+					if props.AllowDeleting || props.AnswerScore != nil {
+						disabled
+					}
+					if props.QuizSession != nil {
+						hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
+						hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "true-or-false" }`, props.Question.Id) }
+					}
+					if props.Answer != nil && props.Answer.Answer != nil && !*props.Answer.Answer {
+						checked
+					}
+					value="false"
+				/>
+				false
+			</label>
+		</form>
+	</div>
+}
+
+func isSingleChoiceAnswerSelected(index int, answerLetter string) bool {
+	return (index == 0 && answerLetter == "A") || (index == 1 && answerLetter == "B") || (index == 2 && answerLetter == "C") || (index == 3 && answerLetter == "D")
+}
+func isMultipleChoiceAnswerSelected(index int, answerLetters []string) bool {
+	return (index == 0 && slices.Contains(answerLetters, "A")) || (index == 1 && slices.Contains(answerLetters, "B")) || (index == 2 && slices.Contains(answerLetters, "C")) || (index == 3 && slices.Contains(answerLetters, "D"))
+}

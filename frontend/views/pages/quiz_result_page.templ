@@ -1,0 +1,107 @@
+package pages
+
+import (
+	"fmt"
+	"spaced-ace/models/business"
+	"spaced-ace/views/components"
+)
+
+templ QuizResultPage(viewModel QuizResulPageViewModel) {
+	<main class="flex h-full w-full flex-col gap-y-4 p-6">
+		<div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
+			<span
+				hx-get="/my-quizzes"
+				hx-push-url="true"
+				hx-target="main"
+				hx-swap="outerHTML"
+				class="cursor-pointer text-base font-semibold text-nowrap hover:underline"
+			>
+				My quizzes
+			</span>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+			</svg>
+			<span
+				class="cursor-pointer text-base font-semibold text-nowrap hover:underline"
+			>
+				{ viewModel.Quiz.Title }
+			</span>
+		</div>
+		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
+			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
+				<div class="w-full flex justify-between align-top gap-x-2">
+					<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
+					if viewModel.QuizResult != nil {
+						<span class="text-xl font-semibold">{ fmt.Sprintf("%g / %g (%.2f%%)", viewModel.QuizResult.Score, viewModel.QuizResult.MaxScore, viewModel.QuizResult.Score / viewModel.QuizResult.MaxScore * 100) }</span>
+					}
+				</div>
+				<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
+				<div class="h-4 w-full"></div>
+				<div class="flex w-full items-center">
+					<span class="w-full text-sm">
+						<span class="font-semibold">Started:</span>
+						<span>{ viewModel.QuizSession.StartedAt.Local().Format("2006-01-02 15:04") }</span>
+					</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Closes:</span>
+						if !viewModel.QuizSession.ClosesAt.IsZero() {
+							<span>{ viewModel.QuizSession.ClosesAt.Local().Format("2006-01-02 15:04") }</span>
+						} else {
+							<span>- </span>
+						}
+					</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Finished:</span>
+						if viewModel.QuizSession.Finished {
+							<span>{ viewModel.QuizSession.FinishedAt.Local().Format("2006-01-02 15:04") }</span>
+						} else {
+							<span>Not finished yet</span>
+						}
+					</span>
+				</div>
+			</div>
+			<div
+				id="questions"
+				class="flex w-full flex-col gap-y-4"
+			>
+				for _, q := range viewModel.Quiz.Questions {
+					switch question := q.(type) {
+						case *business.SingleChoiceQuestion:
+							@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+								QuizSession: viewModel.QuizSession,
+								Question:    question,
+								Answer:      viewModel.AnswerLists.GetSingleChoiceAnswerOrNil(q.(*business.SingleChoiceQuestion).CommonQuestionProperties.Id),
+								AnswerScore: viewModel.QuizResult.GetAnswerScoreOrNilForSingleChoiceAnswer(
+									viewModel.AnswerLists.GetSingleChoiceAnswerOrNil(q.(*business.SingleChoiceQuestion).CommonQuestionProperties.Id),
+								),
+								AllowDeleting:             false,
+								ReplacePlaceholderWithOOB: false,
+							})
+						case *business.MultipleChoiceQuestion:
+							@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+								QuizSession: viewModel.QuizSession,
+								Question:    question,
+								Answer:      viewModel.AnswerLists.GetMultipleChoiceAnswerOrNil(q.(*business.MultipleChoiceQuestion).CommonQuestionProperties.Id),
+								AnswerScore: viewModel.QuizResult.GetAnswerScoreOrNilForMultipleChoiceAnswer(
+									viewModel.AnswerLists.GetMultipleChoiceAnswerOrNil(q.(*business.MultipleChoiceQuestion).CommonQuestionProperties.Id),
+								),
+								AllowDeleting:             false,
+								ReplacePlaceholderWithOOB: false,
+							})
+						case *business.TrueOrFalseQuestion:
+							@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+								QuizSession: viewModel.QuizSession,
+								Question:    question,
+								Answer:      viewModel.AnswerLists.GetTrueOrFalseAnswerOrNil(q.(*business.TrueOrFalseQuestion).CommonQuestionProperties.Id),
+								AnswerScore: viewModel.QuizResult.GetAnswerScoreOrNilForTrueOrFalseAnswer(
+									viewModel.AnswerLists.GetTrueOrFalseAnswerOrNil(q.(*business.TrueOrFalseQuestion).CommonQuestionProperties.Id),
+								),
+								AllowDeleting:             false,
+								ReplacePlaceholderWithOOB: false,
+							})
+					}
+				}
+			</div>
+		</div>
+	</main>
+}

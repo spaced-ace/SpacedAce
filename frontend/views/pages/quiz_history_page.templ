@@ -1,0 +1,120 @@
+package pages
+
+import (
+	"fmt"
+	"spaced-ace/views/components"
+	"time"
+)
+
+templ QuizHistoryPage(viewModel QuizHistoryPageViewModel) {
+	<main class="flex h-full w-full flex-col gap-y-8 p-6">
+		<span class="text-2xl font-bold text-nowrap">History</span>
+		if len(viewModel.QuizHistoryEntries) > 0 {
+			<div class="relative overflow-auto max-h-[calc(100dvh-104px)]] border rounded-md border-gray-300">
+				<table class="min-w-full border-collapse table-fixed">
+					<thead>
+						<tr class="border-b bg-white z-2">
+							<th class="px-4 py-2 text-left sticky top-0 w-1/4 bg-white">Quiz Name</th>
+							<th class="px-2 py-2 text-right sticky top-0 w-1/8 bg-white">Score</th>
+							<th class="px-2 py-2 text-center sticky top-0 w-1/8 bg-white">Date Taken</th>
+							<th class="px-2 py-2 text-center sticky top-0 w-1/8 bg-white">Time Spent</th>
+							<th class="px-2 py-2 text-left sticky top-0 w-1/8 bg-white">Finished</th>
+							<th class="px-2 py-2 text-left sticky top-0 w-1/10 bg-white"></th>
+						</tr>
+					</thead>
+					<tbody>
+						for i, e := range viewModel.QuizHistoryEntries {
+							<tr
+								if i != len(viewModel.QuizHistoryEntries) - 1 {
+									class="border-b"
+								}
+							>
+								<td
+									hx-get={ fmt.Sprintf("/quizzes/%s/preview-popup", e.QuizId) }
+									hx-target="#popup-container"
+									hx-push-url="false"
+									class="px-4 py-2 text-left hover:underline hover:cursor-pointer"
+								>{ e.QuizName }</td>
+								if e.Finished {
+									<td
+										if e.ScorePercentage >= 80 {
+											class="px-2 py-2 text-right text-green-600"
+										}
+										if e.ScorePercentage >= 50 && e.ScorePercentage < 80 {
+											class="px-2 py-2 text-right text-orange-600"
+										}
+										if e.ScorePercentage < 50 {
+											class="px-2 py-2 text-right text-red-600"
+										}
+									>{ fmt.Sprintf("%g%%", e.ScorePercentage) }</td>
+								} else {
+									<td class="px-2 py-2 text-right">- </td>
+								}
+								<td class="px-2 py-2 text-center">{ e.DateTaken.Local().Format("2006-01-02") }</td>
+								if e.Finished {
+									<td class="px-2 py-2 text-center">{ formatDuration(e.TimeSpent) }</td>
+								} else {
+									<td class="px-2 py-2 text-center">- </td>
+								}
+								if e.Finished {
+									<td class="px-2 py-2 text-left text-green-600">Finished</td>
+								} else {
+									<td class="px-2 py-2 text-left text-orange-600">In progress</td>
+								}
+								<td
+									hx-get={ fmt.Sprintf("/quiz-history/%s", e.SessionID) }
+									hx-target="main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="group px-2 py-2 text-center align-middle hover:cursor-pointer hover:bg-gray-100"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-6 flex-shrink-0 group-hover:text-gray-600 inline-block"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+									</svg>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		} else {
+			<div class="w-full h-full flex justify-start items-center flex-col gap-y-4">
+				<div class="w-full h-64"></div>
+				<span class="text-xl font-light">You haven't taken any quizzes yet.</span>
+			</div>
+		}
+	</main>
+	@components.SideBarMenu("/quiz-history", true)
+}
+
+func formatDuration(d time.Duration) string {
+	hours := int(d.Hours())
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+
+	var parts []string
+	if hours > 0 {
+		parts = append(parts, fmt.Sprintf("%dh", hours))
+	}
+	if minutes > 0 {
+		parts = append(parts, fmt.Sprintf("%dm", minutes))
+	}
+	if seconds > 0 {
+		parts = append(parts, fmt.Sprintf("%ds", seconds))
+	}
+
+	return fmt.Sprintf("%s", joinParts(parts))
+}
+func joinParts(parts []string) string {
+	if len(parts) == 1 {
+		return parts[0]
+	}
+	return fmt.Sprintf("%s %s", parts[0], parts[1])
+}

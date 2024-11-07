@@ -1,0 +1,31 @@
+package forms
+
+import "spaced-ace/views/components"
+
+templ LoginForm(errors map[string]string) {
+	<form
+		hx-post="/login"
+		hx-swap="outerHTML"
+		class="flex flex-col gap-y-4 p-6 w-[500px]"
+	>
+		<span class="text-center text-3xl font-bold">Login</span>
+		@components.EMailInput(components.EMailInputProps{
+			Error: errors["email"],
+		})
+		@components.TextInput(components.TextInputProps{
+			Name:        "password",
+			Label:       "Password",
+			Placeholder: "Password",
+			Type:        "password",
+			Error:       errors["password"],
+		})
+		@components.Button(components.ButtonProps{
+			Text: "Submit",
+			Type: "submit",
+		})
+		@components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)
+		if errors["other"] != "" {
+			<span class="w-full py-4 text-red-500 text-nowrap">{ errors["other"] }</span>
+		}
+	</form>
+}

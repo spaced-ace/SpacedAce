@@ -1,0 +1,19 @@
+package components
+
+templ Navbar() {
+	<nav
+		hx-push-url="true"
+		hx-boost="false"
+		class="sticky top-0 flex w-full justify-center"
+	>
+		<div class="flex h-16 w-full gap-x-2 px-2 items-center max-w-[1440px] bg-white">
+			@Logo()
+			<div class="w-full"></div>
+			@LinkLabel("Browse", "/browse")
+			@LinkLabel("What's new?", "/changelog")
+			@LinkLabel("Pricing", "/pricing")
+			@LinkLabel("Login", "/login")
+			@LinkButton("Sign up", "/signup", ButtonColorBlack)
+		</div>
+	</nav>
+}

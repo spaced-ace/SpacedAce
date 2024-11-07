@@ -1,12 +1,15 @@
 package main
 
 import (
-	"net/http"
-	handlers "spaced-ace-backend/api/handlers"
+	"golang.org/x/net/context"
+	"log"
+	"spaced-ace-backend/api/handlers"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/constants"
 	"spaced-ace-backend/question"
 	"spaced-ace-backend/quiz"
+	"spaced-ace-backend/utils"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -19,26 +22,35 @@ func main() {
 	quiz.InitDb()
 	question.InitDb()
 
-	public := e.Group("")
-	protected := e.Group("")
-	quiz := e.Group("/quizzes")
-	questions := e.Group("/questions")
-	public.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	// Init and close SQLC connection gracefully
+	sqlcQuerier := utils.GetQuerier()
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	defer func() {
+		closeCtx, closeCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer closeCancel()
+		if err := sqlcQuerier.Close(closeCtx); err != nil {
+			log.Printf("Error closing database connection: %v", err)
+		}
+	}()
 
+	public := e.Group("")
 	public.POST("/authenticate-user", auth.AuthenticateUser)
 	public.GET("/authenticated", auth.Authenticated)
 	public.POST("/create-user", auth.Register)
 	public.DELETE("/delete-user/:id", auth.DeleteUserEndpoint)
+
+	protected := e.Group("")
 	protected.POST("/logout", auth.Logout)
 
-	quiz.GET("/:id", handlers.GetQuizEndpoint)
-	quiz.PATCH("/:id", handlers.UpdateQuizEndpoint)
-	quiz.DELETE("/:id", handlers.DeleteQuizEndpoint)
-	quiz.GET("/user/:id", handlers.GetQuizzesOfUserEndpoint)
-	quiz.POST("/create", handlers.CreateQuizEndpoint)
+	quizGroup := protected.Group("/quizzes")
+	quizGroup.GET("/:id", handlers.GetQuizEndpoint)
+	quizGroup.PATCH("/:id", handlers.UpdateQuizEndpoint)
+	quizGroup.DELETE("/:id", handlers.DeleteQuizEndpoint)
+	quizGroup.GET("/user/:id", handlers.GetQuizzesOfUserEndpoint)
+	quizGroup.POST("/create", handlers.CreateQuizEndpoint)
 
+	questions := protected.Group("/questions")
 	questions.POST("/multiple-choice", handlers.CreateMultipleChoiceQuestionEndpoint)
 	questions.GET("/multiple-choice/:id", handlers.GetMultipleChoiceEndpoint)
 	questions.PATCH("/multiple-choice/:id", handlers.UpdateMultipleChoiceQuestionEndpoint)
@@ -53,6 +65,24 @@ func main() {
 	questions.GET("/true-or-false/:id", handlers.GetTrueOrFalseEndpoint)
 	questions.PATCH("/true-or-false/:id", handlers.UpdateTrueOrFalseQuestionEndpoint)
 	questions.DELETE("/true-or-false/:quizId/:id", handlers.DeleteTrueOrFalseQuestionEndpoint)
+
+	quizSessions := protected.Group("/quiz-sessions")
+	quizSessions.GET("/:quizSessionId", handlers.GetQuizSession)
+	quizSessions.GET("", handlers.GetQuizSessions)
+	quizSessions.GET("/has-open", handlers.HasOpenQuizSession)
+	quizSessions.POST("/start", handlers.StartQuizSession)
+	quizSessions.POST("/:quizSessionId/submit", handlers.PostSubmitQuiz)
+	quizSessions.GET("/:quizSessionId/result", handlers.GetQuizResult)
+	quizSessions.GET("/:quizSessionId/answers", handlers.GetAnswers)
+	quizSessions.PUT("/:quizSessionId/answers", handlers.PutCreateOrUpdateAnswer)
+
+	quizHistory := protected.Group("/quiz-history")
+	quizHistory.GET("", handlers.GetQuizHistoryEntries)
+
+	learnList := protected.Group("/learn-list")
+	learnList.GET("", handlers.GetLearnList)
+	learnList.POST("/:quizID/add", handlers.PostAddQuizToLearnList)
+	learnList.POST("/:quizID/remove", handlers.PostRemoveQuizFromLearnList)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

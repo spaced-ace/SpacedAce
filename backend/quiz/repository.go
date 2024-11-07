@@ -70,8 +70,8 @@ func GetQuizById(id string) (*DBQuiz, error) {
 func GetQuizAccess(userid string, quizid string) (int, error) {
 	var access []int
 	err := utils.DB.Select(&access, "SELECT roleid FROM quiz_accesses WHERE userid = $1 AND quizid = $2 LIMIT 1", userid, quizid)
-	if err != nil {
-		return access[len(access)-1], err
+	if err != nil || len(access) == 0 {
+		return 0, err
 	}
 	return access[len(access)-1], nil
 }

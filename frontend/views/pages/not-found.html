@@ -1,0 +1,24 @@
+{{ define "not-found" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/tailwindcss.css">
+    <meta charset="UTF-8">
+    <title>Spaced Ace - Not Found</title>
+</head>
+<section class="flex h-screen items-center bg-gray-50 p-16 dark:bg-gray-700">
+    <div class="container flex flex-col items-center">
+        <div class="flex max-w-md flex-col gap-6 text-center">
+            <h2 class="text-9xl font-extrabold text-gray-600 dark:text-gray-100">
+                <span class="sr-only">Error</span>404
+            </h2>
+            <p class="text-2xl dark:text-gray-300 md:text-3xl">Sorry, we couldn't find this page.</p>
+            <a href="#" class="rounded bg-purple-600 px-8 py-4 text-xl font-semibold text-gray-50 hover:text-gray-200">Back to home</a>
+        </div>
+    </div>
+</section>
+<body>
+
+</body>
+</html>
+{{ end }}

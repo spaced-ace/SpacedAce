@@ -8,6 +8,7 @@ import (
 	"net/http"
 	models "spaced-ace-backend/api/models"
 	"spaced-ace-backend/auth"
+	"spaced-ace-backend/question"
 	quiz "spaced-ace-backend/quiz"
 )
 
@@ -79,11 +80,56 @@ func GetQuizEndpoint(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
+
+	var questions []models.Question
+	singleChoiceQuestions, _ := question.GetSingleChoiceQuestions(quizId)
+	for _, q := range singleChoiceQuestions {
+		questions = append(questions, models.SingleChoiceQuestion{
+			ID:            q.UUID,
+			QuizID:        q.QuizID,
+			QuestionType:  models.SingleChoice,
+			Question:      q.Question,
+			Answers:       q.Answers,
+			CorrectAnswer: q.CorrectAnswer,
+		})
+	}
+	multipleChoiceQuestions, _ := question.GetMultipleChoiceQuestions(quizId)
+	for _, q := range multipleChoiceQuestions {
+		questions = append(questions, models.MultipleChoiceQuestion{
+			ID:             q.UUID,
+			QuizID:         q.QuizID,
+			QuestionType:   models.MultipleChoice,
+			Question:       q.Question,
+			Answers:        q.Answers,
+			CorrectAnswers: q.CorrectAnswers,
+		})
+	}
+	trueOrFalseQuestions, _ := question.GetTrueOrFalseQuestions(quizId)
+	for _, q := range trueOrFalseQuestions {
+		questions = append(questions, models.TrueOrFalseQuestion{
+			ID:            q.UUID,
+			QuizID:        q.QuizID,
+			QuestionType:  models.TrueOrFalse,
+			Question:      q.Question,
+			CorrectAnswer: q.CorrectAnswer,
+		})
+	}
+
 	userinfo, err := auth.GetUserById(uid)
 	if err != nil {
-		return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted"})
+		return c.JSON(http.StatusOK, models.Quiz{
+			QuizInfo: models.QuizInfo{
+				Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: "Deleted",
+			},
+			Questions: questions,
+		})
 	}
-	return c.JSON(http.StatusOK, models.QuizInfo{Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: userinfo.Name, CreatorId: userinfo.Id})
+	return c.JSON(http.StatusOK, models.Quiz{
+		QuizInfo: models.QuizInfo{
+			Id: quiz.Id, Title: quiz.Name, Description: quiz.Description.String, CreatorName: userinfo.Name, CreatorId: userinfo.Id,
+		},
+		Questions: questions,
+	})
 }
 
 func GetQuizzesOfUserEndpoint(c echo.Context) error {

@@ -1,0 +1,33 @@
+package pages
+
+import "spaced-ace/views/components"
+
+templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
+	<main class="flex h-full w-full flex-col gap-y-8 p-6">
+		<div class="flex w-full items-center gap-x-2">
+			<span class="text-2xl font-bold text-nowrap">My Quizzes</span>
+			<div class="w-full bg-pink-500"></div>
+			@components.Button(components.ButtonProps{
+				Text:  "Manage Learn List",
+				Color: components.ButtonColorBlack,
+				HxGet: "/my-quizzes/learn-list/show",
+				Attributes: templ.Attributes{
+					"hx-target":   "#popup-container",
+					"hx-push-url": "false",
+				},
+			})
+		</div>
+		@components.SearchBar(components.SearchBarProps{
+			Name:        "query",
+			Placeholder: "Search...",
+			HxPost:      "/my-exams",
+		})
+		@components.QuizList(components.QuizListProps{
+			QuizInfoWithColors:     viewModel.QuizInfosWithColors,
+			AllowEdit:              true,
+			AllowDelete:            true,
+			AllowManagingLearnList: true,
+		})
+	</main>
+	@components.SideBarMenu("/my-quizzes", true)
+}

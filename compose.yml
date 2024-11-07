@@ -50,6 +50,7 @@ services:
       DB_HOST: database
       DB_PORT: 5432
       DB_NAME: postgres
+    restart: on-failure
     depends_on:
       - database
       - llm-api
@@ -58,6 +59,7 @@ services:
     networks:
       - spaced_ace_network
   database:
+    platform: linux/amd64
     build:
         dockerfile: ./Dockerfile
         context: ./postgres/

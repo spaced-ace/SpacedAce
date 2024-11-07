@@ -32,6 +32,10 @@ def init_base_url() -> str:
     return os.environ.get('BASE_URL', 'http://ollama:11434')
 
 
+def init_mock_response() -> bool:
+    return os.environ.get('MOCK_RESPONSE', 'false') == 'true'
+
+
 def get_db_config() -> dict:
     return {
         'host': os.environ.get('DB_HOST', 'database'),
@@ -55,6 +59,8 @@ PROVIDER: providers.Provider = (
     if get_provider() == providers.OpenAI.NAME
     else providers.Google(client, API_KEY, MODEL)
 )
+
+MOCK_RESPONSE = init_mock_response()
 
 
 def request_data(messages) -> dict:
@@ -83,6 +89,12 @@ async def close_resources():
 
 @app.post('/multiple-choice/create')
 async def multiple_choice_create(context: Prompt) -> MulipleChoice:
+    if MOCK_RESPONSE:
+        return MulipleChoice(
+            question='What is the capital of France?',
+            options=['Paris', 'London', 'Berlin', 'Madrid'],
+            correct_options=['A'],
+        )
     lang = detect_lang.detect_language(context.prompt)
     messages = llmio.format_question(
         context.prompt, models.MULTIPLE_CHOICE, lang
@@ -96,6 +108,12 @@ async def multiple_choice_create(context: Prompt) -> MulipleChoice:
 
 @app.post('/single-choice/create')
 async def single_choice_create(context: Prompt) -> SingleChoice:
+    if MOCK_RESPONSE:
+        return SingleChoice(
+            question='What is the capital of France?',
+            options=['Paris', 'London', 'Berlin', 'Madrid'],
+            correct_option='A',
+        )
     lang = detect_lang.detect_language(context.prompt)
     messages = llmio.format_question(
         context.prompt, models.SINGLE_CHOICE, lang
@@ -109,6 +127,10 @@ async def single_choice_create(context: Prompt) -> SingleChoice:
 
 @app.post('/true-or-false/create')
 async def true_or_false_create(context: Prompt) -> TrueOrFalse:
+    if MOCK_RESPONSE:
+        return TrueOrFalse(
+            question='Budapest is the capital of Hungary.', correct_option=True
+        )
     lang = detect_lang.detect_language(context.prompt)
     messages = llmio.format_question(
         context.prompt, models.TRUE_OR_FALSE, lang

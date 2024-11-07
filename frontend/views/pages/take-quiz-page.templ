@@ -1,0 +1,140 @@
+package pages
+
+import (
+	"fmt"
+	"spaced-ace/models/business"
+	"spaced-ace/views/components"
+)
+
+templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
+	<main class="flex h-full w-full flex-col gap-y-4 p-6">
+		<div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
+			<span
+				hx-get="/my-quizzes"
+				hx-push-url="true"
+				hx-target="main"
+				hx-swap="outerHTML"
+				class="cursor-pointer text-base font-semibold text-nowrap hover:underline"
+			>
+				My quizzes
+			</span>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+			</svg>
+			<span
+				class="cursor-pointer text-base font-semibold text-nowrap hover:underline"
+			>
+				{ viewModel.Quiz.Title }
+			</span>
+		</div>
+		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
+			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
+				<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
+				<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
+				<div class="h-4 w-full"></div>
+				<div class="flex w-full items-center">
+					<span class="w-full text-sm">
+						<span class="font-semibold">Started:</span>
+						<span>{ viewModel.QuizSession.StartedAt.Local().Format("2006-01-02 15:04") }</span>
+					</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Closes:</span>
+						<span>
+							if viewModel.QuizSession.Finished {
+								viewModel.QuizSession.ClosesAt.Local().Format("2006-01-02 15:04")
+							} else {
+								-
+							}
+						</span>
+					</span>
+					<span class="w-full text-sm">
+						<span class="font-semibold">Finished:</span>
+						<span>
+							if viewModel.QuizSession.Finished {
+								viewModel.QuizSession.FinishedAt.Local().Format("2006-01-02 15:04")
+							} else {
+								Not finished yet
+							}
+						</span>
+					</span>
+				</div>
+			</div>
+			<div
+				id="questions"
+				class="flex w-full flex-col gap-y-4"
+			>
+				for _, q := range viewModel.Quiz.Questions {
+					if viewModel.AnswerLists == nil {
+						switch question := q.(type) {
+							case *business.SingleChoiceQuestion:
+								@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.MultipleChoiceQuestion:
+								@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.TrueOrFalseQuestion:
+								@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    nil,
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+						}
+					} else {
+						switch question := q.(type) {
+							case *business.SingleChoiceQuestion:
+								@components.SingleChoiceQuestion(components.SingleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetSingleChoiceAnswerOrNil(q.(*business.SingleChoiceQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.MultipleChoiceQuestion:
+								@components.MultipleChoiceQuestion(components.MultipleChoiceQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetMultipleChoiceAnswerOrNil(q.(*business.MultipleChoiceQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+							case *business.TrueOrFalseQuestion:
+								@components.TrueOrFalseQuestion(components.TrueOrFalseQuestionProps{
+									QuizSession:               viewModel.QuizSession,
+									Question:                  question,
+									Answer:                    viewModel.AnswerLists.GetTrueOrFalseAnswerOrNil(q.(*business.TrueOrFalseQuestion).CommonQuestionProperties.Id),
+									AllowDeleting:             false,
+									ReplacePlaceholderWithOOB: false,
+								})
+						}
+					}
+				}
+			</div>
+		</div>
+		<div class="flex w-full justify-end">
+			<div class="flex w-[220px]">
+				@components.Button(components.ButtonProps{
+					Text:   "Submit quiz",
+					Color:  components.ButtonColorBlack,
+					HxPost: fmt.Sprintf("/quiz-sessions/%s/submit", viewModel.QuizSession.Id),
+					Attributes: templ.Attributes{
+						"hx-target":   "main",
+						"hx-swap":     "outerHTML",
+						"hx-push-url": "false",
+					},
+				})
+			</div>
+		</div>
+	</main>
+}

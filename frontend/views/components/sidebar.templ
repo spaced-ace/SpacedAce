@@ -1,0 +1,70 @@
+package components
+
+import (
+	"fmt"
+	"spaced-ace/models/business"
+)
+
+type SidebarProps struct {
+	Username  string
+	ActiveUrl string
+	QuizInfos []business.QuizInfo
+}
+
+templ SideBar(props SidebarProps) {
+	<div
+		id="sidebar"
+		class="flex h-full flex-shrink-0 flex-col gap-y-4 border-x py-4 w-[260px]"
+	>
+		<div
+			id="profile"
+			class="flex w-full items-center gap-x-4 px-2"
+		>
+			<div class="h-16 w-16 flex-shrink-0 rounded-md border bg-gray-400"></div>
+			<span class="text-lg font-semibold text-nowrap">{ props.Username }</span>
+			<div class="w-full"></div>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="flex-shrink-0 size-6"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"></path>
+			</svg>
+		</div>
+		<hr class="w-full"/>
+		@SideBarMenu("", false)
+		<hr class="w-full"/>
+		<div
+			id="sidebar-quizzes-container"
+			hx-target="#content-container"
+			hx-push-url="true"
+			class="flex w-full flex-col max-h-[calc(100dvh-400px)] px-2"
+		>
+			<span class="pb-4 text-base font-bold">Quizzes</span>
+			<div
+				id="sidebar-quizzes"
+				class="flex h-full w-full flex-col gap-y-1 overflow-y-auto"
+			>
+				for _, q := range props.QuizInfos {
+					<div
+						hx-get={ fmt.Sprintf("/quizzes/%s/preview-popup", q.Id) }
+						hx-target="#popup-container"
+						hx-push-url="false"
+						class="flex w-full flex-shrink-0 cursor-pointer items-center gap-x-2 rounded-md px-2 py-1 group hover:bg-gray-200"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 group-hover:fill-black flex-shrink-0">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"></path>
+						</svg>
+						<span class="text-ellipsis text-base font-medium">{ q.Title }</span>
+					</div>
+				}
+			</div>
+			<div class="flex h-fit w-full pt-4">
+				@LinkButton("+ Create new", "/create-new-quiz", ButtonColorWhite)
+			</div>
+		</div>
+	</div>
+}

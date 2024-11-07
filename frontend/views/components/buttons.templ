@@ -1,0 +1,82 @@
+package components
+
+type ButtonColor int
+
+const (
+	ButtonColorBlack = iota
+	ButtonColorWhite = 1
+	ButtonColorRed   = 2
+	ButtonColorBlue  = 4
+)
+
+templ LinkButton(text, url string, color ButtonColor) {
+	<a
+		hx-target="main"
+		hx-swap="outerHTML"
+		if color == ButtonColorBlack {
+			class="h-min flex-grow rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-200 disabled:opacity-75"
+		}
+		if color == ButtonColorWhite {
+			class="h-min flex-grow rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-75"
+		}
+		if color == ButtonColorRed {
+			class="h-min flex-grow rounded-md border border-red-800 bg-red-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-600 disabled:text-red-100 disabled:opacity-75"
+		}
+		if color == ButtonColorBlue {
+			class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-600 disabled:text-blue-100 disabled:opacity-75"
+		}
+		href={ templ.SafeURL(url) }
+	>{ text }</a>
+}
+
+type ButtonProps struct {
+	Text       string
+	Type       string
+	HxGet      string
+	HxPost     string
+	HxPut      string
+	HxPatch    string
+	HxDelete   string
+	Color      ButtonColor
+	Attributes templ.Attributes
+	Disabled   bool
+}
+
+templ Button(props ButtonProps) {
+	<button
+		type={ props.Type }
+		if props.HxGet != "" {
+			hx-get={ props.HxGet }
+		}
+		if props.HxPost != "" {
+			hx-post={ props.HxPost }
+		}
+		if props.HxPut != "" {
+			hx-put={ props.HxPut }
+		}
+		if props.HxPatch != "" {
+			hx-patch={ props.HxPatch }
+		}
+		if props.HxDelete != "" {
+			hx-delete={ props.HxDelete }
+		}
+		if props.Color == ButtonColorBlack {
+			class="h-min flex-grow rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-200 disabled:opacity-75"
+		}
+		if props.Color == ButtonColorWhite {
+			class="h-min flex-grow rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-75"
+		}
+		if props.Color == ButtonColorRed {
+			class="h-min flex-grow rounded-md border border-red-800 bg-red-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-600 disabled:text-red-100 disabled:opacity-75"
+		}
+		if props.Color == ButtonColorBlue {
+			class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-600 disabled:text-blue-100 disabled:opacity-75"
+		}
+		if props.Disabled {
+			disabled
+		}
+		{ props.Attributes... }
+	>
+		{ props.Text }
+	</button>
+}

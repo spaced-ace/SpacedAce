@@ -27,8 +27,14 @@ COPY auth auth
 COPY cmd cmd
 COPY constants constants
 COPY context context
-COPY pages pages
+COPY models models
+COPY render render
+COPY service service
+COPY utils utils
 COPY views views
+
+RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN templ generate
 
 COPY --from=tailwind /workdir/static static
 COPY static/images static/images
