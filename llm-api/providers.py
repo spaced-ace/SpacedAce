@@ -4,6 +4,7 @@ import abc
 class Provider(metaclass=abc.ABCMeta):
     """Groups common functions of LLM providers"""
 
+    NAME: str
     CHAT_COMPLETION_ENDPOINT: str
 
     @staticmethod
@@ -13,6 +14,7 @@ class Provider(metaclass=abc.ABCMeta):
 
 
 class Ollama(Provider):
+    NAME = 'ollama'
     CHAT_COMPLETION_ENDPOINT = '/api/chat'
 
     def __init__(self) -> None:
@@ -24,6 +26,7 @@ class Ollama(Provider):
 
 
 class OpenAI(Provider):
+    NAME = 'openai'
     CHAT_COMPLETION_ENDPOINT = '/chat/completions'
 
     def __init__(self) -> None:

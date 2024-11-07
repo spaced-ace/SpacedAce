@@ -15,12 +15,12 @@ app = FastAPI()
 
 
 def get_provider() -> str:
-    return os.environ.get('PROVIDER', 'ollama')
+    return os.environ.get('PROVIDER', providers.Ollama.NAME)
 
 
 def init_model() -> str:
     provider = get_provider()
-    if provider == 'ollama':
+    if provider == providers.Ollama.NAME:
         return os.environ.get('MODEL', 'llama3.1:8b')
     else:
         return os.environ.get(
@@ -46,12 +46,14 @@ MODEL = init_model()
 BASE_URL = init_base_url()
 API_KEY = os.environ.get('API_KEY')
 PROVIDER: providers.Provider = (
-    providers.Ollama() if get_provider() == 'ollama' else providers.OpenAI()
+    providers.Ollama()
+    if get_provider() == providers.Ollama.NAME
+    else providers.OpenAI()
 )
 
 client = AsyncClient(
     base_url=BASE_URL,
-    timeout=60 if get_provider() == 'ollama' else 30,
+    timeout=60 if get_provider() == providers.Ollama.NAME else 30,
     headers={'Authorization': f'Bearer {API_KEY}'}
     if API_KEY is not None
     else None,
