@@ -1,27 +1,40 @@
 import os
+
+import llmio
 import database
+import models
+import providers
 import textchunks
-import multiple_choice
-import single_choice
-import true_or_false
+import detect_lang
 from fastapi import FastAPI, HTTPException
 from httpx import AsyncClient
 from models import Prompt, MulipleChoice, SingleChoice, TextChunk, TrueOrFalse
 from returns.pipeline import is_successful
 
 app = FastAPI()
-client = AsyncClient()
+
+
+def get_provider() -> str:
+    return os.environ.get('PROVIDER', providers.Ollama.NAME)
 
 
 def init_model() -> str:
-    return os.environ.get('MODEL', 'mistral')
+    provider = get_provider()
+    if provider == providers.Ollama.NAME:
+        return os.environ.get('MODEL', 'llama3.1:8b')
+    else:
+        return os.environ.get(
+            'MODEL', 'jazzysnake01/llama-3-8b-quizgen-instruct'
+        )
 
 
 def init_base_url() -> str:
-    return os.environ.get('OLLAMA_URL', 'http://ollama:11434')
+    return os.environ.get('BASE_URL', 'http://ollama:11434')
+
 
 def init_mock_response() -> bool:
     return os.environ.get('MOCK_RESPONSE', 'false') == 'true'
+
 
 def get_db_config() -> dict:
     return {
@@ -35,17 +48,28 @@ def get_db_config() -> dict:
 
 MODEL = init_model()
 BASE_URL = init_base_url()
+API_KEY = os.environ.get('API_KEY', '')
+client = AsyncClient(
+    timeout=60,
+)
+PROVIDER: providers.Provider = (
+    providers.Ollama(client, BASE_URL, MODEL)
+    if get_provider() == providers.Ollama.NAME
+    else providers.OpenAI(client, BASE_URL, API_KEY, MODEL)
+    if get_provider() == providers.OpenAI.NAME
+    else providers.Google(client, API_KEY, MODEL)
+)
+
 MOCK_RESPONSE = init_mock_response()
 
-def ollama_request_data(prompt: str, template: str, system: str) -> dict:
+
+def request_data(messages) -> dict:
     return {
-        'template': template,
-        'system': system,
-        'temperature': 0.1,
+        'temperature': 0.4,
         'model': MODEL,
-        'prompt': prompt,
         'stream': False,
-        'format': 'json',
+        'messages': messages,
+        'max_new_tokens': 500,
     }
 
 
@@ -71,18 +95,14 @@ async def multiple_choice_create(context: Prompt) -> MulipleChoice:
             options=['Paris', 'London', 'Berlin', 'Madrid'],
             correct_options=['A'],
         )
-    
-    res = await client.post(
-        f'{BASE_URL}/api/generate',
-        json=ollama_request_data(
-            context.prompt, multiple_choice.TEMPLATE, multiple_choice.SYSTEM
-        ),
-        timeout=60,
+    lang = detect_lang.detect_language(context.prompt)
+    messages = llmio.format_question(
+        context.prompt, models.MULTIPLE_CHOICE, lang
     )
-    response = res.json()['response']
-    question = multiple_choice.try_parse_multiple_choice(response)
+    response = await PROVIDER.get_model_response(messages)
+    question = llmio.try_parse_multiple_choice(response)
     if question is None:
-        raise ValueError('Failed to generate multiple choice question')
+        raise ValueError('Failed to generate single choice question')
     return question
 
 
@@ -94,16 +114,12 @@ async def single_choice_create(context: Prompt) -> SingleChoice:
             options=['Paris', 'London', 'Berlin', 'Madrid'],
             correct_option='A',
         )
-
-    res = await client.post(
-        f'{BASE_URL}/api/generate',
-        json=ollama_request_data(
-            context.prompt, single_choice.TEMPLATE, single_choice.SYSTEM
-        ),
-        timeout=60,
+    lang = detect_lang.detect_language(context.prompt)
+    messages = llmio.format_question(
+        context.prompt, models.SINGLE_CHOICE, lang
     )
-    response = res.json()['response']
-    question = single_choice.try_parse_single_choice(response)
+    response = await PROVIDER.get_model_response(messages)
+    question = llmio.try_parse_single_choice(response)
     if question is None:
         raise ValueError('Failed to generate single choice question')
     return question
@@ -115,18 +131,14 @@ async def true_or_false_create(context: Prompt) -> TrueOrFalse:
         return TrueOrFalse(
             question='Budapest is the capital of Hungary.', correct_option=True
         )
-
-    res = await client.post(
-        f'{BASE_URL}/api/generate',
-        json=ollama_request_data(
-            context.prompt, true_or_false.TEMPLATE, true_or_false.SYSTEM
-        ),
-        timeout=60,
+    lang = detect_lang.detect_language(context.prompt)
+    messages = llmio.format_question(
+        context.prompt, models.TRUE_OR_FALSE, lang
     )
-    response = res.json()['response']
-    question = true_or_false.try_parse_true_or_false(response)
+    response = await PROVIDER.get_model_response(messages)
+    question = llmio.try_parse_true_or_false(response)
     if question is None:
-        raise ValueError('Failed to generate true-or-false question')
+        raise ValueError('Failed to generate single choice question')
     return question
 
 
