@@ -44,19 +44,16 @@ def get_db_config() -> dict:
 
 MODEL = init_model()
 BASE_URL = init_base_url()
-API_KEY = os.environ.get('API_KEY')
-PROVIDER: providers.Provider = (
-    providers.Ollama()
-    if get_provider() == providers.Ollama.NAME
-    else providers.OpenAI()
-)
-
+API_KEY = os.environ.get('API_KEY', '')
 client = AsyncClient(
-    base_url=BASE_URL,
-    timeout=60 if get_provider() == providers.Ollama.NAME else 30,
-    headers={'Authorization': f'Bearer {API_KEY}'}
-    if API_KEY is not None
-    else None,
+    timeout=60,
+)
+PROVIDER: providers.Provider = (
+    providers.Ollama(client, BASE_URL, MODEL)
+    if get_provider() == providers.Ollama.NAME
+    else providers.OpenAI(client, BASE_URL, API_KEY, MODEL)
+    if get_provider() == providers.OpenAI.NAME
+    else providers.Google(client, API_KEY, MODEL)
 )
 
 
@@ -90,12 +87,7 @@ async def multiple_choice_create(context: Prompt) -> MulipleChoice:
     messages = llmio.format_question(
         context.prompt, models.MULTIPLE_CHOICE, lang
     )
-    res = await client.post(
-        PROVIDER.CHAT_COMPLETION_ENDPOINT,
-        json=request_data(messages),
-    )
-    res.raise_for_status()
-    response = PROVIDER.parse_chat_completion_response(res.json())
+    response = await PROVIDER.get_model_response(messages)
     question = llmio.try_parse_multiple_choice(response)
     if question is None:
         raise ValueError('Failed to generate single choice question')
@@ -108,12 +100,7 @@ async def single_choice_create(context: Prompt) -> SingleChoice:
     messages = llmio.format_question(
         context.prompt, models.SINGLE_CHOICE, lang
     )
-    res = await client.post(
-        PROVIDER.CHAT_COMPLETION_ENDPOINT,
-        json=request_data(messages),
-    )
-    res.raise_for_status()
-    response = PROVIDER.parse_chat_completion_response(res.json())
+    response = await PROVIDER.get_model_response(messages)
     question = llmio.try_parse_single_choice(response)
     if question is None:
         raise ValueError('Failed to generate single choice question')
@@ -126,12 +113,7 @@ async def true_or_false_create(context: Prompt) -> TrueOrFalse:
     messages = llmio.format_question(
         context.prompt, models.TRUE_OR_FALSE, lang
     )
-    res = await client.post(
-        PROVIDER.CHAT_COMPLETION_ENDPOINT,
-        json=request_data(messages),
-    )
-    res.raise_for_status()
-    response = PROVIDER.parse_chat_completion_response(res.json())
+    response = await PROVIDER.get_model_response(messages)
     question = llmio.try_parse_true_or_false(response)
     if question is None:
         raise ValueError('Failed to generate single choice question')
