@@ -84,5 +84,8 @@ func main() {
 	learnList.POST("/:quizID/add", handlers.PostAddQuizToLearnList)
 	learnList.POST("/:quizID/remove", handlers.PostRemoveQuizFromLearnList)
 
+	reviewItem := protected.Group("/review-items")
+	reviewItem.GET("", handlers.GetReviewItems)
+
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
