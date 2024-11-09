@@ -145,7 +145,8 @@ CREATE TABLE IF NOT EXISTS review_items(
     difficulty FLOAT NOT NULL,
     score INT NOT NULL,
     streak INT NOT NULL,
-    next_review_date TIMESTAMP NOT NULL
+    next_review_date TIMESTAMP NOT NULL,
+    interval_in_minutes INT NOT NULL
 );
 CREATE INDEX idx_review_items_user_id ON review_items(user_id);
 CREATE INDEX idx_review_items_single_choice_question_id ON review_items(single_choice_question_id);

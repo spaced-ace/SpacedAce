@@ -206,3 +206,55 @@
     WHERE true
         AND user_id = $1
         AND quiz_id = $2;
+
+-- name: GetReviewItems :many
+    SELECT *
+    FROM review_items
+    WHERE true
+        AND user_id = $1;
+
+-- name: CreateSingleChoiceReviewItem :one
+    INSERT INTO review_items(id, user_id, single_choice_question_id, ease_factor, difficulty, score, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)
+    RETURNING *;
+
+-- name: CreateMultipleChoiceReviewItem :one
+    INSERT INTO review_items(id, user_id, multiple_choice_question_id, ease_factor, difficulty, score, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)
+    RETURNING *;
+
+-- name: CreateTrueOrFalseReviewItem :one
+    INSERT INTO review_items(id, user_id, true_or_false_question_id, ease_factor, difficulty, score, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)
+    RETURNING *;
+
+-- name: DeleteReviewItem :exec
+    DELETE FROM review_items
+    WHERE true
+        AND id = $1;
+
+-- name: DeleteReviewItemsByQuizID :exec
+    DELETE FROM review_items
+        USING single_choice_questions, multiple_choice_questions, true_or_false_questions, quizzes
+        WHERE true
+            AND (
+                review_items.single_choice_question_id = single_choice_questions.uuid
+                    AND single_choice_questions.quizid = quizzes.id
+                    AND quizzes.id = $1
+                )
+                OR (
+                review_items.multiple_choice_question_id = multiple_choice_questions.uuid
+                    AND multiple_choice_questions.quizid = quizzes.id
+                    AND quizzes.id = $1
+                ) OR (
+                review_items.true_or_false_question_id = true_or_false_questions.uuid
+                    AND true_or_false_questions.quizid = quizzes.id
+                    AND quizzes.id = $1
+                );
+
+-- name: UpdateReviewItem :one
+    UPDATE review_items
+    SET ease_factor = $2, difficulty = $3, score = $4, streak = $5, next_review_date = $6, interval_in_minutes = $7
+    WHERE true
+        AND id = $1
+    RETURNING *;
