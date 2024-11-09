@@ -1,3 +1,66 @@
+-- Non-SQLc schemas
+
+CREATE TABLE IF NOT EXISTS quizzes(
+    id UUID PRIMARY KEY,
+    name TEXT NOT NULL,
+    creatorid UUID REFERENCES users(id) ON DELETE SET NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS quiz_accesses(
+    userid UUID REFERENCES users(id) ON DELETE CASCADE,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    roleid SMALLINT NOT NULL, --1 = owner, 2 = viewer
+    PRIMARY KEY(userid, quizid, roleid),
+    UNIQUE(userid, quizid)
+);
+
+CREATE TABLE IF NOT EXISTS single_choice_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    answers TEXT[4],
+    correct_answer CHAR
+);
+
+CREATE TABLE IF NOT EXISTS multiple_choice_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    answers TEXT[4],
+    correct_answers CHAR[]
+);
+
+CREATE TABLE IF NOT EXISTS true_or_false_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    correct_answer BOOLEAN
+);
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    password TEXT
+);
+CREATE INDEX IF NOT EXISTS users_email ON users(email);
+
+CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    valid_until TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS sessions_id ON sessions(id);
+CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS sessions_valid_until ON sessions(valid_until);
+
+SELECT cron.schedule('del_exp_sessions', '10 * * * *', $$DELETE FROM sessions WHERE valid_until < now()$$);
+
+-- SQLc schemas
+
 CREATE TABLE IF NOT EXISTS quiz_sessions(
     id   UUID PRIMARY KEY NOT NULL,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
