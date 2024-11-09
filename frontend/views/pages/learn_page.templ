@@ -13,9 +13,24 @@ templ LearnPage(viewModel LearnPageViewModel) {
 				<span class="text-xl font-semibold">Quiz Overview</span>
 				<span class="text-sm font-light text-gray-600">Your progression and next reviews across all quizzes</span>
 			</div>
-			<div class="flex flex-col">
-				<span class="text-base">Total questions: { fmt.Sprintf("%d", viewModel.TotalQuestions) }</span>
-				<span class="text-base">Questions due for review: { fmt.Sprintf("%d", viewModel.QuestionsToReview) }</span>
+			<div class="flex w-full justify-between items-end">
+				<div class="flex flex-col">
+					<span class="text-base">Total questions: { fmt.Sprintf("%d", viewModel.TotalQuestions) }</span>
+					<span class="text-base">Questions due for review: { fmt.Sprintf("%d", viewModel.QuestionsToReview) }</span>
+				</div>
+				<div>
+					@components.Button(components.ButtonProps{
+						Text:     "Review All",
+						Color:    components.ButtonColorBlack,
+						HxGet:    "/learn/review-all",
+						Disabled: viewModel.QuestionsToReview == 0,
+						Attributes: templ.Attributes{
+							"hx-target":   "main",
+							"hx-push-url": "true",
+							"hx-swap":     "outerHTML",
+						},
+					})
+				</div>
 			</div>
 		</div>
 		<div
