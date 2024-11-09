@@ -143,7 +143,6 @@ CREATE TABLE IF NOT EXISTS review_items(
     ),
     ease_factor FLOAT NOT NULL,
     difficulty FLOAT NOT NULL,
-    score INT NOT NULL,
     streak INT NOT NULL,
     next_review_date TIMESTAMP NOT NULL,
     interval_in_minutes INT NOT NULL
