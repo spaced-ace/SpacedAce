@@ -14,6 +14,7 @@ import (
 	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
 	"spaced-ace/views/pages"
+	"time"
 )
 
 func handleCreateQuiz(c echo.Context) error {
@@ -518,8 +519,49 @@ func handleGetReviewItemList(c echo.Context) error {
 			{Name: "Due", Value: "due"},
 			{Name: "Not Due", Value: "not-due"},
 		},
-		Query:        "",
-		ReviewItems:  []business.ReviewItem{},
+		Query: "",
+		ReviewItems: []business.ReviewItem{
+			{
+				ID:           "review-item-id",
+				QuizName:     "The Wonders of the Pacific Northwest Rainforest",
+				QuestionName: "What is the capital of France?",
+				QuestionID:   "quiz-id",
+				NextReview:   time.Now().Add(-1 * time.Minute),
+				Difficulty:   2.5,
+				Streak:       1,
+				NeedToReview: true,
+			},
+			{
+				ID:           "review-item-id",
+				QuizName:     "The Wonders of the Pacific Northwest Rainforest",
+				QuestionName: "What is the capital of France?",
+				QuestionID:   "quiz-id",
+				NextReview:   time.Now().Add(-1 * time.Minute),
+				Difficulty:   1.5,
+				Streak:       2,
+				NeedToReview: true,
+			},
+			{
+				ID:           "review-item-id",
+				QuizName:     "The Wonders of the Pacific Northwest Rainforest",
+				QuestionName: "What is the capital of France?",
+				QuestionID:   "quiz-id",
+				NextReview:   time.Now().Add(-1 * time.Minute),
+				Difficulty:   4,
+				Streak:       3,
+				NeedToReview: true,
+			},
+			{
+				ID:           "review-item-id",
+				QuizName:     "The Wonders of the Pacific Northwest Rainforest",
+				QuestionName: "What is the capital of France?",
+				QuestionID:   "quiz-id",
+				NextReview:   time.Now().Add(1 * time.Hour),
+				Difficulty:   2.5,
+				Streak:       0,
+				NeedToReview: false,
+			},
+		},
 		PageOptions:  []int{1, 2, 3, 4, 5},
 		CurrentPage:  1,
 		PreviousPage: -1,

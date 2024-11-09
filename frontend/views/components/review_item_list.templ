@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"spaced-ace/models/business"
+	"time"
 )
 
 type Option struct {
@@ -24,6 +25,10 @@ type ReviewItemListProps struct {
 	CurrentPage  int
 	PreviousPage int
 	NextPage     int
+}
+
+type ReviewItemTableProps struct {
+	ReviewItems []business.ReviewItem
 }
 
 templ ReviewItemList(props ReviewItemListProps) {
@@ -149,15 +154,17 @@ templ ReviewItemList(props ReviewItemListProps) {
 		</div>
 		<div class="flex w-full flex-col gap-y-8 rounded-md border border-gray-300 p-4 shadow-sm">
 			<span class="text-xl font-semibold">Quiz Questions</span>
-			<table></table>
-			<div class="w-full justify-center items-center gap-x-2 flex">
+			@ReviewItemTable(ReviewItemTableProps{
+				ReviewItems: props.ReviewItems,
+			})
+			<div class="flex w-full items-center justify-center gap-x-2">
 				<button
 					name="page"
 					value={ fmt.Sprintf("%d", props.PreviousPage) }
 					if props.PreviousPage == -1 {
 						disabled
 					}
-					class="flex gap-x-2 justify-center items-center hover:bg-gray-100 rounded-md p-2 disabled:bg-white disabled:cursor-not-allowed disabled:text-gray-400"
+					class="flex items-center justify-center gap-x-2 rounded-md p-2 hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-white disabled:text-gray-400"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
@@ -169,9 +176,9 @@ templ ReviewItemList(props ReviewItemListProps) {
 						name="page"
 						value={ fmt.Sprintf("%d", page) }
 						if props.CurrentPage == page {
-							class="size-10 rounded hover:bg-gray-100 border border-gray-300"
+							class="rounded border border-gray-300 size-10 hover:bg-gray-100"
 						} else {
-							class="size-10 rounded hover:bg-gray-100"
+							class="rounded size-10 hover:bg-gray-100"
 						}
 					>{ fmt.Sprintf("%d", page) }</button>
 				}
@@ -181,7 +188,7 @@ templ ReviewItemList(props ReviewItemListProps) {
 					if props.NextPage == -1 {
 						disabled
 					}
-					class="flex gap-x-2 justify-center items-center hover:bg-gray-100 rounded-md p-2 disabled:bg-white disabled:cursor-not-allowed disabled:text-gray-400"
+					class="flex items-center justify-center gap-x-2 rounded-md p-2 hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-white disabled:text-gray-400"
 				>
 					<span>Next</span>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -191,4 +198,75 @@ templ ReviewItemList(props ReviewItemListProps) {
 			</div>
 		</div>
 	</form>
+}
+
+templ ReviewItemTable(props ReviewItemTableProps) {
+	<table class="min-w-full divide-y divide-gray-300">
+		<thead>
+			<tr>
+				<th scope="col" class="px-6 py-3 text-left text-sm font-medium tracking-wider text-gray-500">Question</th>
+				<th scope="col" class="px-6 py-3 text-center text-sm font-medium tracking-wider text-gray-500">Next Review</th>
+				<th scope="col" class="px-6 py-3 text-center text-sm font-medium tracking-wider text-gray-500">Difficulty</th>
+				<th scope="col" class="px-6 py-3 text-center text-sm font-medium tracking-wider text-gray-500">Streak</th>
+				<th scope="col" class="px-6 py-3 text-right text-sm font-medium tracking-wider text-gray-500">Action</th>
+			</tr>
+		</thead>
+		<tbody class="bg-white divide-y divide-gray-300">
+			for _, item := range props.ReviewItems {
+				<tr>
+					<td class="whitespace-normal px-6 py-4">
+						<div class="flex flex-col">
+							<span class="font-medium text-gray-900 text-md">{ item.QuestionName }</span>
+							<span class="text-xs text-gray-500">{ item.QuizName }</span>
+						</div>
+					</td>
+					<td class="text-center align-middle">
+						if item.NextReview.Before(time.Now()) {
+							<span>Now</span>
+						} else {
+							<span>{ item.NextReview.Local().Format("2006-01-02") }</span>
+						}
+					</td>
+					<td class="text-center align-middle">
+						if item.Difficulty <= 1.5 {
+							<span class="rounded-full bg-green-300 px-4 py-2 text-sm font-semibold text-gray-900">Easy</span>
+						}
+						if item.Difficulty > 1.5 && item.Difficulty <= 3.5 {
+							<span class="rounded-full bg-orange-300 px-4 py-2 text-sm font-semibold text-gray-900">Medium</span>
+						}
+						if item.Difficulty > 3.5 {
+							<span class="rounded-full bg-red-300 px-4 py-2 text-sm font-semibold text-gray-900">Hard</span>
+						}
+					</td>
+					<td class="text-center align-middle">
+						if item.Streak == 0 {
+							<span class="text-lg font-bold">-</span>
+						}
+						if item.Streak == 1 {
+							<span class="text-2xl font-bold text-yellow-400">1</span>
+						}
+						if item.Streak == 2 {
+							<span class="bg-gradient-to-br from-amber-400 to-orange-500 bg-clip-text text-2xl font-bold text-transparent">2</span>
+						}
+						if item.Streak >= 3 {
+							<span class="bg-gradient-to-br from-orange-300 to-red-500 bg-clip-text text-2xl font-bold text-transparent">{ fmt.Sprintf("%d", item.Streak) }</span>
+						}
+					</td>
+					<td class="px-2 text-right">
+						@Button(ButtonProps{
+							Text:     "Review",
+							Color:    ButtonColorBlack,
+							HxGet:    fmt.Sprintf("/learn/%s", item.ID),
+							Disabled: !item.NeedToReview,
+							Attributes: templ.Attributes{
+								"hx-target":   "main",
+								"hx-push-url": "true",
+								"hx-swap":     "outerHTML",
+							},
+						})
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
