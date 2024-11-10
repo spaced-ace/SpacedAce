@@ -446,3 +446,45 @@ func (a *ApiService) RemoveQuizFromLearnList(quizID string) (*business.LearnList
 
 	return learnList, nil
 }
+
+func (a *ApiService) GetReviewItemListData(quizID, difficulty, status, query string, page int) (reviewItems []business.ReviewItem, quizOptions []business.Option, maxReviewItemCount int, err error) {
+	reviewItemsRequestBody := external.ReviewItemsRequestBody{
+		QuizID:     quizID,
+		Difficulty: difficulty,
+		Status:     status,
+		Page:       page,
+		Query:      query,
+	}
+
+	reviewItemsResponseBody := new(external.ReviewItemResponseBody)
+	if err = a.getResponse("GET", "/review-items", reviewItemsRequestBody, reviewItemsResponseBody); err != nil {
+		return nil, nil, 0, fmt.Errorf("getting review items: %w\n", err)
+	}
+
+	reviewItems = make([]business.ReviewItem, 0, len(reviewItemsResponseBody.ReviewItems))
+	for _, item := range reviewItemsResponseBody.ReviewItems {
+		reviewItem, err := item.MapToBusiness()
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("mapping review item %+v: %w\n", reviewItem, err)
+		}
+		reviewItems = append(reviewItems, *reviewItem)
+	}
+
+	maxReviewItemCount = reviewItemsResponseBody.ReviewItemCountForFilter
+
+	quizOptionsResponseBody := new(external.QuizOptionsResponseBody)
+	if err = a.getResponse("GET", "/review-items/quiz-options", nil, quizOptionsResponseBody); err != nil {
+		return nil, nil, 0, fmt.Errorf("getting quiz options: %w\n", err)
+	}
+
+	quizOptions = make([]business.Option, 0, len(quizOptionsResponseBody.QuizOptions))
+	for _, option := range quizOptionsResponseBody.QuizOptions {
+		quizOption, err := option.MapToBusiness()
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("mapping quiz options: %w\n", err)
+		}
+		quizOptions = append(quizOptions, *quizOption)
+	}
+
+	return reviewItems, quizOptions, maxReviewItemCount, nil
+}

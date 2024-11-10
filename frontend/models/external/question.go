@@ -38,7 +38,7 @@ func (q SingleChoiceQuestionResponseBody) MapToBusiness() (*business.SingleChoic
 			QuestionType: models.SingleChoice,
 			Question:     q.Question,
 		},
-		Options: []business.Option{
+		Options: []business.QuestionOption{
 			{Value: q.Answers[0], Correct: q.CorrectAnswer == "A"},
 			{Value: q.Answers[1], Correct: q.CorrectAnswer == "B"},
 			{Value: q.Answers[2], Correct: q.CorrectAnswer == "C"},
@@ -72,7 +72,7 @@ func (q MultipleChoiceQuestionResponseBody) MapToBusiness() (*business.MultipleC
 			QuestionType: models.MultipleChoice,
 			Question:     q.Question,
 		},
-		Options: []business.Option{
+		Options: []business.QuestionOption{
 			{Value: q.Answers[0], Correct: utils.StringInArray("A", q.CorrectAnswers)},
 			{Value: q.Answers[1], Correct: utils.StringInArray("B", q.CorrectAnswers)},
 			{Value: q.Answers[2], Correct: utils.StringInArray("C", q.CorrectAnswers)},

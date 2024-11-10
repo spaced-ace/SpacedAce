@@ -6,18 +6,13 @@ import (
 	"time"
 )
 
-type Option struct {
-	Name  string
-	Value string
-}
-
 type ReviewItemListProps struct {
-	SelectedQuizOption Option
-	QuizOptions        []Option
-	SelectedDifficulty Option
-	DifficultyOptions  []Option
-	SelectedStatus     Option
-	StatusOptions      []Option
+	SelectedQuizOption business.Option
+	QuizOptions        []business.Option
+	SelectedDifficulty business.Option
+	DifficultyOptions  []business.Option
+	SelectedStatus     business.Option
+	StatusOptions      []business.Option
 	Query              string
 
 	ReviewItems  []business.ReviewItem
