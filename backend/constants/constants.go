@@ -1,6 +1,9 @@
 package constants
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 var (
 	LLM_API_URL = "http://localhost:8000"
@@ -15,6 +18,8 @@ var (
 	REVIEW_ITEM_STREAK_DEFAULT int32 = 0
 
 	REVIEW_ITEM_INTERVAL_IN_MINUTES_DEFAULT int32 = 60
+
+	REVIEW_ITEM_PAGE_SIZE = 10
 )
 
 func init() {
@@ -23,5 +28,12 @@ func init() {
 	}
 	if envPort, exists := os.LookupEnv("PORT"); exists {
 		PORT = envPort
+	}
+
+	if envReviewItemPageSize, exist := os.LookupEnv("REVIEW_ITEM_PAGE_SIZE"); exist {
+		parsedPageSize, err := strconv.Atoi(envReviewItemPageSize)
+		if err != nil {
+			envReviewItemPageSize = strconv.Itoa(parsedPageSize)
+		}
 	}
 }

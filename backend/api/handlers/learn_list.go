@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
 	"net/http"
+	"slices"
 	"spaced-ace-backend/api/models"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/constants"
@@ -14,8 +16,17 @@ import (
 	"spaced-ace-backend/question"
 	"spaced-ace-backend/quiz"
 	"spaced-ace-backend/utils"
+	"strings"
 	"time"
 )
+
+type ReviewItemsRequestBody struct {
+	QuizID     string `json:"quiz"`
+	Difficulty string `json:"difficulty"`
+	Status     string `json:"status"`
+	Page       int    `json:"page"`
+	Query      string `json:"query"`
+}
 
 func GetLearnList(c echo.Context) error {
 	session, err := c.Cookie("session")
@@ -182,25 +193,115 @@ func GetReviewItems(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
 	}
 
+	var request = ReviewItemsRequestBody{}
+	if err = json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("parsing request body: %w", err))
+	}
+
+	filter, err := validateReviewItemsRequest(request)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("validationg the request body: %w", err))
+	}
+
 	sqlcQuerier := utils.GetQuerier()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	dbReviewItems, err := sqlcQuerier.GetReviewItems(ctx, sessionUserID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("getting review item for user with ID %q: %w", sessionUserID, err))
+	}
 
 	reviewItems := make([]*models.ReviewItem, 0, len(dbReviewItems))
 	for _, dbReviewItem := range dbReviewItems {
-		reviewItem, err := models.MapReviewItem(dbReviewItem)
+		reviewItem, err := models.MapReviewItemFromReviewItemsRow(dbReviewItem)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w", err))
 		}
 		reviewItems = append(reviewItems, reviewItem)
 	}
 
-	response := models.ReviewItemListResponseBody{
-		ReviewItems: reviewItems,
+	filteredReviewItem := make([]*models.ReviewItem, 0, len(reviewItems))
+	for _, item := range reviewItems {
+		if filter.QuizID != "" && item.QuizID != filter.QuizID {
+			continue
+		}
+
+		if filter.Status != "" {
+			if filter.Status == "due" && !item.NextReviewDate.Time.Before(time.Now()) {
+				continue
+			}
+			if filter.Status == "not-due" && item.NextReviewDate.Time.Before(time.Now()) {
+				continue
+			}
+		}
+
+		if filter.Difficulty != "" {
+			if filter.Difficulty == "easy" && item.Difficulty > 1.5 {
+				continue
+			}
+			if filter.Difficulty == "medium" && item.Difficulty <= 1.5 || item.Difficulty > 3.5 {
+				continue
+			}
+			if filter.Difficulty == "hard" && item.Difficulty <= 3.5 {
+				continue
+			}
+		}
+
+		if filter.Query != "" && !strings.Contains(strings.ToLower(item.QuestionName), strings.ToLower(filter.Query)) {
+			continue
+		}
+
+		filteredReviewItem = append(filteredReviewItem, item)
+	}
+
+	reviewItemCountForFilter := len(filteredReviewItem)
+
+	lowerIndex := (filter.Page - 1) * constants.REVIEW_ITEM_PAGE_SIZE
+	upperIndex := filter.Page * constants.REVIEW_ITEM_PAGE_SIZE
+	reviewItemsOnPage := make([]*models.ReviewItem, 0, constants.REVIEW_ITEM_PAGE_SIZE)
+	for i, item := range filteredReviewItem {
+		if i >= lowerIndex && i <= upperIndex {
+			reviewItemsOnPage = append(reviewItemsOnPage, item)
+		}
+	}
+
+	response := models.ReviewItemResponseBody{
+		ReviewItems:              reviewItemsOnPage,
+		ReviewItemCountForFilter: reviewItemCountForFilter,
 	}
 	return c.JSON(http.StatusOK, response)
+}
+func GetQuizOptions(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+	sessionUserID, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dbQuizOptions, err := sqlcQuerier.GetQuizOptions(ctx, sessionUserID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting quiz options for user with ID %q: %w", sessionUserID, err))
+	}
+
+	quizOptions := make([]*models.Option, 0, len(dbQuizOptions))
+	for _, dbQuizOption := range dbQuizOptions {
+		quizOptions = append(
+			quizOptions, &models.Option{
+				Name:  dbQuizOption.QuizName,
+				Value: dbQuizOption.QuizID,
+			},
+		)
+	}
+
+	return c.JSON(http.StatusOK, models.QuizOptionsResponseBody{QuizOptions: quizOptions})
 }
 
 func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*models.ReviewItem, error) {
@@ -250,7 +351,7 @@ func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*m
 func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string) (*models.ReviewItem, error) {
 	sqlcQuerier := utils.GetQuerier()
 
-	dbReviewItem, err := sqlcQuerier.CreateSingleChoiceReviewItem(
+	reviewItemID, err := sqlcQuerier.CreateSingleChoiceReviewItem(
 		ctx,
 		db.CreateSingleChoiceReviewItemParams{
 			ID:                     uuid.NewString(),
@@ -271,6 +372,11 @@ func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string
 		return nil, fmt.Errorf("creating review item for single choice question with ID %q: %w", questionID, err)
 	}
 
+	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
+	if err != nil {
+		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
+	}
+
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
 	if err != nil {
 		return nil, fmt.Errorf("mapping review item: %w", err)
@@ -281,7 +387,7 @@ func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string
 func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID string) (*models.ReviewItem, error) {
 	sqlcQuerier := utils.GetQuerier()
 
-	dbReviewItem, err := sqlcQuerier.CreateMultipleChoiceReviewItem(
+	reviewItemID, err := sqlcQuerier.CreateMultipleChoiceReviewItem(
 		ctx,
 		db.CreateMultipleChoiceReviewItemParams{
 			ID:                       uuid.NewString(),
@@ -302,6 +408,11 @@ func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID stri
 		return nil, fmt.Errorf("creating review item for multiple choice question with ID %q: %w", questionID, err)
 	}
 
+	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
+	if err != nil {
+		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
+	}
+
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
 	if err != nil {
 		return nil, fmt.Errorf("mapping review item: %w", err)
@@ -312,7 +423,7 @@ func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID stri
 func createTrueOrFalseReviewItem(ctx context.Context, userID, questionID string) (*models.ReviewItem, error) {
 	sqlcQuerier := utils.GetQuerier()
 
-	dbReviewItem, err := sqlcQuerier.CreateTrueOrFalseReviewItem(
+	reviewItemID, err := sqlcQuerier.CreateTrueOrFalseReviewItem(
 		ctx,
 		db.CreateTrueOrFalseReviewItemParams{
 			ID:                    uuid.NewString(),
@@ -331,6 +442,11 @@ func createTrueOrFalseReviewItem(ctx context.Context, userID, questionID string)
 	)
 	if err != nil {
 		return nil, fmt.Errorf("creating review item for true or false question with ID %q: %w", questionID, err)
+	}
+
+	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
+	if err != nil {
+		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
 	}
 
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
@@ -381,4 +497,20 @@ func buildLearnListItems(quizAccesses []quiz.DBQuizAccess, addedQuizzes []*db.Le
 	}
 
 	return available, selected, nil
+}
+
+func validateReviewItemsRequest(request ReviewItemsRequestBody) (*ReviewItemsRequestBody, error) {
+	if !slices.Contains([]string{"", "easy", "medium", "hard"}, request.Difficulty) {
+		return nil, fmt.Errorf("invalid difficulty value %q\n", request.Difficulty)
+	}
+
+	if !slices.Contains([]string{"", "due", "not-due"}, request.Status) {
+		return nil, fmt.Errorf("invalid status value %q\n", request.Status)
+	}
+
+	if request.Page < 1 {
+		request.Page = 1
+	}
+
+	return &request, nil
 }
