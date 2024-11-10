@@ -195,12 +195,12 @@ func GetReviewItems(c echo.Context) error {
 
 	var request = ReviewItemsRequestBody{}
 	if err = json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("parsing request body: %w", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("parsing request body: %w\n", err))
 	}
 
 	filter, err := validateReviewItemsRequest(request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("validationg the request body: %w", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("validationg the request body: %w\n", err))
 	}
 
 	sqlcQuerier := utils.GetQuerier()
@@ -209,14 +209,14 @@ func GetReviewItems(c echo.Context) error {
 
 	dbReviewItems, err := sqlcQuerier.GetReviewItems(ctx, sessionUserID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("getting review item for user with ID %q: %w", sessionUserID, err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("getting review item for user with ID %q: %w\n", sessionUserID, err))
 	}
 
 	reviewItems := make([]*models.ReviewItem, 0, len(dbReviewItems))
 	for _, dbReviewItem := range dbReviewItems {
 		reviewItem, err := models.MapReviewItemFromReviewItemsRow(dbReviewItem)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w", err))
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
 		}
 		reviewItems = append(reviewItems, reviewItem)
 	}
@@ -307,7 +307,7 @@ func GetQuizOptions(c echo.Context) error {
 func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*models.ReviewItem, error) {
 	dbSingleChoiceQuestions, err := question.GetSingleChoiceQuestions(quizID)
 	if err != nil {
-		return nil, fmt.Errorf("getting single choice questions for quiz with ID %q", quizID)
+		return nil, fmt.Errorf("getting single choice questions for quiz with ID %q\n", quizID)
 	}
 
 	reviewItems := make([]*models.ReviewItem, 0, len(dbSingleChoiceQuestions))
@@ -315,33 +315,33 @@ func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*m
 	for _, dbQuestion := range dbSingleChoiceQuestions {
 		reviewItem, err := createSingleChoiceReviewItem(ctx, userID, dbQuestion.UUID)
 		if err != nil {
-			return nil, fmt.Errorf("creating review item for single choice question with ID %q: %w", dbQuestion.UUID, err)
+			return nil, fmt.Errorf("creating review item for single choice question with ID %q: %w\n", dbQuestion.UUID, err)
 		}
 		reviewItems = append(reviewItems, reviewItem)
 	}
 
 	dbMultipleChoiceQuestions, err := question.GetMultipleChoiceQuestions(quizID)
 	if err != nil {
-		return nil, fmt.Errorf("getting multiple choice questions for quiz with ID %q", quizID)
+		return nil, fmt.Errorf("getting multiple choice questions for quiz with ID %q\n", quizID)
 	}
 
 	for _, dbQuestion := range dbMultipleChoiceQuestions {
 		reviewItem, err := createMultipleChoiceReviewItem(ctx, userID, dbQuestion.UUID)
 		if err != nil {
-			return nil, fmt.Errorf("creating review item for multiple choice question with ID %q: %w", dbQuestion.UUID, err)
+			return nil, fmt.Errorf("creating review item for multiple choice question with ID %q: %w\n", dbQuestion.UUID, err)
 		}
 		reviewItems = append(reviewItems, reviewItem)
 	}
 
 	dbTrueOrFalseQuestions, err := question.GetTrueOrFalseQuestions(quizID)
 	if err != nil {
-		return nil, fmt.Errorf("getting true or false questions for quiz with ID %q", quizID)
+		return nil, fmt.Errorf("getting true or false questions for quiz with ID %q\n", quizID)
 	}
 
 	for _, dbQuestion := range dbTrueOrFalseQuestions {
 		reviewItem, err := createTrueOrFalseReviewItem(ctx, userID, dbQuestion.UUID)
 		if err != nil {
-			return nil, fmt.Errorf("creating review item for true or false question with ID %q: %w", dbQuestion.UUID, err)
+			return nil, fmt.Errorf("creating review item for true or false question with ID %q: %w\n", dbQuestion.UUID, err)
 		}
 		reviewItems = append(reviewItems, reviewItem)
 	}
@@ -361,7 +361,7 @@ func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string
 			Difficulty:             constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                 constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now(),
+				Time:             time.Now().Add(-1 * time.Hour),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},
@@ -369,17 +369,17 @@ func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("creating review item for single choice question with ID %q: %w", questionID, err)
+		return nil, fmt.Errorf("creating review item for single choice question with ID %q: %w\n", questionID, err)
 	}
 
 	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
 	if err != nil {
-		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
+		return nil, fmt.Errorf("getting review item with ID %q: %w\n", reviewItemID, err)
 	}
 
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
 	if err != nil {
-		return nil, fmt.Errorf("mapping review item: %w", err)
+		return nil, fmt.Errorf("mapping review item: %w\n", err)
 	}
 
 	return reviewItem, nil
@@ -397,7 +397,7 @@ func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID stri
 			Difficulty:               constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                   constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now(),
+				Time:             time.Now().Add(-1 * time.Hour),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},
@@ -405,17 +405,17 @@ func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID stri
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("creating review item for multiple choice question with ID %q: %w", questionID, err)
+		return nil, fmt.Errorf("creating review item for multiple choice question with ID %q: %w\n", questionID, err)
 	}
 
 	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
 	if err != nil {
-		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
+		return nil, fmt.Errorf("getting review item with ID %q: %w\n", reviewItemID, err)
 	}
 
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
 	if err != nil {
-		return nil, fmt.Errorf("mapping review item: %w", err)
+		return nil, fmt.Errorf("mapping review item: %w\n", err)
 	}
 
 	return reviewItem, nil
@@ -433,7 +433,7 @@ func createTrueOrFalseReviewItem(ctx context.Context, userID, questionID string)
 			Difficulty:            constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now(),
+				Time:             time.Now().Add(-1 * time.Hour),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},
@@ -441,17 +441,17 @@ func createTrueOrFalseReviewItem(ctx context.Context, userID, questionID string)
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("creating review item for true or false question with ID %q: %w", questionID, err)
+		return nil, fmt.Errorf("creating review item for true or false question with ID %q: %w\n", questionID, err)
 	}
 
 	dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
 	if err != nil {
-		return nil, fmt.Errorf("getting review item with ID %q: %w", reviewItemID, err)
+		return nil, fmt.Errorf("getting review item with ID %q: %w\n", reviewItemID, err)
 	}
 
 	reviewItem, err := models.MapReviewItem(dbReviewItem)
 	if err != nil {
-		return nil, fmt.Errorf("mapping review item: %w", err)
+		return nil, fmt.Errorf("mapping review item: %w\n", err)
 	}
 
 	return reviewItem, nil
@@ -481,7 +481,7 @@ func buildLearnListItems(quizAccesses []quiz.DBQuizAccess, addedQuizzes []*db.Le
 	for _, access := range quizAccesses {
 		dbQuiz, err := quiz.GetQuizById(access.QuizId)
 		if err != nil {
-			return nil, nil, fmt.Errorf("getting quiz with ID %q: %w", access.QuizId, err)
+			return nil, nil, fmt.Errorf("getting quiz with ID %q: %w\n", access.QuizId, err)
 		}
 
 		item := models.LearnListItem{
