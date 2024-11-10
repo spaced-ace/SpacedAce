@@ -87,6 +87,7 @@ func main() {
 	reviewItem := protected.Group("/review-items")
 	reviewItem.GET("", handlers.GetReviewItems)
 	reviewItem.GET("/quiz-options", handlers.GetQuizOptions)
+	reviewItem.GET("/item-counts", handlers.GetReviewItemCounts)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

@@ -288,7 +288,7 @@ func GetQuizOptions(c echo.Context) error {
 
 	dbQuizOptions, err := sqlcQuerier.GetQuizOptions(ctx, sessionUserID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting quiz options for user with ID %q: %w", sessionUserID, err))
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting quiz options for user with ID %q: %w\n", sessionUserID, err))
 	}
 
 	quizOptions := make([]*models.Option, 0, len(dbQuizOptions))
@@ -302,6 +302,33 @@ func GetQuizOptions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.QuizOptionsResponseBody{QuizOptions: quizOptions})
+}
+func GetReviewItemCounts(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+	sessionUserID, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dbCounts, err := sqlcQuerier.GetReviewItemCounts(ctx, sessionUserID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("getting item counts for user with ID %q: %w\n", sessionUserID, err))
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		models.ReviewItemCountsResponseBody{
+			Total:       int(dbCounts.Total),
+			DueToReview: int(dbCounts.DueToReview),
+		},
+	)
 }
 
 func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*models.ReviewItem, error) {

@@ -36,6 +36,10 @@ type ReviewItemResponseBody struct {
 type QuizOptionsResponseBody struct {
 	QuizOptions []*Option `json:"quizOptions"`
 }
+type ReviewItemCountsResponseBody struct {
+	Total       int `json:"total"`
+	DueToReview int `json:"dueToReview"`
+}
 
 func MapReviewItem(dbItem *db.GetReviewItemRow) (*ReviewItem, error) {
 	if dbItem == nil {

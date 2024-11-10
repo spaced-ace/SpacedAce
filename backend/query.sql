@@ -303,3 +303,19 @@
     INNER JOIN quiz_accesses A ON A.quizid = Q.id
     WHERE true
         AND A.userid = $1;
+
+
+-- name: GetReviewItemCounts :one
+    SELECT
+        count(id) as total,
+        count(
+            CASE
+                WHEN true
+                    AND review_items.user_id = $1
+                    AND review_items.next_review_date < now()
+                THEN 1
+            END
+        ) as due_to_review
+    FROM review_items
+    WHERE true
+        AND review_items.user_id = $1;
