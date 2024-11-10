@@ -234,9 +234,18 @@ func handleLearnPage(c echo.Context) error {
 		return handleNonHXRequest(c)
 	}
 
+	cc := c.(*context.AppContext)
+
+	total, dueToReview, err := cc.ApiService.GetReviewItemCounts()
+	if err != nil {
+		log.Default().Print(fmt.Errorf("getting review item counts: %s\n", err))
+		total = -1
+		dueToReview = -1
+	}
+
 	viewModel := pages.LearnPageViewModel{
-		TotalQuestions:    150,
-		QuestionsToReview: 40,
+		TotalQuestions:    total,
+		QuestionsToReview: dueToReview,
 	}
 	return render.TemplRender(c, 200, pages.LearnPage(viewModel))
 }

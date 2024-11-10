@@ -488,3 +488,10 @@ func (a *ApiService) GetReviewItemListData(quizID, difficulty, status, query str
 
 	return reviewItems, quizOptions, maxReviewItemCount, nil
 }
+func (a *ApiService) GetReviewItemCounts() (total int, dueToReview int, err error) {
+	response := new(external.ReviewItemCountsResponseBody)
+	if err := a.getResponse("GET", "/review-items/item-counts", nil, response); err != nil {
+		return 0, 0, err
+	}
+	return response.Total, response.DueToReview, nil
+}

@@ -33,6 +33,10 @@ type ReviewItemResponseBody struct {
 	ReviewItems              []*ReviewItem `json:"reviewItems"`
 	ReviewItemCountForFilter int           `json:"reviewItemCountForFilter"`
 }
+type ReviewItemCountsResponseBody struct {
+	Total       int `json:"total"`
+	DueToReview int `json:"dueToReview"`
+}
 
 func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 	if r == nil {
