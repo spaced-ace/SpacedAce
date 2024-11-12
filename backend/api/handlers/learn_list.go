@@ -331,6 +331,108 @@ func GetReviewItemCounts(c echo.Context) error {
 	)
 }
 
+func GetQuestionAndNextReviewItem(c echo.Context) error {
+	session, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+	sessionUserID, err := auth.GetUserIdBySession(session.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	sqlcQuerier := utils.GetQuerier()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	reviewItemID := c.Param("reviewItemID")
+
+	nextReviewItemID := ""
+	var reviewItem *models.ReviewItem
+	if reviewItemID != "" {
+		dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting review item with ID %q: %w\n", reviewItemID, err))
+		}
+
+		reviewItem, err = models.MapReviewItem(dbReviewItem)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
+		}
+	} else {
+		dbReviewItems, err := sqlcQuerier.GetReviewItems(ctx, sessionUserID)
+		if err != nil || len(dbReviewItems) < 1 {
+			return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting enough review items for user with ID %q: %w\n", sessionUserID, err))
+		}
+
+		reviewItem, err = models.MapReviewItemFromReviewItemsRow(dbReviewItems[0])
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
+		}
+
+		nextReviewItemID = dbReviewItems[1].ID
+	}
+
+	var singleChoiceQuestion *models.SingleChoiceQuestion
+	if reviewItem.SingleChoiceQuestionID != nil {
+		dbQuestion, err := question.GetSingleChoiceQuestion(*reviewItem.SingleChoiceQuestionID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting single choice question with ID %q: %w\n", reviewItem.SingleChoiceQuestionID, err))
+		}
+
+		singleChoiceQuestion = &models.SingleChoiceQuestion{
+			ID:            dbQuestion.UUID,
+			QuizID:        dbQuestion.QuizID,
+			QuestionType:  models.SingleChoice,
+			Question:      dbQuestion.Question,
+			Answers:       dbQuestion.Answers,
+			CorrectAnswer: dbQuestion.CorrectAnswer,
+		}
+	}
+
+	var multipleChoiceQuestion *models.MultipleChoiceQuestion
+	if reviewItem.MultipleChoiceQuestionID != nil {
+		dbQuestion, err := question.GetMultipleChoiceQuestion(*reviewItem.MultipleChoiceQuestionID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting multiple choice question with ID %q: %w\n", reviewItem.MultipleChoiceQuestionID, err))
+		}
+
+		multipleChoiceQuestion = &models.MultipleChoiceQuestion{
+			ID:             dbQuestion.UUID,
+			QuizID:         dbQuestion.QuizID,
+			QuestionType:   models.MultipleChoice,
+			Question:       dbQuestion.Question,
+			Answers:        dbQuestion.Answers,
+			CorrectAnswers: dbQuestion.CorrectAnswers,
+		}
+	}
+
+	var trueOrFalseQuestion *models.TrueOrFalseQuestion
+	if reviewItem.TrueOrFalseQuestionID != nil {
+		dbQuestion, err := question.GetTrueOrFalseQuestion(*reviewItem.TrueOrFalseQuestionID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting true or false question with ID %q: %w\n", reviewItem.TrueOrFalseQuestionID, err))
+		}
+
+		trueOrFalseQuestion = &models.TrueOrFalseQuestion{
+			ID:            dbQuestion.UUID,
+			QuizID:        dbQuestion.QuizID,
+			QuestionType:  models.TrueOrFalse,
+			Question:      dbQuestion.Question,
+			CorrectAnswer: dbQuestion.CorrectAnswer,
+		}
+	}
+
+	response := models.ReviewItemPageDataResponseBody{
+		CurrentReviewItemID:    reviewItemID,
+		SingleChoiceQuestion:   singleChoiceQuestion,
+		MultipleChoiceQuestion: multipleChoiceQuestion,
+		TrueOrFalseQuestion:    trueOrFalseQuestion,
+		NextReviewItemID:       nextReviewItemID,
+	}
+	return c.JSON(200, response)
+}
+
 func createAndStoreReviewItems(ctx context.Context, userID, quizID string) ([]*models.ReviewItem, error) {
 	dbSingleChoiceQuestions, err := question.GetSingleChoiceQuestions(quizID)
 	if err != nil {
