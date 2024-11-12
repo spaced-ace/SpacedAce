@@ -52,8 +52,8 @@ func RegisterRoutes(e *echo.Echo) {
 
 	protected.GET("/learn/review-item-list", handleGetReviewItemList)
 	protected.GET("/learn", handleLearnPage)
-	//protected.GET("/learn/:reviewItemID", handleReviewItem)
-	//protected.GET("/learn/review-all", handleReviewAll) // find the first reviewable item, on submission schedule the question and redirect to /learn or /learn/review-all
+	protected.GET("/learn/:reviewItemID", handleReviewPage)
+	protected.GET("/learn/review-all", handleReviewPage)
 
 	// Auth endpoints
 	public.POST("/login", auth.PostLogin)

@@ -37,6 +37,13 @@ type ReviewItemCountsResponseBody struct {
 	Total       int `json:"total"`
 	DueToReview int `json:"dueToReview"`
 }
+type ReviewItemPageDataResponseBody struct {
+	CurrentReviewItemID    string                              `json:"currentReviewItemID"`
+	SingleChoiceQuestion   *SingleChoiceQuestionResponseBody   `json:"singleChoiceQuestion"`
+	MultipleChoiceQuestion *MultipleChoiceQuestionResponseBody `json:"multipleChoiceQuestion"`
+	TrueOrFalseQuestion    *TrueOrFalseQuestionResponseBody    `json:"trueOrFalseQuestion"`
+	NextReviewItemID       string                              `json:"nextReviewItemID"`
+}
 
 func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 	if r == nil {
@@ -64,5 +71,41 @@ func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 		Difficulty:   r.Difficulty,
 		Streak:       int(r.Streak),
 		NeedToReview: r.NextReviewDate.Time.Before(time.Now()),
+	}, nil
+}
+func (r *ReviewItemPageDataResponseBody) MapToBusiness() (*business.ReviewItemPageData, error) {
+	var singleChoiceQuestion *business.SingleChoiceQuestion
+	if r.SingleChoiceQuestion != nil {
+		var err error
+		singleChoiceQuestion, err = r.SingleChoiceQuestion.MapToBusiness()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var multipleChoiceQuestion *business.MultipleChoiceQuestion
+	if r.MultipleChoiceQuestion != nil {
+		var err error
+		multipleChoiceQuestion, err = r.MultipleChoiceQuestion.MapToBusiness()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var trueOrFalseQuestion *business.TrueOrFalseQuestion
+	if r.TrueOrFalseQuestion != nil {
+		var err error
+		trueOrFalseQuestion, err = r.TrueOrFalseQuestion.MapToBusiness()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &business.ReviewItemPageData{
+		CurrentReviewItemID:    r.CurrentReviewItemID,
+		SingleChoiceQuestion:   singleChoiceQuestion,
+		MultipleChoiceQuestion: multipleChoiceQuestion,
+		TrueOrFalseQuestion:    trueOrFalseQuestion,
+		NextReviewItemID:       r.NextReviewItemID,
 	}, nil
 }

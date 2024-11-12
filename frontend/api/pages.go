@@ -249,6 +249,25 @@ func handleLearnPage(c echo.Context) error {
 	}
 	return render.TemplRender(c, 200, pages.LearnPage(viewModel))
 }
+func handleReviewPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	reviewItemID := c.Param("reviewItemID")
+	if reviewItemID == "" {
+		// TODO get a review item and an ID for the next one
+	} else {
+		// TODO get the review item for the ID
+		// TODO set nextReviewItemID to ""
+	}
+
+	//cc := c.(*context.AppContext)
+
+	viewModel := pages.QuizReviewPageViewModel{}
+	return render.TemplRender(c, 200, pages.QuizReviewPage(viewModel))
+}
 
 func handleNonHXRequest(c echo.Context) error {
 	activeUrl := c.Request().URL.Path

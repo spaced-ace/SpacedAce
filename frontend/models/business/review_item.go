@@ -12,3 +12,11 @@ type ReviewItem struct {
 	Streak       int
 	NeedToReview bool
 }
+
+type ReviewItemPageData struct {
+	CurrentReviewItemID    string
+	SingleChoiceQuestion   *SingleChoiceQuestion
+	MultipleChoiceQuestion *MultipleChoiceQuestion
+	TrueOrFalseQuestion    *TrueOrFalseQuestion
+	NextReviewItemID       string
+}

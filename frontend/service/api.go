@@ -495,3 +495,6 @@ func (a *ApiService) GetReviewItemCounts() (total int, dueToReview int, err erro
 	}
 	return response.Total, response.DueToReview, nil
 }
+func (a *ApiService) GetQuestionAndNextReviewItem(reviewItemID string) (*business.ReviewItemPageData, error) {
+	return nil, nil
+}

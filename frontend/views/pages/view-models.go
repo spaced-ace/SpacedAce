@@ -47,3 +47,11 @@ type LearnPageViewModel struct {
 	TotalQuestions    int
 	QuestionsToReview int
 }
+
+type QuizReviewPageViewModel struct {
+	currentReviewItemID       string
+	singleChoiceQuestion      *business.SingleChoiceQuestion
+	multipleChoiceQuestion    *business.MultipleChoiceQuestion
+	trueOrFalseChoiceQuestion *business.TrueOrFalseQuestion
+	nextReviewItemID          string
+}
