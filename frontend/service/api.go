@@ -12,6 +12,7 @@ import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
 	"spaced-ace/models/external"
+	"spaced-ace/models/request"
 )
 
 type ApiService struct {
@@ -512,4 +513,23 @@ func (a *ApiService) GetQuestionAndNextReviewItem(reviewItemID string) (*busines
 	}
 
 	return reviewItemPageData, nil
+}
+func (a *ApiService) SubmitReviewItemQuestion(reviewItemID string, form request.SubmitReviewItemQuestionForm) (*business.ReviewItem, error) {
+	requestBody := external.SubmitReviewItemQuestionRequestBody{
+		SingleChoiceValue:   form.SingleChoiceValue,
+		MultipleChoiceValue: form.MultipleChoiceValue,
+		TrueOrFalseValue:    form.TrueOrFalseValue,
+	}
+
+	responseBody := new(external.ReviewItem)
+	if err := a.getResponse("POST", fmt.Sprintf("/review-items/%s/submit", reviewItemID), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	reviewItem, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return reviewItem, nil
 }

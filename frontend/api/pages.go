@@ -271,7 +271,6 @@ func handleReviewPage(c echo.Context) error {
 		TrueOrFalseChoiceQuestion: questionAndNextReviewItem.TrueOrFalseQuestion,
 		NextReviewItemID:          questionAndNextReviewItem.NextReviewItemID,
 	}
-	fmt.Printf("%+v\n", viewModel)
 	return render.TemplRender(c, 200, pages.QuizReviewPage(viewModel))
 }
 

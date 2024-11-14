@@ -90,6 +90,7 @@ func main() {
 	reviewItem.GET("/item-counts", handlers.GetReviewItemCounts)
 	reviewItem.GET("/get-question-and-next-item/:reviewItemID", handlers.GetQuestionAndNextReviewItem)
 	reviewItem.GET("/get-question-and-next-item", handlers.GetQuestionAndNextReviewItem)
+	reviewItem.POST("/:reviewItemID/submit", handlers.PostSubmitReviewItemQuestion)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }

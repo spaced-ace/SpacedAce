@@ -602,6 +602,47 @@ func handleGetReviewItemList(c echo.Context) error {
 	}
 	return render.TemplRender(c, 200, components.ReviewItemList(props))
 }
+func handleSubmitReviewItemQuestion(c echo.Context) error {
+	reviewItemID := c.Param("reviewItemID")
+
+	answerForm := new(request.SubmitReviewItemQuestionForm)
+	if err := c.Bind(answerForm); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "parsing review item question submission form", err)
+	}
+
+	cc := c.(*context.AppContext)
+
+	_, err := cc.ApiService.SubmitReviewItemQuestion(reviewItemID, *answerForm)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("submitting review item question form: %w\n", err))
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/learn")
+	return c.NoContent(http.StatusOK)
+}
+func handleSubmitReviewItemQuestionAndNext(c echo.Context) error {
+	reviewItemID := c.Param("reviewItemID")
+	nextReviewItemID := c.Param("nextReviewItemID")
+
+	answerForm := new(request.SubmitReviewItemQuestionForm)
+	if err := c.Bind(answerForm); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "parsing review item question submission form", err)
+	}
+
+	cc := c.(*context.AppContext)
+
+	_, err := cc.ApiService.SubmitReviewItemQuestion(reviewItemID, *answerForm)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("submitting review item question form: %w\n", err))
+	}
+
+	if nextReviewItemID == "" {
+		c.Response().Header().Set("HX-Redirect", "/learn")
+	} else {
+		c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/learn/%s", nextReviewItemID))
+	}
+	return c.NoContent(http.StatusOK)
+}
 
 func handleQuizPreviewPopup(c echo.Context) error {
 	cc := c.(*context.AppContext)

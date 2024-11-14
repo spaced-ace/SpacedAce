@@ -54,6 +54,8 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.GET("/learn", handleLearnPage)
 	protected.GET("/learn/:reviewItemID", handleReviewPage)
 	protected.GET("/learn/review-all", handleReviewPage)
+	protected.POST("/learn/:reviewItemID/submit", handleSubmitReviewItemQuestion)
+	protected.POST("/learn/:reviewItemID/submit-and-next/:nextReviewItemID", handleSubmitReviewItemQuestionAndNext)
 
 	// Auth endpoints
 	public.POST("/login", auth.PostLogin)

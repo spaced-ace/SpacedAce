@@ -44,6 +44,11 @@ type ReviewItemPageDataResponseBody struct {
 	TrueOrFalseQuestion    *TrueOrFalseQuestionResponseBody    `json:"trueOrFalseQuestion"`
 	NextReviewItemID       string                              `json:"nextReviewItemID"`
 }
+type SubmitReviewItemQuestionRequestBody struct {
+	SingleChoiceValue   string   `json:"singleChoiceValue"`
+	MultipleChoiceValue []string `json:"multipleChoiceValue"`
+	TrueOrFalseValue    bool     `json:"trueOrFalseValue"`
+}
 
 func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 	if r == nil {
