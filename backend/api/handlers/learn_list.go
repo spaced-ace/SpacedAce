@@ -370,7 +370,9 @@ func GetQuestionAndNextReviewItem(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
 		}
 
-		nextReviewItemID = dbReviewItems[1].ID
+		if len(dbReviewItems) >= 2 {
+			nextReviewItemID = dbReviewItems[1].ID
+		}
 	}
 
 	var singleChoiceQuestion *models.SingleChoiceQuestion

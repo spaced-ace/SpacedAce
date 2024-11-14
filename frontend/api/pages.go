@@ -255,17 +255,23 @@ func handleReviewPage(c echo.Context) error {
 		return handleNonHXRequest(c)
 	}
 
+	cc := c.(*context.AppContext)
+
 	reviewItemID := c.Param("reviewItemID")
-	if reviewItemID == "" {
-		// TODO get a review item and an ID for the next one
-	} else {
-		// TODO get the review item for the ID
-		// TODO set nextReviewItemID to ""
+	questionAndNextReviewItem, err := cc.ApiService.GetQuestionAndNextReviewItem(reviewItemID)
+	if err != nil {
+		log.Default().Print(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	//cc := c.(*context.AppContext)
-
-	viewModel := pages.QuizReviewPageViewModel{}
+	viewModel := pages.QuizReviewPageViewModel{
+		CurrentReviewItemID:       questionAndNextReviewItem.CurrentReviewItemID,
+		SingleChoiceQuestion:      questionAndNextReviewItem.SingleChoiceQuestion,
+		MultipleChoiceQuestion:    questionAndNextReviewItem.MultipleChoiceQuestion,
+		TrueOrFalseChoiceQuestion: questionAndNextReviewItem.TrueOrFalseQuestion,
+		NextReviewItemID:          questionAndNextReviewItem.NextReviewItemID,
+	}
+	fmt.Printf("%+v\n", viewModel)
 	return render.TemplRender(c, 200, pages.QuizReviewPage(viewModel))
 }
 

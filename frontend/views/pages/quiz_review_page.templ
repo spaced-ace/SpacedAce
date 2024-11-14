@@ -10,17 +10,17 @@ templ QuizReviewPage(viewModel QuizReviewPageViewModel) {
 		<span class="text-2xl font-bold text-nowrap">Review</span>
 		<form class="flex flex-col gap-y-4">
 			<div class="flex flex-col gap-y-1 rounded-md border border-gray-300 p-6 shadow-sm">
-				if viewModel.singleChoiceQuestion != nil {
-					<span class="overflow-auto whitespace-normal text-xl font-semibold">{ viewModel.singleChoiceQuestion.Question }</span>
+				if viewModel.SingleChoiceQuestion != nil {
+					<span class="overflow-auto whitespace-normal text-xl font-semibold">{ viewModel.SingleChoiceQuestion.Question }</span>
 				}
 			</div>
 			<div class="flex w-full justify-end">
 				<div>
-					if viewModel.nextReviewItemID == "" {
+					if viewModel.NextReviewItemID == "" {
 						@components.Button(components.ButtonProps{
 							Text:   "Submit",
 							Color:  components.ButtonColorBlack,
-							HxPost: fmt.Sprintf("/learn/%s/submit", viewModel.currentReviewItemID),
+							HxPost: fmt.Sprintf("/learn/%s/submit", viewModel.CurrentReviewItemID),
 							Attributes: templ.Attributes{
 								"hx-target": "main",
 								"hx-swap":   "outerHTML",
@@ -30,7 +30,7 @@ templ QuizReviewPage(viewModel QuizReviewPageViewModel) {
 						@components.Button(components.ButtonProps{
 							Text:   "Next",
 							Color:  components.ButtonColorBlack,
-							HxPost: fmt.Sprintf("/learn/%s/submit-and-continue", viewModel.currentReviewItemID),
+							HxPost: fmt.Sprintf("/learn/%s/submit-and-continue", viewModel.CurrentReviewItemID),
 							Attributes: templ.Attributes{
 								"hx-target": "main",
 								"hx-swap":   "outerHTML",

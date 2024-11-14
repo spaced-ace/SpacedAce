@@ -496,5 +496,20 @@ func (a *ApiService) GetReviewItemCounts() (total int, dueToReview int, err erro
 	return response.Total, response.DueToReview, nil
 }
 func (a *ApiService) GetQuestionAndNextReviewItem(reviewItemID string) (*business.ReviewItemPageData, error) {
-	return nil, nil
+	url := "/review-items/get-question-and-next-item"
+	if reviewItemID != "" {
+		url = fmt.Sprintf("%s/%s", url, reviewItemID)
+	}
+
+	requestBody := new(external.ReviewItemPageDataResponseBody)
+	if err := a.getResponse("GET", url, nil, requestBody); err != nil {
+		return nil, fmt.Errorf("getting question and next review item with ID %q: %w\n", reviewItemID, err)
+	}
+
+	reviewItemPageData, err := requestBody.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("mapping review item page data: %w\n", err)
+	}
+
+	return reviewItemPageData, nil
 }
