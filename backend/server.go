@@ -88,8 +88,8 @@ func main() {
 	reviewItem.GET("", handlers.GetReviewItems)
 	reviewItem.GET("/quiz-options", handlers.GetQuizOptions)
 	reviewItem.GET("/item-counts", handlers.GetReviewItemCounts)
-	reviewItem.GET("/get-question-and-next-item/:reviewItemID", handlers.GetQuestionAndNextReviewItem)
-	reviewItem.GET("/get-question-and-next-item", handlers.GetQuestionAndNextReviewItem)
+	reviewItem.GET("/get-question/:reviewItemID", handlers.GetReviewItemQuestion)
+	reviewItem.GET("/get-question", handlers.GetReviewItemQuestion)
 	reviewItem.POST("/:reviewItemID/submit", handlers.PostSubmitReviewItemQuestion)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))

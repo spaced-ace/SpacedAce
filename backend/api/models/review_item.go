@@ -31,12 +31,11 @@ type ReviewItemCountsResponseBody struct {
 	Total       int `json:"total"`
 	DueToReview int `json:"dueToReview"`
 }
-type ReviewItemPageDataResponseBody struct {
+type ReviewItemQuestionResponseBody struct {
 	CurrentReviewItemID    string                  `json:"currentReviewItemID"`
 	SingleChoiceQuestion   *SingleChoiceQuestion   `json:"singleChoiceQuestion"`
 	MultipleChoiceQuestion *MultipleChoiceQuestion `json:"multipleChoiceQuestion"`
 	TrueOrFalseQuestion    *TrueOrFalseQuestion    `json:"trueOrFalseQuestion"`
-	NextReviewItemID       string                  `json:"nextReviewItemID"`
 }
 type SubmitReviewItemQuestionRequestBody struct {
 	SingleChoiceValue   string   `json:"singleChoiceValue"`

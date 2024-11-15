@@ -496,15 +496,15 @@ func (a *ApiService) GetReviewItemCounts() (total int, dueToReview int, err erro
 	}
 	return response.Total, response.DueToReview, nil
 }
-func (a *ApiService) GetQuestionAndNextReviewItem(reviewItemID string) (*business.ReviewItemPageData, error) {
-	url := "/review-items/get-question-and-next-item"
+func (a *ApiService) GetReviewItemQuestion(reviewItemID string) (*business.ReviewItemQuestionData, error) {
+	url := "/review-items/get-question"
 	if reviewItemID != "" {
 		url = fmt.Sprintf("%s/%s", url, reviewItemID)
 	}
 
-	requestBody := new(external.ReviewItemPageDataResponseBody)
+	requestBody := new(external.ReviewItemQuestionResponseBody)
 	if err := a.getResponse("GET", url, nil, requestBody); err != nil {
-		return nil, fmt.Errorf("getting question and next review item with ID %q: %w\n", reviewItemID, err)
+		return nil, fmt.Errorf("getting question for review item with ID %q: %w\n", reviewItemID, err)
 	}
 
 	reviewItemPageData, err := requestBody.MapToBusiness()

@@ -163,7 +163,7 @@ func GetReviewItemCounts(c echo.Context) error {
 	)
 }
 
-func GetQuestionAndNextReviewItem(c echo.Context) error {
+func GetReviewItemQuestion(c echo.Context) error {
 	session, err := c.Cookie("session")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
@@ -179,7 +179,6 @@ func GetQuestionAndNextReviewItem(c echo.Context) error {
 
 	reviewItemID := c.Param("reviewItemID")
 
-	nextReviewItemID := ""
 	var reviewItem *models.ReviewItem
 	if reviewItemID != "" {
 		dbReviewItem, err := sqlcQuerier.GetReviewItem(ctx, reviewItemID)
@@ -200,10 +199,6 @@ func GetQuestionAndNextReviewItem(c echo.Context) error {
 		reviewItem, err = models.MapReviewItemFromReviewItemsRow(dbReviewItems[0])
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
-		}
-
-		if len(dbReviewItems) >= 2 {
-			nextReviewItemID = dbReviewItems[1].ID
 		}
 	}
 
@@ -257,12 +252,11 @@ func GetQuestionAndNextReviewItem(c echo.Context) error {
 		}
 	}
 
-	response := models.ReviewItemPageDataResponseBody{
+	response := models.ReviewItemQuestionResponseBody{
 		CurrentReviewItemID:    reviewItem.ID,
 		SingleChoiceQuestion:   singleChoiceQuestion,
 		MultipleChoiceQuestion: multipleChoiceQuestion,
 		TrueOrFalseQuestion:    trueOrFalseQuestion,
-		NextReviewItemID:       nextReviewItemID,
 	}
 	return c.JSON(200, response)
 }

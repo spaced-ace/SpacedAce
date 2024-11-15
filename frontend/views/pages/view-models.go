@@ -53,5 +53,5 @@ type QuizReviewPageViewModel struct {
 	SingleChoiceQuestion      *business.SingleChoiceQuestion
 	MultipleChoiceQuestion    *business.MultipleChoiceQuestion
 	TrueOrFalseChoiceQuestion *business.TrueOrFalseQuestion
-	NextReviewItemID          string
+	HasNextReviewItem         bool
 }

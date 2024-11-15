@@ -13,10 +13,9 @@ type ReviewItem struct {
 	NeedToReview bool
 }
 
-type ReviewItemPageData struct {
+type ReviewItemQuestionData struct {
 	CurrentReviewItemID    string
 	SingleChoiceQuestion   *SingleChoiceQuestion
 	MultipleChoiceQuestion *MultipleChoiceQuestion
 	TrueOrFalseQuestion    *TrueOrFalseQuestion
-	NextReviewItemID       string
 }

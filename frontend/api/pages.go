@@ -258,18 +258,20 @@ func handleReviewPage(c echo.Context) error {
 	cc := c.(*context.AppContext)
 
 	reviewItemID := c.Param("reviewItemID")
-	questionAndNextReviewItem, err := cc.ApiService.GetQuestionAndNextReviewItem(reviewItemID)
+	reviewItemQuestion, err := cc.ApiService.GetReviewItemQuestion(reviewItemID)
 	if err != nil {
 		log.Default().Print(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
+	hasNextReviewItem := reviewItemID == "" // reviewItemID is empty, when is /review-items/review-all called
+
 	viewModel := pages.QuizReviewPageViewModel{
-		CurrentReviewItemID:       questionAndNextReviewItem.CurrentReviewItemID,
-		SingleChoiceQuestion:      questionAndNextReviewItem.SingleChoiceQuestion,
-		MultipleChoiceQuestion:    questionAndNextReviewItem.MultipleChoiceQuestion,
-		TrueOrFalseChoiceQuestion: questionAndNextReviewItem.TrueOrFalseQuestion,
-		NextReviewItemID:          questionAndNextReviewItem.NextReviewItemID,
+		CurrentReviewItemID:       reviewItemQuestion.CurrentReviewItemID,
+		SingleChoiceQuestion:      reviewItemQuestion.SingleChoiceQuestion,
+		MultipleChoiceQuestion:    reviewItemQuestion.MultipleChoiceQuestion,
+		TrueOrFalseChoiceQuestion: reviewItemQuestion.TrueOrFalseQuestion,
+		HasNextReviewItem:         hasNextReviewItem,
 	}
 	return render.TemplRender(c, 200, pages.QuizReviewPage(viewModel))
 }

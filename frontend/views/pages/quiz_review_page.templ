@@ -89,7 +89,7 @@ templ QuizReviewPage(viewModel QuizReviewPageViewModel) {
 			</div>
 			<div class="flex w-full justify-end">
 				<div>
-					if viewModel.NextReviewItemID == "" {
+					if !viewModel.HasNextReviewItem {
 						@components.Button(components.ButtonProps{
 							Text:   "Submit",
 							Color:  components.ButtonColorBlack,
@@ -102,13 +102,9 @@ templ QuizReviewPage(viewModel QuizReviewPageViewModel) {
 						})
 					} else {
 						@components.Button(components.ButtonProps{
-							Text:  "Next",
-							Color: components.ButtonColorBlack,
-							HxPost: fmt.Sprintf(
-								"/learn/%s/submit-and-continue/%s",
-								viewModel.CurrentReviewItemID,
-								viewModel.NextReviewItemID,
-							),
+							Text:   "Next",
+							Color:  components.ButtonColorBlack,
+							HxPost: fmt.Sprintf("/learn/%s/submit-and-next", viewModel.CurrentReviewItemID),
 							Attributes: templ.Attributes{
 								"hx-target": "main",
 								"hx-swap":   "outerHTML",

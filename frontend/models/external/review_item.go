@@ -37,12 +37,11 @@ type ReviewItemCountsResponseBody struct {
 	Total       int `json:"total"`
 	DueToReview int `json:"dueToReview"`
 }
-type ReviewItemPageDataResponseBody struct {
+type ReviewItemQuestionResponseBody struct {
 	CurrentReviewItemID    string                              `json:"currentReviewItemID"`
 	SingleChoiceQuestion   *SingleChoiceQuestionResponseBody   `json:"singleChoiceQuestion"`
 	MultipleChoiceQuestion *MultipleChoiceQuestionResponseBody `json:"multipleChoiceQuestion"`
 	TrueOrFalseQuestion    *TrueOrFalseQuestionResponseBody    `json:"trueOrFalseQuestion"`
-	NextReviewItemID       string                              `json:"nextReviewItemID"`
 }
 type SubmitReviewItemQuestionRequestBody struct {
 	SingleChoiceValue   string   `json:"singleChoiceValue"`
@@ -78,7 +77,7 @@ func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 		NeedToReview: r.NextReviewDate.Time.Before(time.Now()),
 	}, nil
 }
-func (r *ReviewItemPageDataResponseBody) MapToBusiness() (*business.ReviewItemPageData, error) {
+func (r *ReviewItemQuestionResponseBody) MapToBusiness() (*business.ReviewItemQuestionData, error) {
 	var singleChoiceQuestion *business.SingleChoiceQuestion
 	if r.SingleChoiceQuestion != nil {
 		var err error
@@ -106,11 +105,10 @@ func (r *ReviewItemPageDataResponseBody) MapToBusiness() (*business.ReviewItemPa
 		}
 	}
 
-	return &business.ReviewItemPageData{
+	return &business.ReviewItemQuestionData{
 		CurrentReviewItemID:    r.CurrentReviewItemID,
 		SingleChoiceQuestion:   singleChoiceQuestion,
 		MultipleChoiceQuestion: multipleChoiceQuestion,
 		TrueOrFalseQuestion:    trueOrFalseQuestion,
-		NextReviewItemID:       r.NextReviewItemID,
 	}, nil
 }
