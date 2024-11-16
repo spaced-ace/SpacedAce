@@ -4,7 +4,7 @@ import (
 	"spaced-ace/models"
 )
 
-type Option struct {
+type QuestionOption struct {
 	Value   string `json:"value"`
 	Correct bool   `json:"correct"`
 }
@@ -19,12 +19,12 @@ type CommonQuestionProperties struct {
 
 type SingleChoiceQuestion struct {
 	CommonQuestionProperties
-	Options []Option `json:"options"`
+	Options []QuestionOption `json:"options"`
 }
 
 type MultipleChoiceQuestion struct {
 	CommonQuestionProperties
-	Options []Option `json:"options"`
+	Options []QuestionOption `json:"options"`
 }
 
 type TrueOrFalseQuestion struct {

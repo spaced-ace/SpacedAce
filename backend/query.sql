@@ -206,3 +206,116 @@
     WHERE true
         AND user_id = $1
         AND quiz_id = $2;
+
+-- name: GetReviewItems :many
+    SELECT
+        review_items.*,
+        Q.name::text AS quiz_name,
+        Q.id::text AS quiz_id,
+        CASE
+            WHEN SQC.question IS NOT NULL THEN SQC.question::text
+            WHEN MQC.question IS NOT NULL THEN MQC.question::text
+            ELSE TQC.question::text
+            END AS question_name
+    FROM review_items
+    LEFT JOIN single_choice_questions SQC ON review_items.single_choice_question_id = SQC.uuid
+    LEFT JOIN multiple_choice_questions MQC ON review_items.multiple_choice_question_id = MQC.uuid
+    LEFT JOIN true_or_false_questions TQC ON review_items.true_or_false_question_id = TQC.uuid
+    LEFT JOIN quizzes Q ON ( false
+        OR q.id = SQC.quizid
+        OR q.id = MQC.quizid
+        OR q.id = TQC.quizid
+    )
+    WHERE true
+      AND user_id = $1;
+
+-- name: GetReviewItem :one
+    SELECT
+        review_items.*,
+        Q.name::text AS quiz_name,
+        Q.id::text AS quiz_id,
+        CASE
+            WHEN SQC.question IS NOT NULL THEN SQC.question::text
+            WHEN MQC.question IS NOT NULL THEN MQC.question::text
+            ELSE TQC.question::text
+            END AS question_name
+    FROM review_items
+    LEFT JOIN single_choice_questions SQC ON review_items.single_choice_question_id = SQC.uuid
+    LEFT JOIN multiple_choice_questions MQC ON review_items.multiple_choice_question_id = MQC.uuid
+    LEFT JOIN true_or_false_questions TQC ON review_items.true_or_false_question_id = TQC.uuid
+    LEFT JOIN quizzes Q ON ( false
+       OR q.id = SQC.quizid
+       OR q.id = MQC.quizid
+       OR q.id = TQC.quizid
+    )
+    WHERE review_items.id = $1;
+
+-- name: CreateSingleChoiceReviewItem :one
+    INSERT INTO review_items(id, user_id, single_choice_question_id, ease_factor, difficulty, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id;
+
+-- name: CreateMultipleChoiceReviewItem :one
+    INSERT INTO review_items(id, user_id, multiple_choice_question_id, ease_factor, difficulty, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id;
+-- name: CreateTrueOrFalseReviewItem :one
+    INSERT INTO review_items(id, user_id, true_or_false_question_id, ease_factor, difficulty, streak, next_review_date, interval_in_minutes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id;
+
+-- name: DeleteReviewItem :exec
+    DELETE FROM review_items
+    WHERE true
+        AND id = $1;
+
+-- name: DeleteReviewItemsByQuizID :exec
+    DELETE FROM review_items
+        USING single_choice_questions, multiple_choice_questions, true_or_false_questions, quizzes
+        WHERE true
+            AND user_id = $1
+            AND (
+                review_items.single_choice_question_id = single_choice_questions.uuid
+                    AND single_choice_questions.quizid = quizzes.id
+                    AND quizzes.id = $2
+                )
+                OR (
+                review_items.multiple_choice_question_id = multiple_choice_questions.uuid
+                    AND multiple_choice_questions.quizid = quizzes.id
+                    AND quizzes.id = $2
+                ) OR (
+                review_items.true_or_false_question_id = true_or_false_questions.uuid
+                    AND true_or_false_questions.quizid = quizzes.id
+                    AND quizzes.id = $2
+                );
+
+-- name: UpdateReviewItem :exec
+    UPDATE review_items
+    SET ease_factor = $2, difficulty = $3, streak = $4, next_review_date = $5, interval_in_minutes = $6
+    WHERE true
+        AND id = $1;
+
+-- name: GetQuizOptions :many
+    SELECT
+        Q.id as quiz_id,
+        Q.name as quiz_name
+    FROM quizzes Q
+    INNER JOIN quiz_accesses A ON A.quizid = Q.id
+    WHERE true
+        AND A.userid = $1;
+
+
+-- name: GetReviewItemCounts :one
+    SELECT
+        count(id) as total,
+        count(
+            CASE
+                WHEN true
+                    AND review_items.user_id = $1
+                    AND review_items.next_review_date < now()
+                THEN 1
+            END
+        ) as due_to_review
+    FROM review_items
+    WHERE true
+        AND review_items.user_id = $1;

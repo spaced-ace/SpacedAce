@@ -228,6 +228,55 @@ func handleQuizHistoryPage(c echo.Context) error {
 	return render.TemplRender(c, 200, pages.QuizHistoryPage(viewModel))
 }
 
+func handleLearnPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	cc := c.(*context.AppContext)
+
+	total, dueToReview, err := cc.ApiService.GetReviewItemCounts()
+	if err != nil {
+		log.Default().Print(fmt.Errorf("getting review item counts: %s\n", err))
+		total = -1
+		dueToReview = -1
+	}
+
+	viewModel := pages.LearnPageViewModel{
+		TotalQuestions:    total,
+		QuestionsToReview: dueToReview,
+	}
+	return render.TemplRender(c, 200, pages.LearnPage(viewModel))
+}
+func handleReviewPage(c echo.Context) error {
+	hxRequest := c.Request().Header.Get("HX-Request") == "true"
+	if !hxRequest {
+		return handleNonHXRequest(c)
+	}
+
+	cc := c.(*context.AppContext)
+
+	reviewItemID := c.Param("reviewItemID")
+	reviewItemQuestion, err := cc.ApiService.GetReviewItemQuestion(reviewItemID)
+	if err != nil {
+		log.Default().Print(err)
+		c.Response().Header().Set("HX-Replace-Url", "/learn")
+		return c.Redirect(http.StatusFound, "/learn")
+	}
+
+	hasNextReviewItem := reviewItemID == "" // reviewItemID is empty, when is /review-items/review-all called
+
+	viewModel := pages.QuizReviewPageViewModel{
+		CurrentReviewItemID:       reviewItemQuestion.CurrentReviewItemID,
+		SingleChoiceQuestion:      reviewItemQuestion.SingleChoiceQuestion,
+		MultipleChoiceQuestion:    reviewItemQuestion.MultipleChoiceQuestion,
+		TrueOrFalseChoiceQuestion: reviewItemQuestion.TrueOrFalseQuestion,
+		HasNextReviewItem:         hasNextReviewItem,
+	}
+	return render.TemplRender(c, 200, pages.QuizReviewPage(viewModel))
+}
+
 func handleNonHXRequest(c echo.Context) error {
 	activeUrl := c.Request().URL.Path
 	sideBarProps, err := createSideBarProps(c, activeUrl)

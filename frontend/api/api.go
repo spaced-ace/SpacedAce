@@ -50,6 +50,13 @@ func RegisterRoutes(e *echo.Echo) {
 	protected.PATCH("/quizzes/:id", handleUpdateQuiz)
 	protected.DELETE("/questions/:questionId", handleDeleteQuestion)
 
+	protected.GET("/learn/review-item-list", handleGetReviewItemList)
+	protected.GET("/learn", handleLearnPage)
+	protected.GET("/learn/:reviewItemID", handleReviewPage)
+	protected.GET("/learn/review-all", handleReviewPage)
+	protected.POST("/learn/:reviewItemID/submit", handleSubmitReviewItemQuestion)
+	protected.POST("/learn/:reviewItemID/submit-and-next", handleSubmitReviewItemQuestionAndNext)
+
 	// Auth endpoints
 	public.POST("/login", auth.PostLogin)
 	public.POST("/signup", auth.PostRegister)

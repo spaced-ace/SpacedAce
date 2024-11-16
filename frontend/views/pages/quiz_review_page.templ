@@ -1,0 +1,118 @@
+package pages
+
+import (
+	"fmt"
+	"spaced-ace/views/components"
+)
+
+templ QuizReviewPage(viewModel QuizReviewPageViewModel) {
+	<main class="flex h-full w-full flex-col gap-y-8 overflow-y-auto p-6">
+		<span class="text-2xl font-bold text-nowrap">Review</span>
+		<form class="flex flex-col gap-y-4">
+			<div class="flex flex-col gap-y-1 rounded-md border border-gray-300 p-6 shadow-sm">
+				if viewModel.SingleChoiceQuestion != nil {
+					<span class="overflow-auto whitespace-normal text-xl font-semibold">{ viewModel.SingleChoiceQuestion.Question }</span>
+					<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+					<div class="flex w-full flex-col whitespace-normal rounded-md border border-gray-300 p-2 text-lg gap-y-0.5">
+						for index, option := range viewModel.SingleChoiceQuestion.Options {
+							<label class="whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+								<input
+									type="radio"
+									name="single-choice-value"
+									if index == 0 {
+										value="A"
+									}
+									if index == 1 {
+										value="B"
+									}
+									if index == 2 {
+										value="C"
+									}
+									if index == 3 {
+										value="D"
+									}
+								/>
+								{ option.Value }
+							</label>
+						}
+					</div>
+				}
+				if viewModel.MultipleChoiceQuestion != nil {
+					<span class="overflow-auto whitespace-normal text-xl font-semibold">{ viewModel.MultipleChoiceQuestion.Question }</span>
+					<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+					<div class="flex w-full flex-col whitespace-normal rounded-md border border-gray-300 p-2 text-lg gap-y-0.5">
+						for index, option := range viewModel.MultipleChoiceQuestion.Options {
+							<label class="whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+								<input
+									type="checkbox"
+									name="multiple-choice-value"
+									if index == 0 {
+										value="A"
+									}
+									if index == 1 {
+										value="B"
+									}
+									if index == 2 {
+										value="C"
+									}
+									if index == 3 {
+										value="D"
+									}
+								/>
+								{ option.Value }
+							</label>
+						}
+					</div>
+				}
+				if viewModel.TrueOrFalseChoiceQuestion != nil {
+					<span class="overflow-auto whitespace-normal text-xl font-semibold">{ viewModel.TrueOrFalseChoiceQuestion.Question }</span>
+					<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
+					<div class="flex w-full flex-col whitespace-normal rounded-md border border-gray-300 p-2 text-lg gap-y-0.5">
+						<label class="whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+							<input
+								type="radio"
+								name="true-or-false-value"
+								value="true"
+							/>
+							true
+						</label>
+						<label class="whitespace-normal rounded-md border border-transparent bg-transparent px-2">
+							<input
+								type="radio"
+								name="true-or-false-value"
+								value="false"
+							/>
+							false
+						</label>
+					</div>
+				}
+			</div>
+			<div class="flex w-full justify-end">
+				<div>
+					if !viewModel.HasNextReviewItem {
+						@components.Button(components.ButtonProps{
+							Text:   "Submit",
+							Color:  components.ButtonColorBlack,
+							HxPost: fmt.Sprintf("/learn/%s/submit", viewModel.CurrentReviewItemID),
+							Attributes: templ.Attributes{
+								"hx-target":  "main",
+								"hx-swap":    "outerHTML",
+								"hx-include": "value",
+							},
+						})
+					} else {
+						@components.Button(components.ButtonProps{
+							Text:   "Next",
+							Color:  components.ButtonColorBlack,
+							HxPost: fmt.Sprintf("/learn/%s/submit-and-next", viewModel.CurrentReviewItemID),
+							Attributes: templ.Attributes{
+								"hx-target": "main",
+								"hx-swap":   "outerHTML",
+							},
+						})
+					}
+				</div>
+			</div>
+		</form>
+	</main>
+}

@@ -3,6 +3,7 @@ package question
 import (
 	_ "fmt"
 	"github.com/lib/pq"
+	"spaced-ace-backend/api/models"
 	"spaced-ace-backend/utils"
 )
 
@@ -149,4 +150,34 @@ func UpdateTrueOrFalseQuestion(question *DBTrueOrFalseQuestion) error {
 		question.Question, question.CorrectAnswer, question.UUID,
 	)
 	return err
+}
+
+func (q DBSingleChoiceQuestion) MapToModel() *models.SingleChoiceQuestion {
+	return &models.SingleChoiceQuestion{
+		ID:            q.UUID,
+		QuizID:        q.QuizID,
+		QuestionType:  models.SingleChoice,
+		Question:      q.Question,
+		Answers:       q.Answers,
+		CorrectAnswer: q.CorrectAnswer,
+	}
+}
+func (q DBMultipleChoiceQuestion) MapToModel() *models.MultipleChoiceQuestion {
+	return &models.MultipleChoiceQuestion{
+		ID:             q.UUID,
+		QuizID:         q.QuizID,
+		QuestionType:   models.MultipleChoice,
+		Question:       q.Question,
+		Answers:        q.Answers,
+		CorrectAnswers: q.CorrectAnswers,
+	}
+}
+func (q DBTrueOrFalseQuestion) MapToModel() *models.TrueOrFalseQuestion {
+	return &models.TrueOrFalseQuestion{
+		ID:            q.UUID,
+		QuizID:        q.QuizID,
+		QuestionType:  models.TrueOrFalse,
+		Question:      q.Question,
+		CorrectAnswer: q.CorrectAnswer,
+	}
 }

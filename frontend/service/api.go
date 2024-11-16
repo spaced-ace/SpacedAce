@@ -12,6 +12,7 @@ import (
 	"spaced-ace/models"
 	"spaced-ace/models/business"
 	"spaced-ace/models/external"
+	"spaced-ace/models/request"
 )
 
 type ApiService struct {
@@ -445,4 +446,90 @@ func (a *ApiService) RemoveQuizFromLearnList(quizID string) (*business.LearnList
 	}
 
 	return learnList, nil
+}
+
+func (a *ApiService) GetReviewItemListData(quizID, difficulty, status, query string, page int) (reviewItems []business.ReviewItem, quizOptions []business.Option, maxReviewItemCount int, err error) {
+	reviewItemsRequestBody := external.ReviewItemsRequestBody{
+		QuizID:     quizID,
+		Difficulty: difficulty,
+		Status:     status,
+		Page:       page,
+		Query:      query,
+	}
+
+	reviewItemsResponseBody := new(external.ReviewItemResponseBody)
+	if err = a.getResponse("GET", "/review-items", reviewItemsRequestBody, reviewItemsResponseBody); err != nil {
+		return nil, nil, 0, fmt.Errorf("getting review items: %w\n", err)
+	}
+
+	reviewItems = make([]business.ReviewItem, 0, len(reviewItemsResponseBody.ReviewItems))
+	for _, item := range reviewItemsResponseBody.ReviewItems {
+		reviewItem, err := item.MapToBusiness()
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("mapping review item %+v: %w\n", reviewItem, err)
+		}
+		reviewItems = append(reviewItems, *reviewItem)
+	}
+
+	maxReviewItemCount = reviewItemsResponseBody.ReviewItemCountForFilter
+
+	quizOptionsResponseBody := new(external.QuizOptionsResponseBody)
+	if err = a.getResponse("GET", "/review-items/quiz-options", nil, quizOptionsResponseBody); err != nil {
+		return nil, nil, 0, fmt.Errorf("getting quiz options: %w\n", err)
+	}
+
+	quizOptions = make([]business.Option, 0, len(quizOptionsResponseBody.QuizOptions))
+	for _, option := range quizOptionsResponseBody.QuizOptions {
+		quizOption, err := option.MapToBusiness()
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("mapping quiz options: %w\n", err)
+		}
+		quizOptions = append(quizOptions, *quizOption)
+	}
+
+	return reviewItems, quizOptions, maxReviewItemCount, nil
+}
+func (a *ApiService) GetReviewItemCounts() (total int, dueToReview int, err error) {
+	response := new(external.ReviewItemCountsResponseBody)
+	if err := a.getResponse("GET", "/review-items/item-counts", nil, response); err != nil {
+		return 0, 0, err
+	}
+	return response.Total, response.DueToReview, nil
+}
+func (a *ApiService) GetReviewItemQuestion(reviewItemID string) (*business.ReviewItemQuestionData, error) {
+	url := "/review-items/get-question"
+	if reviewItemID != "" {
+		url = fmt.Sprintf("%s/%s", url, reviewItemID)
+	}
+
+	requestBody := new(external.ReviewItemQuestionResponseBody)
+	if err := a.getResponse("GET", url, nil, requestBody); err != nil {
+		return nil, fmt.Errorf("getting question for review item with ID %q: %w\n", reviewItemID, err)
+	}
+
+	reviewItemPageData, err := requestBody.MapToBusiness()
+	if err != nil {
+		return nil, fmt.Errorf("mapping review item page data: %w\n", err)
+	}
+
+	return reviewItemPageData, nil
+}
+func (a *ApiService) SubmitReviewItemQuestion(reviewItemID string, form request.SubmitReviewItemQuestionForm) (*business.ReviewItem, error) {
+	requestBody := external.SubmitReviewItemQuestionRequestBody{
+		SingleChoiceValue:   form.SingleChoiceValue,
+		MultipleChoiceValue: form.MultipleChoiceValue,
+		TrueOrFalseValue:    form.TrueOrFalseValue,
+	}
+
+	responseBody := new(external.ReviewItem)
+	if err := a.getResponse("POST", fmt.Sprintf("/review-items/%s/submit", reviewItemID), requestBody, responseBody); err != nil {
+		return nil, err
+	}
+
+	reviewItem, err := responseBody.MapToBusiness()
+	if err != nil {
+		return nil, err
+	}
+
+	return reviewItem, nil
 }

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"log"
+	"math"
 	"net/http"
+	"slices"
+	"spaced-ace/constants"
 	"spaced-ace/context"
 	"spaced-ace/models"
 	"spaced-ace/models/business"
@@ -14,6 +17,20 @@ import (
 	"spaced-ace/views/components"
 	"spaced-ace/views/forms"
 	"spaced-ace/views/pages"
+	"strconv"
+)
+
+var (
+	difficultyOptions = []business.Option{
+		{Name: "Easy", Value: "easy"},
+		{Name: "Medium", Value: "medium"},
+		{Name: "Hard", Value: "hard"},
+	}
+
+	statusOptions = []business.Option{
+		{Name: "Due", Value: "due"},
+		{Name: "Not Due", Value: "not-due"},
+	}
 )
 
 func handleCreateQuiz(c echo.Context) error {
@@ -499,6 +516,128 @@ func handleRemoveQuizFromLearnList(c echo.Context) error {
 	return render.TemplRender(c, 200, components.LearnListPopup(props))
 }
 
+func handleGetReviewItemList(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	quiz := c.QueryParam("quiz")
+
+	difficulty := c.QueryParam("difficulty")
+	if !slices.Contains([]string{"easy", "medium", "hard"}, difficulty) {
+		difficulty = ""
+	}
+
+	selectedDifficulty := business.Option{}
+	for _, option := range difficultyOptions {
+		if option.Value == difficulty {
+			selectedDifficulty = option
+			break
+		}
+	}
+
+	status := c.QueryParam("status")
+	if !slices.Contains([]string{"due", "not-due"}, status) {
+		status = ""
+	}
+
+	selectedStatus := business.Option{}
+	for _, option := range statusOptions {
+		if option.Value == status {
+			selectedStatus = option
+			break
+		}
+	}
+
+	query := c.QueryParam("query")
+
+	pageString := c.QueryParam("page")
+	page, err := strconv.Atoi(pageString)
+	if err != nil {
+		page = 1
+	}
+
+	reviewItems, quizOptions, maxReviewItemCount, err := cc.ApiService.GetReviewItemListData(quiz, difficulty, status, query, page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("getting review item list data: %w", err))
+	}
+
+	selectedQuizOption := business.Option{}
+	for _, option := range quizOptions {
+		if option.Value == quiz {
+			selectedQuizOption = option
+			break
+		}
+	}
+
+	pageCount := int(math.Ceil(float64(maxReviewItemCount) / float64(constants.REVIEW_ITEM_PAGE_SIZE)))
+	pageOptions := make([]int, 0, 1)
+	for i := 1; i <= pageCount; i++ {
+		if page >= i && len(pageOptions) < 5 {
+			pageOptions = append(pageOptions, i)
+		}
+	}
+
+	previousPage := page - 1
+	if previousPage < 1 {
+		previousPage = -1
+	}
+
+	nextPage := page + 1
+	if nextPage >= pageCount {
+		nextPage = -1
+	}
+
+	props := components.ReviewItemListProps{
+		SelectedQuizOption: selectedQuizOption,
+		QuizOptions:        quizOptions,
+		SelectedDifficulty: selectedDifficulty,
+		DifficultyOptions:  difficultyOptions,
+		SelectedStatus:     selectedStatus,
+		StatusOptions:      statusOptions,
+		Query:              query,
+		ReviewItems:        reviewItems,
+		PageOptions:        pageOptions,
+		CurrentPage:        page,
+		PreviousPage:       previousPage,
+		NextPage:           nextPage,
+	}
+	return render.TemplRender(c, 200, components.ReviewItemList(props))
+}
+func handleSubmitReviewItemQuestion(c echo.Context) error {
+	err := handleReviewItemQuestionSubmission(c)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/learn")
+	return c.NoContent(http.StatusOK)
+}
+func handleSubmitReviewItemQuestionAndNext(c echo.Context) error {
+	err := handleReviewItemQuestionSubmission(c)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/learn/review-all")
+	return c.NoContent(http.StatusOK)
+}
+
+func handleReviewItemQuestionSubmission(c echo.Context) error {
+	reviewItemID := c.Param("reviewItemID")
+
+	answerForm := new(request.SubmitReviewItemQuestionForm)
+	if err := c.Bind(answerForm); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("parsing review item question submission form: %w\n", err))
+	}
+
+	cc := c.(*context.AppContext)
+
+	_, err := cc.ApiService.SubmitReviewItemQuestion(reviewItemID, *answerForm)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("submitting review item question form: %w\n", err))
+	}
+
+	return nil
+}
 func handleQuizPreviewPopup(c echo.Context) error {
 	cc := c.(*context.AppContext)
 

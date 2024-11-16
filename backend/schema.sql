@@ -1,3 +1,66 @@
+-- Non-SQLc schemas
+
+CREATE TABLE IF NOT EXISTS quizzes(
+    id UUID PRIMARY KEY,
+    name TEXT NOT NULL,
+    creatorid UUID REFERENCES users(id) ON DELETE SET NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS quiz_accesses(
+    userid UUID REFERENCES users(id) ON DELETE CASCADE,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    roleid SMALLINT NOT NULL, --1 = owner, 2 = viewer
+    PRIMARY KEY(userid, quizid, roleid),
+    UNIQUE(userid, quizid)
+);
+
+CREATE TABLE IF NOT EXISTS single_choice_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    answers TEXT[4],
+    correct_answer CHAR
+);
+
+CREATE TABLE IF NOT EXISTS multiple_choice_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    answers TEXT[4],
+    correct_answers CHAR[]
+);
+
+CREATE TABLE IF NOT EXISTS true_or_false_questions (
+    uuid UUID PRIMARY KEY,
+    quizid UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+    question TEXT,
+    correct_answer BOOLEAN
+);
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    password TEXT
+);
+CREATE INDEX IF NOT EXISTS users_email ON users(email);
+
+CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    valid_until TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS sessions_id ON sessions(id);
+CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS sessions_valid_until ON sessions(valid_until);
+
+SELECT cron.schedule('del_exp_sessions', '10 * * * *', $$DELETE FROM sessions WHERE valid_until < now()$$);
+
+-- SQLc schemas
+
 CREATE TABLE IF NOT EXISTS quiz_sessions(
     id   UUID PRIMARY KEY NOT NULL,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
@@ -66,3 +129,25 @@ CREATE TABLE IF NOT EXISTS learn_list_added_items(
     UNIQUE (user_id, quiz_id)
 );
 CREATE INDEX idx_learn_list_added_items_user_id ON learn_list_added_items(user_id);
+
+CREATE TABLE IF NOT EXISTS review_items(
+    id UUID PRIMARY KEY NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    single_choice_question_id UUID REFERENCES single_choice_questions(uuid) ON DELETE CASCADE NULL,
+    multiple_choice_question_id UUID REFERENCES multiple_choice_questions(uuid) ON DELETE CASCADE NULL,
+    true_or_false_question_id UUID REFERENCES true_or_false_questions(uuid) ON DELETE CASCADE NULL,
+    CHECK (
+        (single_choice_question_id IS NOT NULL)::int +
+        (multiple_choice_question_id IS NOT NULL)::int +
+        (true_or_false_question_id IS NOT NULL)::int = 1
+    ),
+    ease_factor FLOAT NOT NULL,
+    difficulty FLOAT NOT NULL,
+    streak INT NOT NULL,
+    next_review_date TIMESTAMP NOT NULL,
+    interval_in_minutes INT NOT NULL
+);
+CREATE INDEX idx_review_items_user_id ON review_items(user_id);
+CREATE INDEX idx_review_items_single_choice_question_id ON review_items(single_choice_question_id);
+CREATE INDEX idx_review_items_multiple_choice_question_id ON review_items(multiple_choice_question_id);
+CREATE INDEX idx_review_items_true_or_false_question_id ON review_items(true_or_false_question_id);

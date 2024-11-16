@@ -42,3 +42,16 @@ type QuizResulPageViewModel struct {
 type QuizHistoryPageViewModel struct {
 	QuizHistoryEntries []business.QuizHistoryEntry
 }
+
+type LearnPageViewModel struct {
+	TotalQuestions    int
+	QuestionsToReview int
+}
+
+type QuizReviewPageViewModel struct {
+	CurrentReviewItemID       string
+	SingleChoiceQuestion      *business.SingleChoiceQuestion
+	MultipleChoiceQuestion    *business.MultipleChoiceQuestion
+	TrueOrFalseChoiceQuestion *business.TrueOrFalseQuestion
+	HasNextReviewItem         bool
+}
