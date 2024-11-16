@@ -66,15 +66,20 @@ func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 		return nil, fmt.Errorf("nil question ID")
 	}
 
+	now := time.Now().UTC()
+	nextReviewDateUTC := r.NextReviewDate.Time.UTC()
+
+	fmt.Printf("\n\nNextReviewDate: %+v\nNow: %+v\n\n\n", nextReviewDateUTC, now)
+
 	return &business.ReviewItem{
 		ID:           r.ID,
 		QuizName:     r.QuizName,
 		QuestionName: r.QuestionName,
 		QuestionID:   questionID,
-		NextReview:   r.NextReviewDate.Time,
+		NextReview:   nextReviewDateUTC,
 		Difficulty:   r.Difficulty,
 		Streak:       int(r.Streak),
-		NeedToReview: r.NextReviewDate.Time.Before(time.Now()),
+		NeedToReview: nextReviewDateUTC.Before(now),
 	}, nil
 }
 func (r *ReviewItemQuestionResponseBody) MapToBusiness() (*business.ReviewItemQuestionData, error) {

@@ -238,7 +238,7 @@ func createSingleChoiceReviewItem(ctx context.Context, userID, questionID string
 			Difficulty:             constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                 constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now().Add(-1 * time.Hour),
+				Time:             time.Now().UTC(),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},
@@ -274,7 +274,7 @@ func createMultipleChoiceReviewItem(ctx context.Context, userID, questionID stri
 			Difficulty:               constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                   constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now().Add(-1 * time.Hour),
+				Time:             time.Now().UTC(),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},
@@ -310,7 +310,7 @@ func createTrueOrFalseReviewItem(ctx context.Context, userID, questionID string)
 			Difficulty:            constants.REVIEW_ITEM_DIFFICULTY_DEFAULT,
 			Streak:                constants.REVIEW_ITEM_STREAK_DEFAULT,
 			NextReviewDate: pgtype.Timestamp{
-				Time:             time.Now().Add(-1 * time.Hour),
+				Time:             time.Now().UTC(),
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
 			},

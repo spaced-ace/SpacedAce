@@ -261,7 +261,8 @@ func handleReviewPage(c echo.Context) error {
 	reviewItemQuestion, err := cc.ApiService.GetReviewItemQuestion(reviewItemID)
 	if err != nil {
 		log.Default().Print(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		c.Response().Header().Set("HX-Replace-Url", "/learn")
+		return c.Redirect(http.StatusFound, "/learn")
 	}
 
 	hasNextReviewItem := reviewItemID == "" // reviewItemID is empty, when is /review-items/review-all called

@@ -241,14 +241,7 @@ func GetMultipleChoiceEndpoint(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.MultipleChoiceQuestion{
-		ID:             q.UUID,
-		QuizID:         q.QuizID,
-		QuestionType:   models.MultipleChoice,
-		Question:       q.Question,
-		Answers:        q.Answers,
-		CorrectAnswers: q.CorrectAnswers,
-	}
+	result := q.MapToModel()
 	return c.JSON(http.StatusOK, &result)
 }
 
@@ -265,15 +258,8 @@ func GetSingleChoiceEndpoint(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.SingleChoiceQuestion{
-		ID:            q.UUID,
-		QuizID:        q.QuizID,
-		QuestionType:  models.SingleChoice,
-		Question:      q.Question,
-		Answers:       q.Answers,
-		CorrectAnswer: q.CorrectAnswer,
-	}
-	return c.JSON(http.StatusOK, &result)
+	result := q.MapToModel()
+	return c.JSON(http.StatusOK, result)
 }
 
 func GetTrueOrFalseEndpoint(c echo.Context) error {
@@ -289,14 +275,8 @@ func GetTrueOrFalseEndpoint(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.TrueOrFalseQuestion{
-		ID:            q.UUID,
-		QuizID:        q.QuizID,
-		QuestionType:  models.TrueOrFalse,
-		Question:      q.Question,
-		CorrectAnswer: q.CorrectAnswer,
-	}
-	return c.JSON(http.StatusOK, &result)
+	result := q.MapToModel()
+	return c.JSON(http.StatusOK, result)
 }
 
 func UpdateMultipleChoiceQuestionEndpoint(c echo.Context) error {
@@ -339,15 +319,8 @@ func UpdateMultipleChoiceQuestionEndpoint(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.MultipleChoiceQuestion{
-		ID:             questionToUpdate.UUID,
-		QuizID:         questionToUpdate.QuizID,
-		QuestionType:   models.MultipleChoice,
-		Question:       questionToUpdate.Question,
-		Answers:        questionToUpdate.Answers,
-		CorrectAnswers: questionToUpdate.CorrectAnswers,
-	}
-	return c.JSON(http.StatusOK, &result)
+	result := questionToUpdate.MapToModel()
+	return c.JSON(http.StatusOK, result)
 }
 
 func UpdateSingleChoiceQuestionEndpoint(c echo.Context) error {
@@ -389,14 +362,7 @@ func UpdateSingleChoiceQuestionEndpoint(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.SingleChoiceQuestion{
-		ID:            questionToUpdate.UUID,
-		QuizID:        questionToUpdate.QuizID,
-		QuestionType:  models.SingleChoice,
-		Question:      questionToUpdate.Question,
-		Answers:       questionToUpdate.Answers,
-		CorrectAnswer: questionToUpdate.CorrectAnswer,
-	}
+	result := questionToUpdate.MapToModel()
 	return c.JSON(http.StatusOK, &result)
 }
 
@@ -434,13 +400,8 @@ func UpdateTrueOrFalseQuestionEndpoint(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	result := models.TrueOrFalseQuestion{
-		ID:            questionToUpdate.UUID,
-		QuizID:        questionToUpdate.QuizID,
-		Question:      questionToUpdate.Question,
-		CorrectAnswer: questionToUpdate.CorrectAnswer,
-	}
-	return c.JSON(http.StatusOK, &result)
+	result := questionToUpdate.MapToModel()
+	return c.JSON(http.StatusOK, result)
 }
 
 func DeleteMultipleChoiceQuestionEndpoint(c echo.Context) error {

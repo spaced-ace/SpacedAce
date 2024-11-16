@@ -3,12 +3,17 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
+	"log"
+	"math"
 	"net/http"
+	"slices"
 	"spaced-ace-backend/api/models"
 	"spaced-ace-backend/auth"
 	"spaced-ace-backend/constants"
+	"spaced-ace-backend/db"
 	"spaced-ace-backend/question"
 	"spaced-ace-backend/utils"
 	"strings"
@@ -196,7 +201,21 @@ func GetReviewItemQuestion(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting enough review items for user with ID %q: %w\n", sessionUserID, err))
 		}
 
-		reviewItem, err = models.MapReviewItemFromReviewItemsRow(dbReviewItems[0])
+		var reviewItemToDue *db.GetReviewItemsRow
+
+		now := time.Now().UTC()
+		for _, item := range dbReviewItems {
+			if item.NextReviewDate.Time.UTC().Before(now) {
+				reviewItemToDue = item
+				break
+			}
+		}
+
+		if reviewItemToDue == nil {
+			return echo.NewHTTPError(http.StatusNotFound, fmt.Errorf("getting review item to due"))
+		}
+
+		reviewItem, err = models.MapReviewItemFromReviewItemsRow(reviewItemToDue)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item: %w\n", err))
 		}
@@ -276,8 +295,8 @@ func PostSubmitReviewItemQuestion(c echo.Context) error {
 
 	reviewItemID := c.Param("reviewItemID")
 
-	request := new(models.SubmitReviewItemQuestionRequestBody)
-	if err = json.NewDecoder(c.Request().Body).Decode(request); err != nil {
+	answers := new(models.SubmitReviewItemQuestionRequestBody)
+	if err = json.NewDecoder(c.Request().Body).Decode(answers); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("parsing submit review item question request body: %w\n", err))
 	}
 
@@ -295,8 +314,144 @@ func PostSubmitReviewItemQuestion(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("mapping review item with ID %q: %w\n", reviewItemID, err))
 	}
 
-	fmt.Printf("do something with %+v\n", reviewItem)
-	// TODO get question, calculate the score with the answer and update the review item
+	score, err := calculateReviewItemScore(reviewItem, answers)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("calculating score for review item with ID %q: %w\n", reviewItemID, err))
+	}
 
-	return c.JSON(http.StatusOK, reviewItem) // TODO return the updated review item
+	updatedReviewItem, err := applySpacedRepetitionAndStore(ctx, reviewItem, score)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("applying spaced repetition on review item with ID %q: %w\n", reviewItemID, err))
+	}
+
+	return c.JSON(http.StatusOK, updatedReviewItem)
+}
+
+func calculateReviewItemScore(reviewItem *models.ReviewItem, answers *models.SubmitReviewItemQuestionRequestBody) (float64, error) {
+	if reviewItem.SingleChoiceQuestionID != nil {
+		dbQuestion, err := question.GetSingleChoiceQuestion(*reviewItem.SingleChoiceQuestionID)
+		if err != nil {
+			return 0, fmt.Errorf("getting single choice question with ID %q: %w\n", *reviewItem.SingleChoiceQuestionID, err)
+		}
+		modelQuestion := dbQuestion.MapToModel()
+
+		score, err := calculateReviewItemSingleChoiceQuestionScore(*modelQuestion, answers.SingleChoiceValue)
+		if err != nil {
+			return 0, fmt.Errorf("calculating single choice question score for review item with ID %q: %w\n", reviewItem.ID, err)
+		}
+		return score, nil
+	}
+	if reviewItem.MultipleChoiceQuestionID != nil {
+		dbQuestion, err := question.GetMultipleChoiceQuestion(*reviewItem.MultipleChoiceQuestionID)
+		if err != nil {
+			return 0, fmt.Errorf("getting multiple choice question with ID %q: %w\n", *reviewItem.MultipleChoiceQuestionID, err)
+		}
+		modelQuestion := dbQuestion.MapToModel()
+
+		score, err := calculateReviewItemMultipleChoiceQuestionScore(*modelQuestion, answers.MultipleChoiceValue)
+		if err != nil {
+			return 0, fmt.Errorf("calculating multiple choice question score for review item with ID %q: %w\n", reviewItem.ID, err)
+		}
+		return score, nil
+	}
+	if reviewItem.TrueOrFalseQuestionID != nil {
+		dbQuestion, err := question.GetTrueOrFalseQuestion(*reviewItem.TrueOrFalseQuestionID)
+		if err != nil {
+			return 0, fmt.Errorf("getting true or false question with ID %q: %w\n", *reviewItem.TrueOrFalseQuestionID, err)
+		}
+		modelQuestion := dbQuestion.MapToModel()
+
+		score, err := calculateReviewItemTrueOrFalseQuestionScore(*modelQuestion, answers.TrueOrFalseValue)
+		if err != nil {
+			return 0, fmt.Errorf("calculating true or false question score for review item with ID %q: %w\n", reviewItem.ID, err)
+		}
+		return score, nil
+	}
+
+	log.Default().Printf("none of the questions were actually answered, additional check may be needed")
+	return 0, nil
+}
+func calculateReviewItemSingleChoiceQuestionScore(singleChoiceQuestion models.SingleChoiceQuestion, answer string) (float64, error) {
+	if singleChoiceQuestion.CorrectAnswer == answer {
+		return 1.0, nil
+	}
+	return 0, nil
+}
+func calculateReviewItemMultipleChoiceQuestionScore(multipleChoiceQuestion models.MultipleChoiceQuestion, answers []string) (float64, error) {
+	positiveScore := 1.0 / float64(len(multipleChoiceQuestion.CorrectAnswers))
+	negativeScore := 1.0 / float64(4-len(multipleChoiceQuestion.CorrectAnswers))
+
+	score := 0.0
+	for _, correctAnswer := range multipleChoiceQuestion.CorrectAnswers {
+		if slices.Contains(answers, correctAnswer) {
+			score += positiveScore
+		} else {
+			score -= negativeScore
+		}
+	}
+	if score <= 0.0 {
+		score = 0
+	}
+	return score, nil
+}
+func calculateReviewItemTrueOrFalseQuestionScore(trueOrFalseQuestion models.TrueOrFalseQuestion, answer bool) (float64, error) {
+	if trueOrFalseQuestion.CorrectAnswer == answer {
+		return 1.0, nil
+	}
+	return 0, nil
+}
+
+func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.ReviewItem, percentage float64) (*models.ReviewItem, error) {
+	// score is the user's performance rating, where:
+	// 5 = perfect recall, 4 = correct with minor hesitation, 3 = correct but difficult,
+	// 2 = incorrect, but partially remembered, 1 = completely incorrect
+	score := 5 * percentage
+
+	if score >= 3 {
+		reviewItem.Difficulty = math.Max(1, reviewItem.Difficulty-1)
+
+		if reviewItem.Streak == 0 {
+			reviewItem.IntervalInMinutes = 60
+		} else if reviewItem.Streak == 1 {
+			reviewItem.IntervalInMinutes = 3 * 60
+		} else {
+			reviewItem.IntervalInMinutes = int32(float64(reviewItem.IntervalInMinutes) * reviewItem.EaseFactor * (1 / reviewItem.Difficulty))
+		}
+
+		reviewItem.EaseFactor = reviewItem.EaseFactor + (0.1 - (5-score)*0.08)
+		reviewItem.Streak = reviewItem.Streak + 1
+	} else {
+		reviewItem.Difficulty = math.Min(5, reviewItem.Difficulty+1.5)
+
+		reviewItem.IntervalInMinutes = 60
+
+		reviewItem.EaseFactor = math.Max(1.3, reviewItem.EaseFactor-0.2)
+		reviewItem.Streak = 0
+	}
+
+	reviewItem.NextReviewDate = models.NullableTime{
+		Time: reviewItem.NextReviewDate.Time.Add(time.Duration(reviewItem.IntervalInMinutes) * time.Minute),
+	}
+
+	sqlcQuerier := utils.GetQuerier()
+	err := sqlcQuerier.UpdateReviewItem(
+		ctx,
+		db.UpdateReviewItemParams{
+			ID:         reviewItem.ID,
+			EaseFactor: reviewItem.EaseFactor,
+			Difficulty: reviewItem.Difficulty,
+			Streak:     reviewItem.Streak,
+			NextReviewDate: pgtype.Timestamp{
+				Time:             reviewItem.NextReviewDate.Time,
+				InfinityModifier: pgtype.Finite,
+				Valid:            true,
+			},
+			IntervalInMinutes: reviewItem.IntervalInMinutes,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("storing updated review item with ID %q: %w\n", reviewItem.ID, err)
+	}
+
+	return reviewItem, nil
 }
