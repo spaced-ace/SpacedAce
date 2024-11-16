@@ -39,6 +39,7 @@ RUN templ generate
 COPY --from=tailwind /workdir/static static
 COPY static/images static/images
 COPY static/icons static/icons
+COPY static/htmx.min.js static/htmx.min.js
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go
 
