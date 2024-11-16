@@ -59,6 +59,7 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
 		<form
+			action=""
 			class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5"
 		>
 			for index, option := range props.Question.Options {
@@ -153,6 +154,7 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
 		<form
+			action=""
 			if props.QuizSession != nil && props.AnswerScore == nil {
 				hx-put={ fmt.Sprintf(`/quiz-sessions/%s/answers`, props.QuizSession.Id) }
 				hx-vals={ fmt.Sprintf(`js:{ "questionId": "%s", "answerType": "multiple-choice" }`, props.Question.Id) }
@@ -248,7 +250,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
-		<form class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
+		<form action="" class="flex w-full flex-col overflow-auto whitespace-normal rounded-md border border-gray-200 p-2 text-lg gap-y-0.5">
 			<label
 				if props.Answer != nil {
 					if props.Answer.Answer != nil && props.Question.Answer == *props.Answer.Answer && props.Question.Answer {
