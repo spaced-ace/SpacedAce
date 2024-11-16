@@ -9,6 +9,27 @@ templ HtmlLayout() {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>Spaced Ace</title>
 			<script src="/static/htmx.min.js"></script>
+            <script>
+                function getEscapedContext() {
+                    const contextElement = document.getElementById('context');
+                    if (!contextElement) return '';
+
+                    const context = contextElement.value || '';
+                    // Check if the string is already escaped
+                    if (context.includes('\\n') || context.includes('\\t') || context.includes('\\"')) {
+                        return context;
+                    }
+
+                    const escapedText = context
+                        .replace(/\\/g, "\\\\")  // Escape backslashes
+                        .replace(/"/g, '\\"')    // Escape double quotes
+                        .replace(/\n/g, "\\n")   // Escape newlines
+                        .replace(/\r/g, "\\r")   // Escape carriage returns
+                        .replace(/\t/g, "\\t");  // Escape tabs
+
+                    return escapedText;
+                }
+            </script>
 		</head>
 		<body
 			hx-boost="true"

@@ -25,7 +25,7 @@ templ GenerateQuestionForm(hasPlaceholderQuestion bool, questionComponent templ.
 			Value:       values.Context,
 			Error:       errors["context"],
 		})
-		<input type="hidden" name="quizId" value={ values.QuizId }/>
+		<input type="hidden" id="quizId" name="quizId" value={ values.QuizId }/>
 		if errors["other"] != "" {
 			<span class="w-full py-4 text-red-500 text-nowrap">{ errors["other"] }</span>
 		}
@@ -67,7 +67,7 @@ templ GenerateQuestionForm(hasPlaceholderQuestion bool, questionComponent templ.
 			<div
 				id="placeholder-question"
 				hx-post="/generate"
-				hx-vals={ fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s", "context": "%s" }`, values.QuizId, values.QuestionType, values.Context) }
+				hx-vals={ fmt.Sprintf(`js:{ "quizId": "%s", "questionType": "%s", "context": getEscapedContext() }`, values.QuizId, values.QuestionType) }
 				hx-trigger="load"
 				hx-target="#generate-question-form"
 				hx-swap="outerHTML"

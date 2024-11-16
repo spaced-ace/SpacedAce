@@ -40,7 +40,7 @@ type trueOrFalseResponse struct {
 
 type textChunk struct {
 	Id   string `json:"id"`
-	Text string `json:"text"`
+	Text string `json:"chunk"`
 }
 
 type prompt struct {
