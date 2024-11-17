@@ -76,6 +76,7 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - spacedace-db:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - spaced_ace_network
 
