@@ -9,5 +9,5 @@ type SignupForm struct {
 	Email         string `form:"email"`
 	Name          string `form:"name"`
 	Password      string `form:"password"`
-	PasswordAgain string `form:"passwordAgain"`
+	PasswordAgain string `form:"password_again"`
 }
