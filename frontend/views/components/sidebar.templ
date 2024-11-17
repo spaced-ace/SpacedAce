@@ -21,8 +21,7 @@ templ SideBar(props SidebarProps) {
 			class="flex w-full items-center gap-x-4 px-2"
 		>
 			<div class="h-16 w-16 flex-shrink-0 rounded-md border bg-gray-400"></div>
-			<span class="text-lg font-semibold text-nowrap">{ props.Username }</span>
-			<div class="w-full"></div>
+			<span class="min-w-0 flex-1 truncate text-lg font-semibold">{ props.Username }</span>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -55,7 +54,7 @@ templ SideBar(props SidebarProps) {
 						hx-push-url="false"
 						class="flex w-full flex-shrink-0 cursor-pointer items-center gap-x-2 rounded-md px-2 py-1 group hover:bg-gray-200"
 					>
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 group-hover:fill-black flex-shrink-0">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex-shrink-0 size-5 group-hover:fill-black">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"></path>
 						</svg>
 						<span class="text-ellipsis text-base font-medium">{ q.Title }</span>

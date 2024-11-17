@@ -184,7 +184,7 @@ func handleGenerateQuestion(c echo.Context) error {
 					200,
 					forms.GenerateQuestionForm(
 						false,
-						nil,
+						components.QuestionPlaceholderRemover(),
 						requestForm,
 						errors,
 					),
@@ -219,7 +219,7 @@ func handleGenerateQuestion(c echo.Context) error {
 					200,
 					forms.GenerateQuestionForm(
 						false,
-						nil,
+						components.QuestionPlaceholderRemover(),
 						requestForm,
 						errors,
 					),
@@ -254,7 +254,7 @@ func handleGenerateQuestion(c echo.Context) error {
 					200,
 					forms.GenerateQuestionForm(
 						false,
-						nil,
+						components.QuestionPlaceholderRemover(),
 						requestForm,
 						errors,
 					),
