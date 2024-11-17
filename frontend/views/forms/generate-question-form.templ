@@ -63,7 +63,7 @@ templ GenerateQuestionForm(hasPlaceholderQuestion bool, questionComponent templ.
 		</div>
 	</form>
 	if hasPlaceholderQuestion {
-		<div hx-swap-oob="beforeend:#questions">
+		<div hx-swap-oob="afterbegin:#questions">
 			<div
 				id="placeholder-question"
 				hx-post="/generate"

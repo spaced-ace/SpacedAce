@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
+	"slices"
 	"spaced-ace/constants"
 	"spaced-ace/models"
 	"spaced-ace/models/business"
@@ -137,6 +138,9 @@ func (a *ApiService) GetQuiz(quizId string) (*business.Quiz, error) {
 			questions = append(questions, question)
 		}
 	}
+
+	// Reverse the order of questions
+	slices.Reverse(questions)
 
 	quiz := &business.Quiz{
 		QuizInfo: business.QuizInfo{
