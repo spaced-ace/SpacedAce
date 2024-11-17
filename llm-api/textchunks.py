@@ -2,12 +2,12 @@ import asyncpg
 import uuid
 from models import TextChunk
 from returns.result import Result, Success, Failure
-from langchain_text_splitters import CharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-text_splitter = CharacterTextSplitter(
-    separator='\n\n',
-    chunk_size=1000,
-    chunk_overlap=200,
+text_splitter = RecursiveCharacterTextSplitter(
+    separators=['\n\n', '\n', '.', ' ', ''],
+    chunk_size=500,
+    chunk_overlap=100,
     length_function=len,
     is_separator_regex=False,
 )
