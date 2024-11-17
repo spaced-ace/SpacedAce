@@ -37,7 +37,7 @@ MULTI_EXAMPLE_EN = """
         "It has been awarded since 1901.",
         "It is given for outstanding work in the field of literature."
         ],
-    "solutions": ["A", "C", "D"]
+    "solution": ["A", "C", "D"]
 }"""
 SINGLE_EXAMPLE_EN = """
 {

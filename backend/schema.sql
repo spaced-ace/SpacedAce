@@ -1,4 +1,11 @@
 -- Non-SQLc schemas
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    password TEXT
+);
+CREATE INDEX IF NOT EXISTS users_email ON users(email);
 
 CREATE TABLE IF NOT EXISTS quizzes(
     id UUID PRIMARY KEY,
@@ -39,14 +46,6 @@ CREATE TABLE IF NOT EXISTS true_or_false_questions (
 );
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;
-
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY,
-    name TEXT,
-    email TEXT,
-    password TEXT
-);
-CREATE INDEX IF NOT EXISTS users_email ON users(email);
 
 CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
     id UUID PRIMARY KEY,
