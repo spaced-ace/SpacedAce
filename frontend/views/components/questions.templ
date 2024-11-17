@@ -331,6 +331,10 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 	</div>
 }
 
+templ QuestionPlaceholderRemover() {
+	<div hx-swap-oob="delete:#placeholder-question"></div>
+}
+
 func isSingleChoiceAnswerSelected(index int, answerLetter string) bool {
 	return (index == 0 && answerLetter == "A") || (index == 1 && answerLetter == "B") || (index == 2 && answerLetter == "C") || (index == 3 && answerLetter == "D")
 }
