@@ -526,12 +526,13 @@ func manageChunking(userPrompt string) (*textChunk, error) {
 		cache[hash] = existingCacheEntry
 	}
 	var chunkToUse textChunk
-	if existingCacheEntry.IndexLastUsed <= len(*existingCacheEntry.chunks)-1 {
+	if existingCacheEntry.IndexLastUsed < len(*existingCacheEntry.chunks)-1 {
 		chunkToUse = (*existingCacheEntry.chunks)[existingCacheEntry.IndexLastUsed+1]
+		existingCacheEntry.IndexLastUsed++
 	} else {
 		chunkToUse = (*existingCacheEntry.chunks)[0]
+		existingCacheEntry.IndexLastUsed = 0
 	}
-	existingCacheEntry.IndexLastUsed++
 	cache[hash] = existingCacheEntry
 	return &chunkToUse, nil
 }
