@@ -22,16 +22,22 @@ templ SideBar(props SidebarProps) {
 		>
 			<div class="h-16 w-16 flex-shrink-0 rounded-md border bg-gray-400"></div>
 			<span class="min-w-0 flex-1 truncate text-lg font-semibold">{ props.Username }</span>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="flex-shrink-0 size-6"
+			<div
+				hx-post="/logout"
+				hx-target="body"
+				class="hover:bg-gray-100 rounded-md p-2 cursor-pointer"
 			>
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"></path>
-			</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="flex-shrink-0 size-6"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"></path>
+				</svg>
+			</div>
 		</div>
 		<hr class="w-full"/>
 		@SideBarMenu("", false)
