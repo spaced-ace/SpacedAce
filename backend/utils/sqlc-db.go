@@ -2,18 +2,17 @@ package utils
 
 import (
 	"fmt"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/net/context"
 	"log"
 	"os"
 	"spaced-ace-backend/db"
 	"sync"
-	"time"
 )
 
 type SQLCQuerier struct {
 	*db.Queries
-	conn *pgx.Conn
+	connPool *pgxpool.Pool
 }
 
 var (
@@ -57,30 +56,30 @@ func newSQLCQuerier() *SQLCQuerier {
 
 	connectionString := fmt.Sprintf("user=%s dbname=%s password=%s host=%s port=%s sslmode=disable", user, dbname, password, host, port)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	conn, err := pgx.Connect(ctx, connectionString)
+	config, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v", err)
+		log.Fatalf("Unable to parse database URL: %v", err)
+	}
+
+	// Create a connection pool
+	connPool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
 	}
 
 	return &SQLCQuerier{
-		Queries: db.New(conn),
-		conn:    conn,
+		Queries:  db.New(connPool),
+		connPool: connPool,
 	}
 }
 
-func (q *SQLCQuerier) Close(ctx context.Context) error {
+func (q *SQLCQuerier) Close() error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if q.conn != nil {
-		err := q.conn.Close(ctx)
-		if err != nil {
-			return err
-		}
-		q.conn = nil
+	if q.connPool != nil {
+		q.connPool.Close() // Close the connection pool
+		q.connPool = nil
 		instance = nil // Allow for re-initialization if needed
 	}
 	return nil
@@ -90,9 +89,16 @@ func (q *SQLCQuerier) IsConnected(ctx context.Context) bool {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if q.conn == nil {
+	if q.connPool == nil {
 		return false
 	}
 
-	return q.conn.Ping(ctx) == nil
+	// Try acquiring a connection and immediately releasing it
+	conn, err := q.connPool.Acquire(ctx)
+	if err != nil {
+		return false
+	}
+	defer conn.Release()
+
+	return true
 }

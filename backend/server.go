@@ -27,9 +27,7 @@ func main() {
 	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	defer func() {
-		closeCtx, closeCancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer closeCancel()
-		if err := sqlcQuerier.Close(closeCtx); err != nil {
+		if err := sqlcQuerier.Close(); err != nil {
 			log.Printf("Error closing database connection: %v", err)
 		}
 	}()
