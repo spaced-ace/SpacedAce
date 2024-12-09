@@ -83,8 +83,6 @@ func GetQuizHistoryEntries(c echo.Context) error {
 
 			timeSpent := time.Duration(0)
 			if result.FinishedAt.Valid {
-				fmt.Printf("Finished: %v", result.FinishedAt)
-				fmt.Printf("Started: %v", result.StartedAt)
 				timeSpent = result.FinishedAt.Time.Sub(result.StartedAt.Time)
 			}
 
