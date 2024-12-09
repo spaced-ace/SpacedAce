@@ -14,7 +14,7 @@ COPY static/main.css static/main.css
 RUN npx tailwindcss -i ./static/main.css -o ./static/tailwindcss.css
 
 
-FROM golang:1.22
+FROM golang:1.22 as go-build
 
 WORKDIR /app
 
@@ -36,16 +36,24 @@ COPY views views
 RUN go install github.com/a-h/templ/cmd/templ@latest
 RUN templ generate
 
+RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go
+
+RUN ls
+
+FROM gcr.io/distroless/static-debian12
+
+WORKDIR /workdir
+
+COPY --from=go-build /app/app /workdir/app
+
 COPY --from=tailwind /workdir/static static
 COPY static/images static/images
 COPY static/icons static/icons
 COPY static/htmx.min.js static/htmx.min.js
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go
 
 EXPOSE 80
 
 ENV PORT=80
 
 # Run
-CMD ["./app"]
+CMD ["/workdir/app"]

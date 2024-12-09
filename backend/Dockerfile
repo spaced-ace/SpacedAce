@@ -1,4 +1,4 @@
-FROM golang:1.22
+FROM golang:1.22 as go-build
 
 WORKDIR /app
 
@@ -13,9 +13,15 @@ RUN sqlc generate
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app server.go
 
+FROM gcr.io/distroless/static-debian12
+
+WORKDIR /workdir
+
+COPY --from=go-build /app/app /workdir/app
+
 EXPOSE 80
 
 ENV PORT=80
 
 # Run
-CMD ["./app"]
+CMD ["/workdir/app"]
