@@ -17,11 +17,6 @@ templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
 				},
 			})
 		</div>
-		@components.SearchBar(components.SearchBarProps{
-			Name:        "query",
-			Placeholder: "Search...",
-			HxPost:      "/my-exams",
-		})
 		@components.QuizList(components.QuizListProps{
 			QuizInfoWithColors:     viewModel.QuizInfosWithColors,
 			AllowEdit:              true,
