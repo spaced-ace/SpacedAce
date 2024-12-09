@@ -1,20 +1,26 @@
 package components
 
-templ IndexPageFeature(name, description string, reversed bool) {
+import "fmt"
+
+templ IndexPageFeature(name, description, imageName string, reversed bool) {
 	<div
 		if reversed {
-			class="flex gap-x-8 w-[1000px] flex-row-reverse"
+			class="flex flex-row-reverse gap-x-8 w-[1000px]"
 		} else {
 			class="flex gap-x-8 w-[1000px]"
 		}
 	>
-		<div class="flex flex-col gap-y-4 justify-center">
-			<div class="flex gap-x-2 items-center">
+		<div class="flex flex-col justify-center gap-y-4">
+			<div class="flex items-center gap-x-2">
 				{ children... }
-				<span class="font-bold text-2xl">{ name }</span>
+				<span class="text-2xl font-bold">{ name }</span>
 			</div>
 			<span>{ description }</span>
 		</div>
-		<div class="flex-shrink-0 h-[400px] w-[600px] bg-gray-400"></div>
+		<img
+			src={ fmt.Sprintf("/static/images/%s.png", imageName) }
+			alt={ imageName }
+			class="flex-shrink-0 rounded-md object-center shadow-md h-[400px] w-[600px]"
+		/>
 	</div>
 }
