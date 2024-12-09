@@ -272,7 +272,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				<input
 					type="radio"
 					name="answer"
-					if props.Question.Answer {
+					if props.Question.Answer && props.AllowDeleting {
 						checked
 					}
 					if props.AllowDeleting || props.AnswerScore != nil {
@@ -310,7 +310,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				<input
 					type="radio"
 					name="answer"
-					if !props.Question.Answer {
+					if !props.Question.Answer && props.AllowDeleting {
 						checked
 					}
 					if props.AllowDeleting || props.AnswerScore != nil {
