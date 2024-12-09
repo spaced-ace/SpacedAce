@@ -77,26 +77,33 @@ func GetQuizHistoryEntries(c echo.Context) error {
 					break
 				}
 			}
-			if result == nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("quiz result not found for quiz session with ID `%s`", quizSession.ID))
-			}
 
 			timeSpent := time.Duration(0)
-			if result.FinishedAt.Valid {
-				timeSpent = result.FinishedAt.Time.Sub(result.StartedAt.Time)
-			}
-
 			percentage := 0.0
-			if result.MaxScore != 0.0 {
-				percentage = result.Score / result.MaxScore * 100
+
+			if result == nil {
+				quizResult, err := calculateAndStoreQuizResult(ctx, quizSession.ID, quizSession.QuizID)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, "error calculating the quiz result: "+err.Error())
+				}
+
+				timeSpent = quizSession.FinishedAt.Time.Sub(quizSession.StartedAt.Time)
+				percentage = quizResult.Score / quizResult.MaxScore * 100
+			} else {
+				if result.FinishedAt.Valid {
+					timeSpent = result.FinishedAt.Time.Sub(result.StartedAt.Time)
+				}
+				if result.MaxScore != 0.0 {
+					percentage = result.Score / result.MaxScore * 100
+				}
 			}
 
 			quizHistoryEntries = append(quizHistoryEntries, models.QuizHistoryEntry{
 				QuizID:          quizSession.QuizID,
-				QuizName:        quizNameMap[result.QuizID],
-				SessionID:       result.SessionID,
-				Finished:        result.FinishedAt.Valid,
-				DateTaken:       result.StartedAt.Time,
+				QuizName:        quizNameMap[quizSession.QuizID],
+				SessionID:       quizSession.ID,
+				Finished:        quizSession.FinishedAt.Valid,
+				DateTaken:       quizSession.StartedAt.Time,
 				TimeSpent:       timeSpent,
 				ScorePercentage: percentage,
 			})

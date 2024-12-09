@@ -79,7 +79,7 @@ func StartQuizSession(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error closing quiz session: %s", openQuizSession.ID))
 		}
-		log.Default().Printf("quiz session closed: %s", openQuizSession.ID)
+		log.Default().Printf("quiz session closed: %s\n", openQuizSession.ID)
 	}
 
 	// Start a new quiz session
