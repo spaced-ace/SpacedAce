@@ -20,7 +20,7 @@ templ LoginForm(errors map[string]string) {
 			Error:       errors["password"],
 		})
 		@components.Button(components.ButtonProps{
-			Text: "Submit",
+			Text: "Login",
 			Type: "submit",
 		})
 		@components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)
