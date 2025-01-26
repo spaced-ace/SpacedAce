@@ -677,3 +677,6 @@ func handleQuizPreviewPopup(c echo.Context) error {
 func handleClosePopup(c echo.Context) error {
 	return c.NoContent(200)
 }
+func handleDrawerPopup(c echo.Context) error {
+	return render.TemplRender(c, 200, components.NavbarDrawerPopup())
+}

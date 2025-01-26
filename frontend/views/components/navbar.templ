@@ -2,15 +2,36 @@ package components
 
 templ Navbar() {
 	<nav
+		id="desktop-navbar"
 		hx-push-url="true"
 		hx-boost="false"
-		class="sticky top-0 flex w-full justify-center"
+		class="hidden sticky top-0 sm:flex w-full justify-center"
 	>
 		<div class="flex h-16 w-full gap-x-2 px-2 items-center max-w-[1440px] bg-white">
 			@Logo()
 			<div class="w-full"></div>
 			@LinkLabel("Login", "/login")
 			@LinkButton("Sign up", "/signup", ButtonColorBlack)
+		</div>
+	</nav>
+	<nav
+		id="mobile-navbar"
+		hx-push-url="true"
+		hx-boost="false"
+		class="sticky top-0 flex sm:hidden w-full shadow-sm"
+	>
+		<div class="flex h-16 w-full gap-x-2 px-4 items-center max-w-[1440px] bg-white">
+			@Logo()
+			<div class="w-full"></div>
+			<div
+				hx-get="/drawer-popup"
+				hx-target="#popup-container"
+				hx-push-url="false"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+				</svg>
+			</div>
 		</div>
 	</nav>
 }
