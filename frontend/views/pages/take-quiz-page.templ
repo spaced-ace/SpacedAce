@@ -7,7 +7,7 @@ import (
 )
 
 templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
-	<main class="flex h-full w-full flex-col gap-y-4 p-6">
+	<main class="flex h-dvh sm:h-full w-full flex-col gap-y-4 p-6 overflow-auto">
 		<div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
 			<span
 				hx-get="/my-quizzes"
@@ -28,10 +28,10 @@ templ TakeQuizPage(viewModel TakeQuizPageViewModel) {
 			</span>
 		</div>
 		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
-			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
+			<div id="information" class="flex w-full flex-col gap-y-2 sm:gap-y-4 rounded-md border border-gray-300 p-4 sm:p-6">
 				<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
 				<span class="text-base text-gray-400">{ viewModel.Quiz.Description }</span>
-				<div class="h-4 w-full"></div>
+				<div class="h-2 sm:h-4 w-full"></div>
 				<div class="flex w-full items-center">
 					<span class="w-full text-sm">
 						<span class="font-semibold">Started:</span>

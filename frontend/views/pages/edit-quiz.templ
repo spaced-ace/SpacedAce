@@ -59,7 +59,7 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
 				)
 				<div
 					id="questions"
-					class="flex w-[700px] flex-col gap-y-2"
+					class="flex w-full sm:w-[700px] flex-col gap-y-2"
 				>
 					for _, q := range viewModel.Quiz.Questions {
 						switch question := q.(type) {
@@ -90,6 +90,7 @@ templ EditQuizPage(viewModel EditQuizPageViewModel) {
 						}
 					}
 				</div>
+				<div class="w-full sm:hidden h-12"></div>
 			</div>
 		</div>
 	</main>
