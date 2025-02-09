@@ -54,7 +54,7 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
@@ -149,7 +149,7 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
@@ -246,7 +246,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>

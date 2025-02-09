@@ -7,7 +7,7 @@ import (
 )
 
 templ QuizResultPage(viewModel QuizResulPageViewModel) {
-	<main class="flex h-full w-full flex-col gap-y-4 p-6">
+	<main class="flex h-full w-full flex-col gap-y-4 overflow-auto p-6">
 		<div id="breadcrumb" class="flex w-full items-center gap-x-1.5">
 			<span
 				hx-get="/my-quizzes"
@@ -28,8 +28,8 @@ templ QuizResultPage(viewModel QuizResulPageViewModel) {
 			</span>
 		</div>
 		<div class="flex w-full flex-col gap-y-4 overflow-y-auto">
-			<div id="information" class="flex w-full flex-col gap-y-4 rounded-md border border-gray-300 p-6">
-				<div class="w-full flex justify-between align-top gap-x-2">
+			<div id="information" class="flex w-full flex-col gap-y-2 rounded-md border border-gray-300 p-4 sm:gap-y-4 sm:p-6">
+				<div class="flex w-full justify-between gap-x-2 align-top">
 					<span class="text-2xl font-bold">{ viewModel.Quiz.Title }</span>
 					if viewModel.QuizResult != nil {
 						<span class="text-xl font-semibold">{ fmt.Sprintf("%g / %g (%.2f%%)", viewModel.QuizResult.Score, viewModel.QuizResult.MaxScore, viewModel.QuizResult.Score / viewModel.QuizResult.MaxScore * 100) }</span>

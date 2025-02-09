@@ -147,7 +147,7 @@ templ ReviewItemList(props ReviewItemListProps) {
 				/>
 			</label>
 		</div>
-		<div class="flex w-full flex-col gap-y-8 rounded-md border border-gray-300 p-4 shadow-sm">
+		<div class="flex w-full flex-col gap-y-8 overflow-auto rounded-md border border-gray-300 p-4 shadow-sm">
 			<span class="text-xl font-semibold">Quiz Questions</span>
 			@ReviewItemTable(ReviewItemTableProps{
 				ReviewItems: props.ReviewItems,
