@@ -3,7 +3,7 @@ package pages
 import "spaced-ace/views/components"
 
 templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
-	<main class="flex h-full w-full flex-col gap-y-8 p-6">
+	<main class="flex flex-col gap-y-4 p-6 h-dvh w-dvw sm:h-full sm:w-full sm:gap-y-8">
 		<div class="flex w-full items-center gap-x-2">
 			<span class="text-2xl font-bold text-nowrap">My Quizzes</span>
 			<div class="w-full bg-pink-500"></div>
@@ -23,6 +23,7 @@ templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
 			AllowDelete:            true,
 			AllowManagingLearnList: true,
 		})
+		<div class="h-6 w-full sm:hidden"></div>
 	</main>
 	@components.SideBarMenu("/my-quizzes", true)
 }

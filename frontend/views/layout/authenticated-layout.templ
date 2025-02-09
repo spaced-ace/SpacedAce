@@ -10,7 +10,7 @@ templ AuthenticatedLayout(props AuthenticatedLayoutProps) {
 	@HtmlLayout() {
 		<div
 			id="content-container"
-			class="flex flex-col sm:flex-row h-dvh w-dvw sm:h-full sm:w-full sm:border-r sm:max-w-[1440px]"
+			class="flex flex-col overflow-hidden sm:flex-row h-dvh w-dvw sm:h-full sm:w-full sm:border-r sm:max-w-[1440px]"
 		>
 			<div class="hidden sm:block">
 				@components.SideBar(components.SidebarProps{

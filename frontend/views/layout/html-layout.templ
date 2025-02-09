@@ -6,7 +6,7 @@ templ HtmlLayout() {
 		<head>
 			<link rel="stylesheet" href="/static/tailwindcss.css"/>
 			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 			<title>Spaced Ace</title>
 			<script src="/static/htmx.min.js"></script>
             <script>
@@ -33,7 +33,7 @@ templ HtmlLayout() {
 		</head>
 		<body
 			hx-boost="true"
-			class="h-dvh w-dvw flex justify-center"
+			class="flex justify-center h-dvh w-dvw"
 		>
 			{ children... }
 			<div id="popup-container" class="contents"></div>
