@@ -29,5 +29,5 @@ func main() {
 
 	api.RegisterRoutes(e)
 
-	e.Logger.Fatal(e.Start(":" + constants.PORT))
+	e.Logger.Fatal(e.Start("0.0.0.0" + ":" + constants.PORT))
 }
