@@ -12,11 +12,11 @@ type LearnListPopupProps struct {
 templ LearnListPopup(props LearnListPopupProps) {
 	<div
 		id="learn-list-popup"
-		class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 pl-[130px]"
+		class="fixed top-1/2 -translate-y-1/2 pl-4 z-999 w-dvw sm:pl-[130px] sm:left-1/2 sm:w-auto sm:-translate-x-1/2"
 	>
-		<div class="flex flex-col gap-y-4 rounded-md border border-gray-300 bg-gray-100 p-4 drop-shadow w-[600px] max-h-[400px]">
+		<div class="flex flex-col gap-y-2 sm:gap-y-4 rounded-md border border-gray-300 bg-gray-100 p-4 drop-shadow w-[calc(100dvw-36px)] sm:w-[600px] max-h-[400px]">
 			<div class="flex w-full items-center justify-between">
-				<span class="text-ellipsis text-2xl font-semibold">Manage Learn List</span>
+				<span class="text-ellipsis text-2xl font-semibold">Manage Learning List</span>
 				<div
 					hx-get="/close-popup"
 					hx-target="#popup-container"
@@ -33,7 +33,7 @@ templ LearnListPopup(props LearnListPopupProps) {
 					<span class="font-semibold">Available Quizzes</span>
 					<div class="w-full gap-y-2 overflow-y-auto h-[256px]">
 						for _, item := range props.LearnList.AvailableItems {
-							<div class="flex w-full items-center justify-between py-2">
+							<div class="flex w-full items-center justify-between py-1 sm:py-2">
 								<span>{ item.QuizName }</span>
 								<div
 									hx-post={ fmt.Sprintf("/my-quizzes/learn-list/%s/add", item.QuizID) }
