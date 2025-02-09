@@ -12,7 +12,7 @@ templ UpdateQuizForm(values request.UpdateQuizRequestForm, errors map[string]str
 		hx-push-url="false"
 		hx-swap="outerHTML"
 		hx-vars={ fmt.Sprintf("{'quizId': '%s' }", values.QuizId) }
-		class="flex h-full flex-shrink-0 flex-col justify-start gap-y-4 w-[700px]"
+		class="flex h-full w-full flex-shrink-0 flex-col justify-start gap-y-4 sm:w-[700px]"
 	>
 		@components.TextInput(components.TextInputProps{
 			Name:        "title",

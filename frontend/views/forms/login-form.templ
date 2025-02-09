@@ -6,7 +6,7 @@ templ LoginForm(errors map[string]string) {
 	<form
 		hx-post="/login"
 		hx-swap="outerHTML"
-		class="flex flex-col gap-y-4 p-6 w-[500px]"
+		class="flex flex-col gap-y-2 sm:gap-y-4 p-4 sm:p-6 w-full sm:w-[500px]"
 	>
 		<span class="text-center text-3xl font-bold">Login</span>
 		@components.EMailInput(components.EMailInputProps{
@@ -20,7 +20,7 @@ templ LoginForm(errors map[string]string) {
 			Error:       errors["password"],
 		})
 		@components.Button(components.ButtonProps{
-			Text: "Submit",
+			Text: "Login",
 			Type: "submit",
 		})
 		@components.LinkButton("Sign up", "/signup", components.ButtonColorWhite)

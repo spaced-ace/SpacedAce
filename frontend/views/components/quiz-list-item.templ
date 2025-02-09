@@ -15,10 +15,10 @@ type QuizListItemProps struct {
 templ QuizListItem(props QuizListItemProps) {
 	<div
 		id={ fmt.Sprintf("quiz-%s", props.QuizInfoWithColors.QuizInfo.Id) }
-		class="flex flex-col rounded-md border bg-gray-100 w-[350px] group min-w-[350px] h-[265px] hover:bg-gray-200"
+		class="flex w-full flex-col rounded-md border bg-gray-100 group h-[265px] hover:bg-gray-200 sm:w-[350px] sm:min-w-[350px]"
 	>
 		<div class={ fmt.Sprintf("h-full w-full rounded-t-md group bg-gradient-to-br from-%s to-%s flex justify-end", props.QuizInfoWithColors.FromColor, props.QuizInfoWithColors.ToColor) }>
-			<div class="hidden h-min items-start justify-start gap-x-2 p-2 group-hover:flex">
+			<div class="flex h-min items-start justify-start gap-x-2 p-2 group-hover:flex sm:hidden">
 				<span
 					hx-get={ fmt.Sprintf("quizzes/%s/edit", props.QuizInfoWithColors.QuizInfo.Id) }
 					hx-push-url="true"

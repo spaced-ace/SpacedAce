@@ -1,0 +1,59 @@
+package components
+
+type QuizDrawerProps struct {
+	Username string
+}
+
+templ QuizDrawerPopup(props QuizDrawerProps) {
+	<div
+		id="quiz-drawer-overlay"
+		class="fixed top-0 right-0 flex flex-shrink-0 justify-end bg-gray-300 bg-opacity-25 h-dvh w-dvw z-999"
+	>
+		<div
+			hx-get="/close-popup"
+			hx-target="#popup-container"
+			class="h-dvh w-[25%]"
+		></div>
+		<div
+			id="quiz-drawer"
+			class="flex flex-col gap-y-4 bg-white px-2 drop-shadow-md h-dvh w-[75%]"
+		>
+			<div
+				hx-get="/close-popup"
+				hx-target="#popup-container"
+				class="flex h-16 w-full items-center justify-end p-2"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+				</svg>
+			</div>
+			<div
+				id="profile"
+				class="flex w-full items-center gap-x-4 px-2"
+			>
+				<div class="h-16 w-16 flex-shrink-0 rounded-md border bg-gray-400"></div>
+				<span class="min-w-0 flex-1 truncate text-lg font-semibold">{ props.Username }</span>
+				<div
+					hx-post="/logout"
+					hx-target="body"
+					class="hover:bg-gray-100 rounded-md p-2 cursor-pointer"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="flex-shrink-0 size-6"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"></path>
+					</svg>
+				</div>
+			</div>
+			@SideBarMenu("", false)
+			<div class="flex h-fit w-full">
+				@LinkButton("+ Create new", "/create-new-quiz", ButtonColorWhite)
+			</div>
+		</div>
+	</div>
+}

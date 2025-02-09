@@ -40,8 +40,12 @@ func RequireSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cc, ok := c.(*AppContext)
 		if !ok || cc.Session == nil {
-			c.Response().Header().Set("HX-Redirect", "/login")
-			return c.NoContent(http.StatusUnauthorized)
+			if c.Request().Header.Get("HX-Request") == "true" {
+				c.Response().Header().Set("HX-Redirect", "/login")
+				c.Response().Header().Set("HX-Refresh", "true")
+				return c.NoContent(http.StatusUnauthorized)
+			}
+			return c.Redirect(http.StatusFound, "/login")
 		}
 		return next(c)
 	}

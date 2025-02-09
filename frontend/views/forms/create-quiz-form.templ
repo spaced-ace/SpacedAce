@@ -9,7 +9,7 @@ templ CreateQuizForm(values request.CreateQuizRequestForm, errors map[string]str
 	<form
 		hx-post="/quizzes/create"
 		hx-swap="outerHTML"
-		class="flex h-full flex-shrink-0 flex-col justify-start py-6 w-[700px]"
+		class="flex h-full w-full flex-shrink-0 flex-col justify-start py-3 sm:w-[700px] sm:py-6"
 	>
 		<span class="text-2xl font-bold text-nowrap">Create new</span>
 		<div class="h-8 w-full"></div>

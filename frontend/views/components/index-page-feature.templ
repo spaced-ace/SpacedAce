@@ -5,22 +5,24 @@ import "fmt"
 templ IndexPageFeature(name, description, imageName string, reversed bool) {
 	<div
 		if reversed {
-			class="flex flex-row-reverse gap-x-8 w-[1000px]"
+			class="flex sm:flex-row-reverse flex-col gap-x-8 gap-y-2 w-full sm:w-[1000px] p-4"
 		} else {
-			class="flex gap-x-8 w-[1000px]"
+			class="flex sm:flex-row flex-col gap-x-8 gap-y-2 w-full sm:w-[1000px] p-4"
 		}
 	>
-		<div class="flex flex-col justify-center gap-y-4">
+		<div class="flex flex-col justify-center gap-y-2 sm:gap-y-4">
 			<div class="flex items-center gap-x-2">
 				{ children... }
 				<span class="text-2xl font-bold">{ name }</span>
 			</div>
 			<span>{ description }</span>
 		</div>
-		<img
-			src={ fmt.Sprintf("/static/images/%s.png", imageName) }
-			alt={ imageName }
-			class="flex-shrink-0 rounded-md object-center shadow-md h-[400px] w-[600px]"
-		/>
+		<div class="w-full flex justify-center">
+			<img
+				src={ fmt.Sprintf("/static/images/%s.png", imageName) }
+				alt={ imageName }
+				class="flex-shrink-0 rounded-md object-center shadow-md sm:h-[400px] sm:w-[600px] h-[200px] w-[300px]"
+			/>
+		</div>
 	</div>
 }

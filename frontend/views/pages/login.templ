@@ -10,7 +10,7 @@ templ LoginPage(viewModel LoginPageViewModel) {
 	@layout.HtmlLayout() {
 		<main class="h-full w-full">
 			@components.Navbar()
-			<div class="flex h-full w-full flex-col items-center justify-center">
+			<div class="flex h-full w-full flex-col items-center justify-center p-4">
 				@forms.LoginForm(
 					viewModel.Errors,
 				)

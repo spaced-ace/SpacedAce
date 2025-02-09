@@ -37,7 +37,7 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 		if props.ReplacePlaceholderWithOOB {
 			hx-swap-oob="outerHTML:#placeholder-question"
 		}
-		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-4 sm:p-6"
 	>
 		<div class="flex w-full items-start justify-between gap-x-2">
 			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
@@ -54,7 +54,7 @@ templ SingleChoiceQuestion(props SingleChoiceQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
@@ -132,7 +132,7 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 		if props.ReplacePlaceholderWithOOB {
 			hx-swap-oob="outerHTML:#placeholder-question"
 		}
-		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-4 sm:p-6"
 	>
 		<div class="flex w-full items-start justify-between gap-x-2">
 			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
@@ -149,7 +149,7 @@ templ MultipleChoiceQuestion(props MultipleChoiceQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
@@ -229,7 +229,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 		if props.ReplacePlaceholderWithOOB {
 			hx-swap-oob="outerHTML:#placeholder-question"
 		}
-		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-6"
+		class="flex w-full flex-col items-start gap-y-1 rounded-md border border-gray-300 p-4 sm:p-6"
 	>
 		<div class="flex w-full items-start justify-between gap-x-2">
 			<span class="overflow-auto whitespace-normal text-xl font-semibold">{ props.Question.Question }</span>
@@ -246,7 +246,7 @@ templ TrueOrFalseQuestion(props TrueOrFalseQuestionProps) {
 				</div>
 			}
 			if props.AnswerScore != nil {
-				<span>{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
+				<span class="text-nowrap">{ fmt.Sprintf("%g / %g", props.AnswerScore.Score, props.AnswerScore.MaxScore) }</span>
 			}
 		</div>
 		<span class="text-sm text-gray-400">Choose the correct answer from the options below.</span>
