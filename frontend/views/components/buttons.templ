@@ -13,6 +13,7 @@ templ LinkButton(text, url string, color ButtonColor) {
 	<a
 		hx-target="main"
 		hx-swap="outerHTML"
+		hx-headers='{"SA-popup-action": "close"}'
 		if color == ButtonColorBlack {
 			class="h-min flex-grow rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-200 disabled:opacity-75"
 		}

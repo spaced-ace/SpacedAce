@@ -680,3 +680,11 @@ func handleClosePopup(c echo.Context) error {
 func handleDrawerPopup(c echo.Context) error {
 	return render.TemplRender(c, 200, components.NavbarDrawerPopup())
 }
+func handleQuizDrawerPopup(c echo.Context) error {
+	cc := c.(*context.AppContext)
+
+	props := components.QuizDrawerProps{
+		Username: cc.Session.User.Name,
+	}
+	return render.TemplRender(c, 200, components.QuizDrawerPopup(props))
+}

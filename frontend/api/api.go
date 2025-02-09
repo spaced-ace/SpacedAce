@@ -19,6 +19,7 @@ func RegisterRoutes(e *echo.Echo) {
 	public.GET("/signup", handleSignupPage)
 	public.GET("/close-popup", handleClosePopup)
 	public.GET("/drawer-popup", handleDrawerPopup)
+	public.GET("/quiz-drawer-popup", handleQuizDrawerPopup)
 
 	// My quizzes page
 	protected.GET("/my-quizzes", handleMyQuizzesPage)
