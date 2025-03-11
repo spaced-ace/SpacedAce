@@ -3,10 +3,10 @@ package auth
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+	"net/url"
 	"spaced-ace/constants"
 	"spaced-ace/models/business"
 	"spaced-ace/models/request"
@@ -72,8 +72,6 @@ func PostRegister(c echo.Context) error {
 	bodyBuffer := bytes.NewBuffer(bodyBytes)
 
 	resp, err := http.Post(constants.BACKEND_URL+"/create-user", "application/json", bodyBuffer)
-	fmt.Println(err)
-	fmt.Println(resp.Status)
 	if err != nil {
 		log.Default().Println(err.Error())
 		errors["other"] = "Internal server error"
@@ -82,7 +80,11 @@ func PostRegister(c echo.Context) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		log.Default().Printf("Register status code: %d\n", resp.StatusCode)
-		errors["other"] = "Internal server error"
+		if resp.StatusCode == http.StatusConflict {
+			errors["email"] = "A user with this email already exists"
+		} else {
+			errors["other"] = "Internal server error"
+		}
 		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
@@ -95,7 +97,6 @@ func PostRegister(c echo.Context) error {
 		return render.TemplRender(c, 200, forms.SignUpForm(sanitizedSignupForm, errors))
 	}
 
-	// get the session cookie
 	var sessionCookie *http.Cookie
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == "session" {
@@ -110,6 +111,7 @@ func PostRegister(c echo.Context) error {
 	}
 
 	c.SetCookie(sessionCookie)
-	c.Response().Header().Set("HX-Redirect", "/my-quizzes")
-	return c.String(http.StatusOK, "login successful")
+
+	c.Response().Header().Set("HX-Redirect", "/email-verification-needed?email="+url.QueryEscape(signupForm.Email))
+	return c.String(http.StatusOK, "registration successful")
 }

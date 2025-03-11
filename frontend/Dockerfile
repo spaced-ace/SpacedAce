@@ -22,6 +22,8 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
+RUN go install github.com/a-h/templ/cmd/templ@v0.2.793
+
 COPY api api
 COPY auth auth
 COPY cmd cmd
@@ -33,7 +35,6 @@ COPY service service
 COPY utils utils
 COPY views views
 
-RUN go install github.com/a-h/templ/cmd/templ@latest
 RUN templ generate
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/main.go

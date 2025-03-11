@@ -1,6 +1,8 @@
 module spaced-ace-backend
 
-go 1.22.0
+go 1.23
+
+toolchain go1.23.4
 
 require (
 	github.com/google/uuid v1.6.0
@@ -8,6 +10,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/lib/pq v1.10.9
+	github.com/resend/resend-go/v2 v2.15.0
 	golang.org/x/crypto v0.17.0
 	golang.org/x/net v0.19.0
 )

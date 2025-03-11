@@ -1,4 +1,4 @@
-FROM golang:1.22 as go-build
+FROM golang:1.23 as go-build
 
 WORKDIR /app
 
@@ -6,9 +6,9 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY . .
-
 RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+COPY . .
 RUN sqlc generate
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o app server.go

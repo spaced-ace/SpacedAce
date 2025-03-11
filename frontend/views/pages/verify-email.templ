@@ -1,0 +1,29 @@
+package pages
+
+import (
+	"spaced-ace/views/components"
+	"spaced-ace/views/layout"
+)
+
+templ VerifyEmailPage(status string, message string) {
+	@layout.HtmlLayout() {
+		<main class="h-full w-full">
+			@components.Navbar()
+			<div class="flex flex-col w-screen h-[calc(100dvh-64px)] justify-center items-center p-4">
+				<div class="p-8 rounded-lg shadow-md max-w-md w-full bg-white">
+					<h2 class="text-2xl font-bold mb-4 text-center">Email Verification</h2>
+					@VerifyEmailStatus(status, message)
+				</div>
+			</div>
+		</main>
+	}
+}
+
+// These are the templated components for the verification status endpoint to return
+templ VerifyEmailStatus(status string, message string) {
+	if status == "success" {
+		@components.VerificationSuccess()
+	} else {
+		@components.VerificationFailed(message)
+	}
+}

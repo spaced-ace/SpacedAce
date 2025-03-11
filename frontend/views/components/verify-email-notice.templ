@@ -1,0 +1,82 @@
+package components
+
+import (
+	"fmt"
+	"html"
+)
+
+type VerifyEmailNoticeProps struct {
+	Email string
+}
+
+func VerifyEmailToJson(v VerifyEmailNoticeProps) string {
+	return fmt.Sprintf("{\"email\":\"%s\"}", html.EscapeString(v.Email))
+}
+
+templ VerifyEmailNotice(props VerifyEmailNoticeProps) {
+	<div
+		id="verify-email-notice"
+		class="bg-amber-100 border border-amber-400 text-amber-800 px-4 py-3 rounded-md mb-4"
+	>
+		<h3 class="font-bold text-lg mb-2">Please Verify Your Email</h3>
+		<p class="mb-2">We've sent a verification link to <strong>{ props.Email }</strong>.</p>
+		<p class="mb-3">Please check your inbox and click the verification link to activate your account.</p>
+		<button
+			hx-post="/resend-verification"
+			hx-vals={ VerifyEmailToJson(props) }
+			hx-target="#verify-email-notice"
+			hx-swap="outerHTML"
+			class="text-amber-800 underline hover:text-amber-600"
+		>
+			Resend verification email
+		</button>
+	</div>
+}
+
+templ VerificationEmailSent() {
+	<div
+		id="verify-email-notice"
+		class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-md mb-4"
+	>
+		<h3 class="font-bold text-lg mb-2">Verification Email Sent</h3>
+		<p>Please check your inbox and click the verification link to activate your account.</p>
+	</div>
+}
+
+templ VerificationSuccess() {
+	<div
+		id="verification-result"
+		class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-md mb-4"
+	>
+		<h3 class="font-bold text-lg mb-2">Email Verified Successfully</h3>
+		<p class="mb-2">Your email has been verified!</p>
+		<a
+			class="text-blue-600 underline hover:text-blue-800"
+			href="/my-quizzes"
+			hx-target="main"
+			hx-headers='{"SX-Refresh":"true"}'
+			hx-push-url="true"
+			hx-swap="outerHTML"
+		>Click here to begin learning</a>
+	</div>
+}
+
+templ VerificationFailed(message string) {
+	<div
+		id="verification-result"
+		class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-md mb-4"
+	>
+		<h3 class="font-bold text-lg mb-2">Verification Failed</h3>
+		<p class="mb-2">{ message }</p>
+		<button
+			hx-get="/login"
+			hx-target="main"
+			hx-push-url="true"
+			hx-swap="outerHTML"
+			hx-headers='{"SX-Refresh":"true"}'
+			class="text-blue-600 underline hover:text-blue-800"
+		>
+			Return to login
+		</button>
+	</div>
+}

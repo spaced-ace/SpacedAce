@@ -47,6 +47,17 @@ func RequireSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 			return c.Redirect(http.StatusFound, "/login")
 		}
+
+		// Check if email is verified
+		if !cc.Session.User.EmailVerified {
+			emailVerificationUrl := "/email-verification-needed?email=" + cc.Session.User.Email
+			if c.Request().Header.Get("HX-Request") == "true" {
+				c.Response().Header().Set("HX-Redirect", emailVerificationUrl)
+				return c.NoContent(http.StatusForbidden)
+			}
+			return c.Redirect(http.StatusFound, emailVerificationUrl)
+		}
+
 		return next(c)
 	}
 }

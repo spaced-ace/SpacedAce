@@ -62,6 +62,9 @@ func RegisterRoutes(e *echo.Echo) {
 	// Auth endpoints
 	public.POST("/login", auth.PostLogin)
 	public.POST("/signup", auth.PostRegister)
+	public.GET("/verify-email", auth.GetVerifyEmail)
+	public.GET("/email-verification-needed", auth.GetEmailVerificationNeeded)
+	public.POST("/resend-verification", auth.PostResendVerification)
 	protected.POST("/logout", func(c echo.Context) error {
 		c.Response().Header().Set("HX-Redirect", "/")
 
