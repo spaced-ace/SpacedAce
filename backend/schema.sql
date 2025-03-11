@@ -3,9 +3,12 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name TEXT,
     email TEXT,
-    password TEXT
+    password TEXT,
+    email_verified BOOLEAN DEFAULT FALSE,
+    verification_token TEXT
 );
 CREATE INDEX IF NOT EXISTS users_email ON users(email);
+CREATE INDEX IF NOT EXISTS users_verification_token ON users(verification_token);
 
 CREATE TABLE IF NOT EXISTS quizzes(
     id UUID PRIMARY KEY,

@@ -18,6 +18,11 @@ import (
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
+
+	err := auth.InitEmailService()
+	if err != nil {
+		panic("Failed to initialize email service")
+	}
 	auth.InitDb()
 	quiz.InitDb()
 	question.InitDb()
@@ -37,6 +42,8 @@ func main() {
 	public.GET("/authenticated", auth.Authenticated)
 	public.POST("/create-user", auth.Register)
 	public.DELETE("/delete-user/:id", auth.DeleteUserEndpoint)
+	public.GET("/verify-email", auth.VerifyEmailEndpoint)
+	public.POST("/resend-verification", auth.ResendVerificationEmailEndpoint)
 
 	protected := e.Group("")
 	protected.POST("/logout", auth.Logout)
