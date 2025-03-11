@@ -57,7 +57,8 @@ func handleLoginPage(c echo.Context) error {
 }
 func handleMyQuizzesPage(c echo.Context) error {
 	hxRequest := c.Request().Header.Get("HX-Request") == "true"
-	if !hxRequest {
+	sxRefresh := c.Request().Header.Get("SX-Refresh") == "true"
+	if !hxRequest || sxRefresh {
 		return handleNonHXRequest(c)
 	}
 

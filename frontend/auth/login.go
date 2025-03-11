@@ -43,6 +43,11 @@ func PostLogin(c echo.Context) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusForbidden {
+			// This is the error for unverified email
+			errors["other"] = "Email not verified. Please check your inbox for the verification link."
+			return render.TemplRender(c, 200, forms.LoginForm(errors))
+		}
 		errors["other"] = "Invalid e-mail or password"
 		return render.TemplRender(c, 200, forms.LoginForm(errors))
 	}
