@@ -50,6 +50,7 @@ services:
       DB_HOST: database
       DB_PORT: 5432
       DB_NAME: postgres
+      RESEND_API_KEY: ${RESEND_API_KEY}
     restart: on-failure
     depends_on:
       - database
