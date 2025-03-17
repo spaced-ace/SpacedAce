@@ -9,6 +9,27 @@ const (
 	ButtonColorBlue  = 4
 )
 
+templ AnimatedLinkButton(text, url string, color ButtonColor) {
+	<a
+		hx-target="main"
+		hx-swap="outerHTML"
+		hx-headers='{"SA-popup-action": "close"}'
+		if color == ButtonColorBlack {
+			class="h-min flex-grow rounded-md border bg-black px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-200 disabled:opacity-75 animate-grow-shrink"
+		}
+		if color == ButtonColorWhite {
+			class="h-min flex-grow rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-black text-nowrap hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-75 animate-grow-shrink"
+		}
+		if color == ButtonColorRed {
+			class="h-min flex-grow rounded-md border border-red-800 bg-red-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-600 disabled:text-red-100 disabled:opacity-75 animate-grow-shrink"
+		}
+		if color == ButtonColorBlue {
+			class="h-min flex-grow rounded-md border border-blue-800 bg-blue-600 px-4 py-2 text-center text-base font-semibold text-white text-nowrap hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-600 disabled:text-blue-100 disabled:opacity-75 animate-grow-shrink"
+		}
+		href={ templ.SafeURL(url) }
+	>{ text }</a>
+}
+
 templ LinkButton(text, url string, color ButtonColor) {
 	<a
 		hx-target="main"

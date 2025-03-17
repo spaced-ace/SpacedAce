@@ -14,6 +14,18 @@ module.exports = {
       pattern: /opacity-\d+$/,
     },
   ],
-  theme: {},
+  theme: {
+    extend: {
+      animation: {
+        'grow-shrink': 'growShrink 1s infinite',
+      },
+      keyframes: {
+        growShrink: {
+          '0%, 100%': { transform: 'scale(0.95)' },
+          '50%': { transform: 'scale(1)' },
+        },
+      },
+    },
+  },
   plugins: [],
 };
