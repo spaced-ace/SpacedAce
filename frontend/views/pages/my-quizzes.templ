@@ -15,6 +15,7 @@ templ MyQuizzesPage(viewModel MyQuizzesPageViewModel) {
 					"hx-target":   "#popup-container",
 					"hx-push-url": "false",
 				},
+				Disabled: len(viewModel.QuizInfosWithColors) == 0,
 			})
 		</div>
 		@components.QuizList(components.QuizListProps{
