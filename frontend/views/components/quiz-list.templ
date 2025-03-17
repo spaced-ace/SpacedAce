@@ -10,17 +10,23 @@ type QuizListProps struct {
 }
 
 templ QuizList(props QuizListProps) {
-	<div
-		id="quizzes"
-		class="flex h-full w-full flex-grow-0 flex-wrap content-start items-start justify-start gap-4 overflow-y-scroll pt-1 pb-6"
-	>
-		for _, q := range props.QuizInfoWithColors {
-			@QuizListItem(QuizListItemProps{
-				QuizInfoWithColors:     q,
-				AllowEdit:              true,
-				AllowDelete:            true,
-				AllowManagingLearnList: true,
-			})
-		}
-	</div>
+	if len(props.QuizInfoWithColors) == 0 {
+		<div class="flex h-full w-full flex-col gap-y-4 justify-center items-center">
+			<span class="text-lg text-gray-500">You have not created any quizzes yet.</span>
+		</div>
+	} else {
+		<div
+			id="quizzes"
+			class="flex h-full w-full flex-grow-0 flex-wrap content-start items-start justify-start gap-4 overflow-y-scroll pt-1 pb-6"
+		>
+			for _, q := range props.QuizInfoWithColors {
+				@QuizListItem(QuizListItemProps{
+					QuizInfoWithColors:     q,
+					AllowEdit:              true,
+					AllowDelete:            true,
+					AllowManagingLearnList: true,
+				})
+			}
+		</div>
+	}
 }
