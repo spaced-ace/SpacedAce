@@ -14,9 +14,10 @@ templ AuthenticatedLayout(props AuthenticatedLayoutProps) {
 		>
 			<div class="hidden sm:block">
 				@components.SideBar(components.SidebarProps{
-					Username:  props.SideBarProps.Username,
-					ActiveUrl: props.SideBarProps.ActiveUrl,
-					QuizInfos: props.SideBarProps.QuizInfos,
+					Username:      props.SideBarProps.Username,
+					ActiveUrl:     props.SideBarProps.ActiveUrl,
+					QuizInfos:     props.SideBarProps.QuizInfos,
+					ProfileDesign: props.SideBarProps.ProfileDesign,
 				})
 			</div>
 			<div class="sm:hidden">

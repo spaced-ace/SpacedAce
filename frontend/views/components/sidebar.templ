@@ -2,13 +2,15 @@ package components
 
 import (
 	"fmt"
+	"spaced-ace/models"
 	"spaced-ace/models/business"
 )
 
 type SidebarProps struct {
-	Username  string
-	ActiveUrl string
-	QuizInfos []business.QuizInfo
+	Username      string
+	ActiveUrl     string
+	QuizInfos     []business.QuizInfo
+	ProfileDesign models.ProfileDesign
 }
 
 templ SideBar(props SidebarProps) {
@@ -20,7 +22,9 @@ templ SideBar(props SidebarProps) {
 			id="profile"
 			class="flex w-full items-center gap-x-4 px-2"
 		>
-			<div class="h-16 w-16 flex-shrink-0 rounded-md border bg-gray-400"></div>
+			<div
+				class={ fmt.Sprintf("h-16 w-16 flex-shrink-0 shadow-sm rounded-md border bg-gradient-to-%s from-%s to-%s", props.ProfileDesign.Direction, props.ProfileDesign.From, props.ProfileDesign.To) }
+			></div>
 			<span class="min-w-0 flex-1 truncate text-lg font-semibold">{ props.Username }</span>
 			<div
 				hx-post="/logout"

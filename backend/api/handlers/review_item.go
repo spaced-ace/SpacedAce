@@ -411,9 +411,9 @@ func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.Revie
 		reviewItem.Difficulty = math.Max(1, reviewItem.Difficulty-1)
 
 		if reviewItem.Streak == 0 {
-			reviewItem.IntervalInMinutes = 60
+			reviewItem.IntervalInMinutes = 120
 		} else if reviewItem.Streak == 1 {
-			reviewItem.IntervalInMinutes = 3 * 60
+			reviewItem.IntervalInMinutes = 3 * 120
 		} else {
 			reviewItem.IntervalInMinutes = int32(float64(reviewItem.IntervalInMinutes) * reviewItem.EaseFactor * (1 / reviewItem.Difficulty))
 		}
@@ -430,7 +430,7 @@ func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.Revie
 	}
 
 	reviewItem.NextReviewDate = models.NullableTime{
-		Time: reviewItem.NextReviewDate.Time.Add(time.Duration(reviewItem.IntervalInMinutes) * time.Minute),
+		Time: time.Now().Add(time.Duration(reviewItem.IntervalInMinutes) * time.Minute),
 	}
 
 	sqlcQuerier := utils.GetQuerier()
@@ -441,7 +441,7 @@ func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.Revie
 			EaseFactor: reviewItem.EaseFactor,
 			Difficulty: reviewItem.Difficulty,
 			Streak:     reviewItem.Streak,
-			NextReviewDate: pgtype.Timestamp{
+			NextReviewDate: pgtype.Timestamptz{
 				Time:             reviewItem.NextReviewDate.Time,
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,

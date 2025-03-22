@@ -9,6 +9,7 @@ import (
 	"spaced-ace/context"
 	"spaced-ace/models/business"
 	"spaced-ace/render"
+	"spaced-ace/utils"
 	"spaced-ace/views/components"
 	"spaced-ace/views/layout"
 	"spaced-ace/views/pages"
@@ -300,9 +301,12 @@ func createSideBarProps(c echo.Context, activeUrl string) (*components.SidebarPr
 		return nil, err
 	}
 
+	profileDesign := utils.GenerateProfileDesign(cc.Session.User.Name)
+
 	return &components.SidebarProps{
-		Username:  cc.Session.User.Name,
-		ActiveUrl: activeUrl,
-		QuizInfos: quizInfos,
+		Username:      cc.Session.User.Name,
+		ActiveUrl:     activeUrl,
+		QuizInfos:     quizInfos,
+		ProfileDesign: profileDesign,
 	}, nil
 }

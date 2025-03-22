@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/url"
+	"spaced-ace/models"
 	"strconv"
 )
 
@@ -48,6 +49,23 @@ func HashToColor(input string) string {
 	return color
 }
 
+func HashToDirection(input string) string {
+	shaHash := sha256.New()
+	shaHash.Write([]byte(input))
+	hash := hex.EncodeToString(shaHash.Sum(nil))
+
+	// Convert the first 6 characters of the hash into an integer
+	directionInt, _ := strconv.ParseInt(hash[:6], 16, 64)
+
+	// Map the integer to a color
+	directions := []string{
+		"t", "tr", "r", "br", "b", "bl", "l", "tl",
+	}
+	direction := directions[directionInt%int64(len(directions))]
+
+	return direction
+}
+
 func GenerateColors(title string, id string) (string, string) {
 	fromColor := HashToColor(title + id)
 	toColor := HashToColor(id)
@@ -65,4 +83,26 @@ func FindInFormData(formData url.Values, name, value string) bool {
 		}
 	}
 	return false
+}
+
+func hashAndSplit(username string) (string, string, string) {
+	hash := sha256.Sum256([]byte(username))
+	hashString := hex.EncodeToString(hash[:])
+
+	// Split hash into three equal parts
+	partLength := len(hashString) / 3
+	part1 := hashString[:partLength]
+	part2 := hashString[partLength : 2*partLength]
+	part3 := hashString[2*partLength:]
+
+	return part1, part2, part3
+}
+
+func GenerateProfileDesign(username string) models.ProfileDesign {
+	part1, part2, part3 := hashAndSplit(username)
+	return models.ProfileDesign{
+		From:      HashToColor(part1),
+		To:        HashToColor(part2),
+		Direction: HashToDirection(part3),
+	}
 }
