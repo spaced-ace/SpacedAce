@@ -441,7 +441,7 @@ func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.Revie
 			EaseFactor: reviewItem.EaseFactor,
 			Difficulty: reviewItem.Difficulty,
 			Streak:     reviewItem.Streak,
-			NextReviewDate: pgtype.Timestamp{
+			NextReviewDate: pgtype.Timestamptz{
 				Time:             reviewItem.NextReviewDate.Time,
 				InfinityModifier: pgtype.Finite,
 				Valid:            true,
