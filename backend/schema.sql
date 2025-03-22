@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS review_items(
     ease_factor FLOAT NOT NULL,
     difficulty FLOAT NOT NULL,
     streak INT NOT NULL,
-    next_review_date TIMESTAMP NOT NULL,
+    next_review_date TIMESTAMPZ NOT NULL,
     interval_in_minutes INT NOT NULL
 );
 CREATE INDEX idx_review_items_user_id ON review_items(user_id);
