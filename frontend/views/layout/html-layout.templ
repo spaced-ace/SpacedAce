@@ -83,6 +83,15 @@ templ HtmlLayout() {
 				  // Format the date in the local timezone
 				  return new Intl.DateTimeFormat('en-GB', formatOptions).format(date);
 				}
+				document.addEventListener('DOMContentLoaded', () => {
+				document.body.addEventListener('htmx:afterSwap', (event) => {
+						const dateSpans = document.querySelectorAll('.dateSpanUnformatted');
+						dateSpans.forEach(dateSpan => {
+							dateSpan.textContent = utcToLocalTime(dateSpan.textContent)
+							dateSpan.classList.replace('dateSpanUnformatted', 'dateSpanFormatted');
+						});
+					});
+				});
             </script>
 		</head>
 		<body
