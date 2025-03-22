@@ -429,8 +429,12 @@ func applySpacedRepetitionAndStore(ctx context.Context, reviewItem *models.Revie
 		reviewItem.Streak = 0
 	}
 
+	baseDate := time.Now().UTC()
+	if baseDate.Compare(reviewItem.NextReviewDate.Time) < 0 {
+		baseDate = reviewItem.NextReviewDate.Time
+	}
 	reviewItem.NextReviewDate = models.NullableTime{
-		Time: reviewItem.NextReviewDate.Time.Add(time.Duration(reviewItem.IntervalInMinutes) * time.Minute),
+		Time: baseDate.Add(time.Duration(reviewItem.IntervalInMinutes) * time.Minute),
 	}
 
 	sqlcQuerier := utils.GetQuerier()
