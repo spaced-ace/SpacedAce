@@ -9,7 +9,7 @@ templ HtmlLayout() {
 			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 			<title>Spaced Ace</title>
 			<script src="/static/htmx.min.js"></script>
-            <script>
+			<script>
                 function getEscapedContext() {
                     const contextElement = document.getElementById('context');
                     if (!contextElement) return '';
@@ -29,6 +29,60 @@ templ HtmlLayout() {
 
                     return escapedText;
                 }
+				/**
+				 * Converts a UTC timestamp to local time
+				 * @param {string|Date} utcTimestamp - UTC timestamp (ISO string, Date object, or other valid date format)
+				 * @param {Object} options - Formatting options
+				 * @param {boolean} options.includeDate - Whether to include the date in the output (default: true)
+				 * @param {boolean} options.includeTime - Whether to include the time in the output (default: true)
+				 * @param {boolean} options.includeSeconds - Whether to include seconds in the time (default: false)
+				 * @param {boolean} options.includeTzOffset - Whether to include timezone offset in the output (default: false)
+				 * @returns {string} Formatted local time string
+				 */
+				function utcToLocalTime(utcTimestamp, options = {}) {
+				  // Set default options
+				  const defaultOptions = {
+					includeDate: true,
+					includeTime: true,
+					includeSeconds: false,
+					includeTzOffset: false
+				  };
+				  
+				  const settings = { ...defaultOptions, ...options };
+				  
+				  // Create Date object from the input timestamp
+				  const date = new Date(utcTimestamp);
+				  
+				  // Check if the date is valid
+				  if (isNaN(date.getTime())) {
+					throw new Error('Invalid timestamp provided');
+				  }
+				  
+				  // Format options for Intl.DateTimeFormat
+				  const formatOptions = {};
+				  
+				  if (settings.includeDate) {
+					formatOptions.year = 'numeric';
+					formatOptions.month = 'short';
+					formatOptions.day = 'numeric';
+				  }
+				  
+				  if (settings.includeTime) {
+					formatOptions.hour = 'numeric';
+					formatOptions.minute = '2-digit';
+					if (settings.includeSeconds) {
+					  formatOptions.second = '2-digit';
+					}
+					formatOptions.hour12 = false; // Use 12-hour format with AM/PM
+				  }
+				  
+				  if (settings.includeTzOffset) {
+					formatOptions.timeZoneName = 'short';
+				  }
+				  
+				  // Format the date in the local timezone
+				  return new Intl.DateTimeFormat('en-GB', formatOptions).format(date);
+				}
             </script>
 		</head>
 		<body
