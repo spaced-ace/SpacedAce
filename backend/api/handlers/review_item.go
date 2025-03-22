@@ -225,7 +225,7 @@ func GetReviewItemQuestion(c echo.Context) error {
 	if reviewItem.SingleChoiceQuestionID != nil {
 		dbQuestion, err := question.GetSingleChoiceQuestion(*reviewItem.SingleChoiceQuestionID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting single choice question with ID %q: %w\n", reviewItem.SingleChoiceQuestionID, err))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting single choice question with ID %q: %w\n", *reviewItem.SingleChoiceQuestionID, err))
 		}
 
 		singleChoiceQuestion = &models.SingleChoiceQuestion{
@@ -242,7 +242,7 @@ func GetReviewItemQuestion(c echo.Context) error {
 	if reviewItem.MultipleChoiceQuestionID != nil {
 		dbQuestion, err := question.GetMultipleChoiceQuestion(*reviewItem.MultipleChoiceQuestionID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting multiple choice question with ID %q: %w\n", reviewItem.MultipleChoiceQuestionID, err))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting multiple choice question with ID %q: %w\n", *reviewItem.MultipleChoiceQuestionID, err))
 		}
 
 		multipleChoiceQuestion = &models.MultipleChoiceQuestion{
@@ -259,7 +259,7 @@ func GetReviewItemQuestion(c echo.Context) error {
 	if reviewItem.TrueOrFalseQuestionID != nil {
 		dbQuestion, err := question.GetTrueOrFalseQuestion(*reviewItem.TrueOrFalseQuestionID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting true or false question with ID %q: %w\n", reviewItem.TrueOrFalseQuestionID, err))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("getting true or false question with ID %q: %w\n", *reviewItem.TrueOrFalseQuestionID, err))
 		}
 
 		trueOrFalseQuestion = &models.TrueOrFalseQuestion{
