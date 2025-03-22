@@ -219,7 +219,12 @@ templ ReviewItemTable(props ReviewItemTableProps) {
 						if item.NextReview.Before(time.Now()) {
 							<span>Now</span>
 						} else {
-							<span>{ item.NextReview.Local().Format("2006-01-02 15:04") }</span>
+							<span>{ item.NextReview.UTC().Format(time.RFC3339) }</span>
+							<script>
+								const script = document.currentScript;
+								span = script.previousElementSibling;
+								span.textContent = utcToLocalTime(span.textContent)
+							</script>
 						}
 					</td>
 					<td class="text-center align-middle">
