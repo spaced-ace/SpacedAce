@@ -14,7 +14,7 @@ COPY static/main.css static/main.css
 RUN npx tailwindcss -i ./static/main.css -o ./static/tailwindcss.css
 
 
-FROM golang:1.22 as go-build
+FROM golang:1.23 as go-build
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-RUN go install github.com/a-h/templ/cmd/templ@v0.2.793
+RUN go install github.com/a-h/templ/cmd/templ@latest
 
 COPY api api
 COPY auth auth
