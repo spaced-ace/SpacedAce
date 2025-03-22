@@ -69,8 +69,6 @@ func (r *ReviewItem) MapToBusiness() (*business.ReviewItem, error) {
 	now := time.Now().UTC()
 	nextReviewDateUTC := r.NextReviewDate.Time.UTC()
 
-	fmt.Printf("\n\nNextReviewDate: %+v\nNow: %+v\n\n\n", nextReviewDateUTC, now)
-
 	return &business.ReviewItem{
 		ID:           r.ID,
 		QuizName:     r.QuizName,

@@ -11,6 +11,10 @@ module.exports = {
         /to-(red|orange|amber|yellow|green|blue|purple|pink|lime|emerald|teal|cyan|indigo|violet|fuchsia|rose)-\d{3}/,
     },
     {
+      pattern:
+          /bg-gradient-to-[a-zA-Z]{1,2}/,
+    },
+    {
       pattern: /opacity-\d+$/,
     },
   ],
